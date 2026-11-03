@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" x="0px" y="0px" viewBox="0 0 270 202.6" style="enable-background:new 0 0 270 202.6;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#56452E;}
+	.st1{fill:#7B7162;}
+	.st2{fill:#AA381C;}
+</style>
+<g>
+	<polygon class="st0" points="190,30 190,20 170,20 170,10 190,10 190,0 160,0 160,30  "></polygon>
+	<rect x="220" y="20" class="st0" width="10" height="10"></rect>
+	<rect x="240" y="20" class="st0" width="10" height="142.6"></rect>
+	<rect x="200" y="20" class="st0" width="10" height="10"></rect>
+	<path class="st0" d="M230,162.6V55c0-8.3-6.7-15-15-15h0c-8.3,0-15,6.7-15,15v87.6h20v10h-30V60h-10v112.6h-20v10h30v-20H230z    M210,132.6V55c0-2.8,2.2-5,5-5h0c2.8,0,5,2.2,5,5v77.6H210z"></path>
+	<rect x="20" y="20" class="st1" width="130" height="10"></rect>
+	<polygon class="st0" points="170,50 190,50 190,40 160,40 160,162.6 170,162.6  "></polygon>
+	<g>
+		<rect x="20" y="40" class="st2" width="10" height="142.6"></rect>
+		<path class="st2" d="M55,40L55,40c-8.3,0-15,6.7-15,15v102.6c0,6.5,4.2,12.1,10,14.1v10.9h10v-10h10v-10V55C70,46.7,63.3,40,55,40    z M60,162.6h-5c-2.8,0-5-2.2-5-5V55c0-2.8,2.2-5,5-5l0,0c2.8,0,5,2.2,5,5V162.6z"></path>
+		<path class="st2" d="M135,40L135,40c-8.3,0-15,6.7-15,15v127.6h10v-30h10v30h10V55C150,46.7,143.3,40,135,40z M140,142.6h-10V55    c0-2.8,2.2-5,5-5c2.8,0,5,2.2,5,5V142.6z"></path>
+		<path class="st2" d="M90,40H80v142.6h10v-30c5.5,0,10,4.5,10,10v20h10v-20c0-6-2.6-11.3-6.8-15c4.2-3.7,6.8-9,6.8-15V60    C110,49,101,40,90,40z M100,132.6c0,5.5-4.5,10-10,10h0V50c5.5,0,10,4.5,10,10V132.6z"></path>
+	</g>
+	<rect x="200" y="172.6" class="st1" width="50" height="10"></rect>
+</g>
+</svg>

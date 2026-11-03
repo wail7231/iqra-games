@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>لعبة المتاهة · IQRA Network</title>
+<link rel="icon" href="../assets/favicon.png">
+<script>try{var t=localStorage.getItem('iqra_theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Montserrat:wght@600;700&family=Noto+Naskh+Arabic:wght@500&family=Reem+Kufi:wght@500;600;700&family=Scheherazade+New:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tests.css">
+</head>
+<body>
+
+<div id="main">
+
+<div id="game">
+<header class="topbar">
+  <a class="icon-btn" id="backBtn" href="index.html#games" title="رجوع إلى الألعاب التفاعلية" aria-label="رجوع">
+    <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+  </a>
+  <a class="tool-pill" href="../index.html" title="العودة إلى أداة التحفيظ" aria-label="العودة إلى أداة التحفيظ">
+    <svg viewBox="0 0 24 24"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5zM12 6.5V19.5"/></svg>
+    <span>أداة التحفيظ</span>
+  </a>
+  <div class="hud-title"><span id="gameName"></span><small id="gameSub">لعبة متاهة</small></div>
+  <div class="stat" id="clockStat" title="الوقت">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+    <span class="v" id="clockVal">٠:٠٠</span>
+  </div>
+  <div class="stat" title="القلوب"><span class="hearts" id="livesVal"></span></div>
+  <div class="stat" title="النقاط">
+    <svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.9L22 10l-5.5 4.8L18 22l-6-3.5L6 22l1.5-7.2L2 10l7.1-1.1z"/></svg>
+    <span class="v" id="scoreVal">٠</span>
+  </div>
+  <button class="icon-btn btn-theme" title="الوضع الليلي" aria-label="الوضع الليلي">
+    <svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+  </button>
+</header>
+<div class="game-progress"><span id="progressBar"></span></div>
+
+<div class="wrap wide">
+  <div class="maze-layout" id="playArea">
+    <aside class="maze-side">
+      <section class="panel q-box">
+        <div class="q-num" id="qNum"></div>
+        <p class="q-text" id="qText"></p>
+      </section>
+      <div class="ans-legend" id="legend"></div>
+    </aside>
+
+    <div class="maze-stage">
+      <div class="maze-box" id="mazeBox">
+        <canvas id="maze"></canvas>
+        <div class="maze-msg" id="mazeMsg"><span></span></div>
+      </div>
+      <div class="dpad" id="dpad">
+        <button class="up" data-d="0" aria-label="أعلى"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+        <button class="left" data-d="3" aria-label="يسار"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button class="right" data-d="1" aria-label="يمين"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="down" data-d="2" aria-label="أسفل"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- تحت المتاهة: قوالب الشكل ثم إعدادات اللعب — تُحفظ لكل لعبة في المتصفح وتُطبَّق فورًا -->
+    <section class="panel maze-cfg" id="cfgPanel">
+      <h3 class="cfg-title">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="15.5" cy="10" r="1.3"/><path d="M12 21a3 3 0 0 1 0-6h1.5"/></svg>
+        شكل المتاهة
+      </h3>
+      <div class="theme-grid" id="themeGrid"></div>
+
+      <h3 class="cfg-title mt">
+        <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+        إعدادات اللعب
+      </h3>
+      <div class="cfg-rows">
+      <div class="cfg-row cfg-level">
+        <div class="cfg-head"><span>المستوى</span><span class="lvl-badge" id="lvlVal">٣</span></div>
+        <input type="range" class="lvl-range" id="lvlRange" min="1" max="10" step="1" aria-label="المستوى">
+        <div class="lvl-scale"><span>سهل</span><span>صعب جدًّا</span></div>
+        <div class="lvl-info">
+          <div class="lvl-foes" id="lvlFoes"></div>
+          <div class="lvl-text" id="lvlText"></div>
+        </div>
+      </div>
+      <div class="cfg-row">
+        <div class="cfg-head"><span>القلوب</span></div>
+        <div class="ed-seg" id="cfgLives">
+          <button data-v="1">١</button><button data-v="3">٣</button><button data-v="5">٥</button><button data-v="0" title="بلا حد">∞</button>
+        </div>
+      </div>
+      <div class="cfg-row">
+        <div class="cfg-head"><span>المؤقت</span><small>لكامل اللعبة</small></div>
+        <div class="ed-seg" id="cfgTimer">
+          <button data-v="0">بلا</button><button data-v="1">١ د</button><button data-v="2">٢ د</button><button data-v="3">٣ د</button><button data-v="5">٥ د</button>
+        </div>
+      </div>
+      </div>
+      <button class="btn btn-primary share-btn hidden" id="shareBtn">
+        <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+        نسخ رابط اللعبة للطلاب
+      </button>
+    </section>
+  </div>
+
+  <section class="panel maze-summary hidden" id="summary">
+    <div class="summary-head">
+      <div class="summary-emoji" id="sumEmoji">🏆</div>
+      <h2 id="sumTitle">أنهيت المتاهة</h2>
+      <p class="summary-score">أجبت من المحاولة الأولى على <b id="sumCorrect">٠</b> من <b id="sumTotal">٠</b></p>
+    </div>
+    <div class="stars" id="sumStars"></div>
+    <div class="win-stats">
+      <div class="win-stat"><span class="k">الوقت</span><span class="v" id="sumTime">٠</span></div>
+      <div class="win-stat"><span class="k">الأخطاء</span><span class="v" id="sumMistakes">٠</span></div>
+    </div>
+    <div class="summary-list" id="sumList"></div>
+    <div class="summary-actions">
+      <button class="btn btn-primary" id="againBtn">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+        العب مرة أخرى
+      </button>
+      <a class="btn btn-ghost" id="editLink" href="#">تعديل اللعبة</a>
+      <a class="btn btn-ghost" href="index.html#games">قائمة الألعاب</a>
+    </div>
+  </section>
+</div>
+</div>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/tests-common.js"></script>
+<script src="js/games-common.js"></script>
+<script src="js/maze.js"></script>
+</body>
+</html>

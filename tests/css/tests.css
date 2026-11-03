@@ -1,0 +1,815 @@
+/* =========================================================
+   اختبارات القرآن الكريم — IQRA Network
+   تصميم مشترك لصفحات مجلد tests: index.html / surah.html / juz.html
+   الهوية البصرية مأخوذة من iqranetwork.com (نفس ألوان أداة التحفيظ)
+   ========================================================= */
+
+:root {
+  --brand: #AB3920;           /* الأحمر الطوبي — لون IQRA الأساسي */
+  --brand-600: #9A3412;
+  --brand-700: #7E2A17;
+  --brand-50: #FBF0EC;
+  --brand-100: #F5DDD4;
+  --brown: #56452E;           /* بني الشعار */
+  --taupe: #7B7162;
+  --gold: #C9A96A;
+  --gold-soft: #E9DBBB;
+
+  --accent: #AB3920;          /* لون النص المميَّز (يفتح في الوضع الليلي) */
+  --bg: #FAF6EF;
+  --bg-2: #F2EBDF;
+  --card: #FFFFFF;
+  --paper: #FFFDF6;
+  --text: #211B17;
+  --muted: #7B7162;
+  --border: #EAE0D0;
+  --ok: #3F6B1F;
+  --ok-bg: #EBF7DD;
+  --bad: #8E1B1B;
+  --bad-bg: #FBE9E7;
+  --on-ok: #FFFFFF;
+
+  --shadow: 0 2px 12px rgba(86, 69, 46, .08);
+  --shadow-lg: 0 18px 44px rgba(86, 69, 46, .18);
+  --radius: 16px;
+  --radius-lg: 24px;
+
+  --font-ui: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --font-display: 'Reem Kufi', 'IBM Plex Sans Arabic', sans-serif;
+  --font-quran: 'Amiri Quran', 'Amiri', serif;
+  --font-latin: 'Montserrat', sans-serif;
+
+  /* زخرفة هندسية (نجمة ثمانية) */
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23AB3920' stroke-opacity='.07'%3E%3Crect x='18' y='18' width='36' height='36'/%3E%3Cpath d='M36 10.5 61.5 36 36 61.5 10.5 36Z'/%3E%3Cpath d='M0 36h10.5M61.5 36H72M36 0v10.5M36 61.5V72'/%3E%3C/g%3E%3C/svg%3E");
+  --pattern-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.13'%3E%3Crect x='18' y='18' width='36' height='36'/%3E%3Cpath d='M36 10.5 61.5 36 36 61.5 10.5 36Z'/%3E%3Cpath d='M0 36h10.5M61.5 36H72M36 0v10.5M36 61.5V72'/%3E%3C/g%3E%3C/svg%3E");
+}
+.dark {
+  --accent: #E8805F;
+  --brand-50: #2C1A14;
+  --brand-100: #43261C;
+  --bg: #14100E;
+  --bg-2: #1C1613;
+  --card: #241C18;
+  --paper: #2A211C;
+  --text: #F4EDE5;
+  --muted: #B0A294;
+  --border: #3B2F28;
+  --ok: #A4D275;
+  --ok-bg: #1E2A15;
+  --bad: #F29484;
+  --bad-bg: #3A1915;
+  --on-ok: #14100E;
+  --gold-soft: #5A4A30;
+  --shadow: 0 2px 12px rgba(0, 0, 0, .4);
+  --shadow-lg: 0 18px 44px rgba(0, 0, 0, .6);
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23C9A96A' stroke-opacity='.07'%3E%3Crect x='18' y='18' width='36' height='36'/%3E%3Cpath d='M36 10.5 61.5 36 36 61.5 10.5 36Z'/%3E%3Cpath d='M0 36h10.5M61.5 36H72M36 0v10.5M36 61.5V72'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg) var(--pattern);
+  background-attachment: fixed;
+  color: var(--text);
+  min-height: 100dvh;
+  overflow-x: clip;
+  transition: background-color .3s ease, color .3s ease;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+.hidden { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.screen { display: none; }
+.screen.active { display: block; animation: fadeUp .35s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; }
+}
+
+.wrap { width: 100%; max-width: 860px; margin: 0 auto; padding: 18px 16px 48px; }
+.wrap.narrow { max-width: 700px; }
+
+/* ================= الشريط العلوي ================= */
+.topbar {
+  position: sticky; top: 0; z-index: 60;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar::after {
+  content: ""; position: absolute; inset: auto 0 -3px 0; height: 3px;
+  background: linear-gradient(90deg, var(--brand), var(--gold), var(--brand));
+}
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: var(--bg); border: 1px solid var(--border); color: var(--text);
+  transition: background .15s ease, color .15s ease, transform .1s ease, border-color .15s ease;
+}
+.icon-btn:hover { background: var(--brand-50); color: var(--accent); border-color: var(--brand-100); }
+.icon-btn:active { transform: scale(.93); }
+.icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tool-pill {
+  display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 13px 0 11px;
+  border-radius: 12px; flex-shrink: 0;
+  background: var(--bg); border: 1px solid var(--border);
+  font-size: 13px; font-weight: 600;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.tool-pill:hover { background: var(--brand-50); color: var(--accent); border-color: var(--brand-100); }
+.tool-pill svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+@media (max-width: 560px) { .tool-pill { width: 40px; padding: 0; justify-content: center; } .tool-pill span { display: none; } }
+/* في شاشة اللعب الشريط مزدحم: الأيقونة وحدها */
+#game .tool-pill { width: 40px; padding: 0; justify-content: center; }
+#game .tool-pill span { display: none; }
+.brand-logo { display: grid; place-items: center; height: 42px; padding: 4px 7px; border-radius: 10px; background: #fff; flex-shrink: 0; }
+.brand-logo img { height: 33px; width: auto; display: block; }
+.brand-text { flex: 1; min-width: 0; line-height: 1.3; }
+.brand-text strong { display: block; font-size: 15.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brand-text small { display: block; font-family: var(--font-latin); font-size: 10.5px; font-weight: 700; letter-spacing: .08em; color: var(--accent); direction: ltr; text-align: right; }
+
+/* قائمة اختيار خط الآيات */
+.font-menu {
+  position: fixed; z-index: 200; min-width: 230px; padding: 8px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.font-menu button {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 8px 12px; border-radius: 11px; border: 1.5px solid transparent; background: var(--bg);
+  transition: border-color .15s ease, background .15s ease;
+}
+.font-menu button:hover { background: var(--brand-50); }
+.font-menu button.on { border-color: var(--accent); background: var(--brand-50); }
+.font-menu .sample { font-size: 21px; line-height: 1.9; }
+.font-menu .name { font-size: 12px; font-weight: 700; color: var(--muted); }
+
+/* ================= اللوحة الرئيسية (Hero) ================= */
+.hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  padding: 30px 22px 28px; margin-bottom: 20px;
+  border-radius: var(--radius-lg);
+  background: radial-gradient(120% 140% at 85% 0%, #C24E33 0%, #AB3920 42%, #7E2A17 100%);
+  color: #fff; text-align: center;
+  box-shadow: 0 16px 36px rgba(126, 42, 23, .28);
+}
+.hero::before { content: ""; position: absolute; inset: 0; background: var(--pattern-light); z-index: -1; }
+.hero::after {
+  content: ""; position: absolute; inset: 8px; border-radius: 18px;
+  border: 1px solid rgba(233, 219, 187, .45); pointer-events: none;
+}
+.hero-kicker {
+  display: inline-block; font-family: var(--font-latin); font-size: 11px; font-weight: 700;
+  letter-spacing: .22em; color: var(--gold-soft); direction: ltr; margin-bottom: 6px;
+}
+.hero h1 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: clamp(26px, 6.4vw, 40px); line-height: 1.5; }
+.hero h1.quran { font-family: var(--font-quran); font-weight: 400; font-size: clamp(34px, 8.5vw, 52px); line-height: 1.7; }
+.hero p { margin: 4px 0 0; color: rgba(255, 255, 255, .86); font-size: 14px; }
+.ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px auto 0; color: var(--gold-soft); }
+.ornament::before, .ornament::after { content: ""; width: 56px; height: 1px; background: linear-gradient(90deg, transparent, currentColor); }
+.ornament::after { transform: scaleX(-1); }
+.ornament i { width: 9px; height: 9px; background: currentColor; transform: rotate(45deg); }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 13px; border-radius: 99px;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22);
+  font-size: 12.5px; font-weight: 600; white-space: nowrap;
+}
+.hero-progress { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .2); margin: 16px auto 0; max-width: 340px; overflow: hidden; }
+.hero-progress > span { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--gold-soft); transition: width .5s ease; }
+
+/* ================= بطاقتا الاختيار ================= */
+.mode-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 620px) { .mode-grid { grid-template-columns: 1fr 1fr; } }
+.mode-card {
+  position: relative; overflow: hidden; text-align: right;
+  display: flex; flex-direction: column; gap: 10px; padding: 24px 22px 20px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  transition: transform .2s ease, box-shadow .25s ease, border-color .2s ease;
+}
+.mode-card::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
+  background: linear-gradient(90deg, var(--brand), var(--gold));
+  transform: scaleX(0); transform-origin: right; transition: transform .3s ease;
+}
+.mode-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--brand-100); }
+.mode-card:hover::before { transform: scaleX(1); }
+.mode-card:active { transform: translateY(-1px); }
+.mode-icon {
+  width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center;
+  background: var(--brand-50); color: var(--accent); border: 1px solid var(--brand-100);
+}
+.mode-icon svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.mode-card h3 { margin: 4px 0 0; font-family: var(--font-display); font-weight: 600; font-size: 22px; }
+.mode-card p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.7; }
+.mode-go { margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-weight: 700; font-size: 13.5px; }
+.mode-go svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s ease; }
+.mode-card:hover .mode-go svg { transform: translateX(-4px); }
+
+/* ================= قوائم السور والأجزاء ================= */
+.section-head { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; }
+.section-head h2 { margin: 0; flex: 1; font-family: var(--font-display); font-weight: 600; font-size: 22px; color: var(--accent); }
+.search-box { position: relative; margin-bottom: 16px; }
+.search-box input {
+  width: 100%; padding: 13px 44px 13px 16px; border-radius: 14px;
+  border: 1.5px solid var(--border); background: var(--card); color: var(--text);
+  font-family: inherit; font-size: 15px; outline: none; box-shadow: var(--shadow);
+  transition: border-color .18s ease;
+}
+.search-box input:focus { border-color: var(--accent); }
+.search-box svg { position: absolute; top: 50%; right: 15px; transform: translateY(-50%); width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none; }
+.tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 10px; }
+.tile {
+  position: relative; overflow: hidden; text-align: right;
+  display: flex; align-items: center; gap: 12px; padding: 12px 12px 14px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .2s ease, border-color .15s ease;
+}
+.tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--accent); }
+.tile:active { transform: none; }
+.tile .info { flex: 1; min-width: 0; }
+.tile .info strong { display: block; font-family: var(--font-quran); font-weight: 400; font-size: 19px; line-height: 1.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile .info small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 1px; white-space: nowrap; }
+.tile .bar { position: absolute; inset: auto 0 0 0; height: 3px; background: transparent; }
+.tile .bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--brand), var(--gold)); }
+.tile .badge { font-size: 11px; font-weight: 700; color: var(--ok); white-space: nowrap; }
+.empty-note { text-align: center; color: var(--muted); padding: 30px 0; font-size: 14px; }
+
+/* رقم داخل نجمة ثمانية */
+.star-num {
+  position: relative; width: 38px; height: 38px; flex-shrink: 0; display: grid; place-items: center;
+  color: #fff; font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; z-index: 0;
+}
+.star-num::before, .star-num::after { content: ""; position: absolute; inset: 4px; background: var(--brand); border-radius: 4px; z-index: -1; }
+.star-num::after { transform: rotate(45deg); }
+.done .star-num::before, .done .star-num::after { background: var(--ok); }
+.done .star-num { color: var(--on-ok); }
+
+/* ================= أزرار عامة ================= */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  padding: 14px 20px; border-radius: 14px; font-weight: 700; font-size: 15px;
+  transition: transform .12s ease, background .15s ease, box-shadow .2s ease;
+}
+.btn:active { transform: scale(.97); }
+.btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.btn-primary { background: linear-gradient(135deg, #B8432A, #9A3412); color: #fff; box-shadow: 0 10px 22px rgba(171, 57, 32, .3); }
+.btn-primary:hover { background: linear-gradient(135deg, #AB3920, #7E2A17); }
+.btn-ghost { background: var(--bg-2); color: var(--text); }
+.btn-ghost:hover { background: var(--border); }
+.btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
+.stat {
+  display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px;
+  background: var(--bg); border: 1px solid var(--border);
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.stat .v { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .7; }
+
+.panel {
+  position: relative; background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  padding: 24px 18px; margin-bottom: 20px; overflow: hidden;
+}
+.panel::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: linear-gradient(90deg, var(--brand), var(--gold), var(--brand)); }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 99px;
+  font-size: 14px; font-weight: 600; box-shadow: var(--shadow-lg);
+  opacity: 0; transition: all .3s cubic-bezier(.2, .9, .3, 1.2);
+  z-index: 10000; pointer-events: none; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.fatal { text-align: center; padding: 60px 20px; }
+.fatal h2 { font-family: var(--font-display); font-weight: 600; margin: 0 0 8px; }
+.fatal p { color: var(--muted); margin: 0 0 20px; }
+.fatal .btn { max-width: 260px; margin: 0 auto; }
+
+/* =========================================================
+   اختبار ترتيب الآيات (surah.html)
+   ========================================================= */
+.page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.page-tile {
+  position: relative; text-align: right; display: flex; align-items: center; gap: 12px;
+  padding: 12px; background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .2s ease, border-color .15s ease;
+}
+.page-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--accent); }
+.page-tile .info { flex: 1; min-width: 0; }
+.page-tile .info strong { display: block; font-size: 14px; font-weight: 700; }
+.page-tile .info small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+.mini-stars { display: flex; gap: 1px; margin-top: 4px; color: var(--border); font-size: 12px; line-height: 1; }
+.mini-stars .on { color: var(--gold); }
+.home-tip { text-align: center; color: var(--muted); font-size: 12.5px; margin: 22px 0 0; line-height: 1.8; }
+
+.hud-title { flex: 1; min-width: 0; font-weight: 700; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35; }
+.hud-title small { display: block; font-weight: 500; font-size: 11.5px; color: var(--muted); }
+.hint-btn {
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  padding: 8px 14px; border-radius: 99px; font-weight: 700; font-size: 13px;
+  background: var(--brand-50); color: var(--accent); border: 1px solid var(--brand-100);
+}
+.hint-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hint-btn:active { transform: scale(.96); }
+.hint-btn:disabled { opacity: .4; cursor: not-allowed; }
+.game-progress { position: sticky; top: 59px; z-index: 55; height: 4px; background: var(--border); }
+.game-progress > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--ok), #7FB24A); transition: width .35s ease; }
+@media (max-width: 640px) {
+  #game .topbar { padding: 8px 10px; gap: 6px; justify-content: space-between; }
+  #game .hud-title, #game .btn-theme { display: none; }
+  #game .icon-btn, #game .tool-pill { width: 36px; height: 36px; border-radius: 10px; }
+  #game .stat { padding: 5px 9px; font-size: 12px; }
+  .hint-btn { padding: 7px 10px; font-size: 12px; }
+  .game-progress { top: 53px; }
+}
+
+.board { display: flex; flex-direction: column; gap: 10px; padding-bottom: 50px; }
+.verse-card {
+  position: relative; display: flex; align-items: stretch; gap: 12px;
+  background: var(--paper); border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; box-shadow: var(--shadow);
+  transition: border-color .2s ease, background .2s ease, transform .12s ease;
+  user-select: none; -webkit-user-select: none; cursor: pointer;
+}
+.verse-card .handle {
+  flex-shrink: 0; width: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  border-radius: 11px; background: var(--bg-2); color: var(--muted);
+  cursor: grab; touch-action: none;
+  transition: background .15s ease, color .15s ease;
+}
+.verse-card .handle:hover { background: var(--brand); color: #fff; }
+.verse-card .handle:active { cursor: grabbing; }
+.verse-card .handle svg { width: 16px; height: 16px; fill: currentColor; pointer-events: none; }
+.verse-card .pos { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; pointer-events: none; }
+.verse-card .ar {
+  flex: 1; min-width: 0; align-self: center;
+  font-family: var(--font-quran); font-size: clamp(19px, 3.4vw, 25px);
+  line-height: 2.15; text-align: right; color: var(--text); word-break: break-word;
+}
+.verse-card.correct { border-color: var(--ok); background: var(--ok-bg); }
+.verse-card.correct .handle { background: var(--ok); color: var(--on-ok); }
+.verse-card .sound-btn {
+  flex-shrink: 0; align-self: center; width: 38px; height: 38px; border-radius: 11px;
+  display: grid; place-items: center; background: var(--bg-2); color: var(--accent);
+  transition: background .15s ease, color .15s ease, transform .12s ease;
+}
+.verse-card .sound-btn:hover { background: var(--brand); color: #fff; }
+.verse-card .sound-btn:active { transform: scale(.9); }
+.verse-card .sound-btn svg { width: 19px; height: 19px; pointer-events: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ic-muted, .muted-all .ic-sound { display: none; }
+.muted-all .ic-muted { display: block; }
+.muted-all .verse-card .sound-btn { color: var(--muted); }
+.verse-card.playing { border-color: var(--accent); box-shadow: 0 0 0 3px var(--brand-100); }
+.verse-card.dragging { box-shadow: var(--shadow-lg); transform: scale(1.02) rotate(.4deg); z-index: 9999; cursor: grabbing; }
+.verse-card.placeholder { border: 1.5px dashed var(--accent); background: var(--brand-50); box-shadow: none; }
+.verse-card.placeholder > * { visibility: hidden; }
+.verse-card.hint-flash { animation: hintFlash 1.4s ease; }
+@keyframes hintFlash {
+  0%, 100% { box-shadow: var(--shadow); transform: scale(1); }
+  40% { box-shadow: 0 0 0 4px var(--gold); transform: scale(1.03); }
+}
+
+.win-wrap { min-height: calc(100dvh - 60px); display: grid; place-items: center; padding: 24px 16px; }
+.win-card { width: 100%; max-width: 440px; text-align: center; padding: 34px 24px 24px; }
+.win-emoji { font-size: 58px; line-height: 1; margin-bottom: 10px; }
+.win-card h2 { margin: 0 0 4px; font-family: var(--font-display); font-weight: 600; font-size: 28px; }
+.win-card .msg { color: var(--muted); margin: 0 0 12px; font-size: 14.5px; }
+.stars { display: flex; justify-content: center; gap: 8px; margin: 10px 0 20px; }
+.star { width: 46px; height: 46px; color: var(--border); }
+.star.on { color: var(--gold); animation: starPop .5s cubic-bezier(.2, .9, .3, 1.6) both; }
+.star.on:nth-child(2) { animation-delay: .12s; }
+.star.on:nth-child(3) { animation-delay: .24s; }
+@keyframes starPop { from { transform: scale(0) rotate(-40deg); } to { transform: scale(1.1) rotate(-4deg); } }
+.star svg { width: 100%; height: 100%; fill: currentColor; }
+.win-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.win-stat { background: var(--bg); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+.win-stat .k { font-size: 12px; color: var(--muted); }
+.win-stat .v { font-size: 21px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.win-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* =========================================================
+   عجلة الأجزاء (juz.html)
+   ========================================================= */
+.hero.compact { padding: 20px 20px 18px; margin-bottom: 14px; }
+.hero.compact h1 { font-size: clamp(24px, 6vw, 34px); }
+.juz-stats { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.juz-stats .stat { background: var(--card); box-shadow: var(--shadow); padding: 7px 15px; }
+
+.wheel-section { display: flex; flex-direction: column; align-items: center; gap: 20px; margin: 16px 0 24px; }
+.wheel-stage { position: relative; width: min(92vw, 500px); }
+.wheel-wrap {
+  position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden;
+  filter: drop-shadow(0 14px 22px rgba(86, 69, 46, .3));
+}
+.wheel-pointer {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 5; pointer-events: none;
+  width: 38px; height: 46px; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .35));
+}
+.wheel {
+  width: 100%; height: 100%; border-radius: 50%; cursor: pointer;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  will-change: transform;
+}
+.wheel:active { cursor: grabbing; }
+.wheel.brake .wheel-svg { animation: brake .35s ease; }
+@keyframes brake { 40% { filter: brightness(1.18); } }
+.wheel-svg { width: 100%; height: 100%; display: block; }
+.wheel-tip { margin: -6px 0 0; color: var(--muted); font-size: 12.5px; text-align: center; }
+.wheel-svg text { font-family: var(--font-ui); pointer-events: none; }
+.wheel-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 30%; height: 30%; border-radius: 50%; z-index: 3; pointer-events: none;
+  background: #fff; border: 4px solid var(--gold);
+  box-shadow: 0 0 0 4px #fff, 0 8px 18px rgba(0, 0, 0, .25);
+  display: grid; place-items: center;
+}
+.wheel-center img { width: 66%; height: auto; display: block; }
+.spin-btn { width: auto; padding: 15px 46px; font-size: 17px; }
+
+.q-kicker { text-align: center; margin: 4px 0 2px; font-size: 14.5px; color: var(--muted); font-weight: 500; }
+.q-title { text-align: center; margin: 0; font-family: var(--font-quran); font-weight: 400; font-size: clamp(30px, 6.5vw, 42px); line-height: 1.6; color: var(--accent); }
+/* عنوان السؤال يتبع خط الآيات المختار في الوضعين */
+.q-title.small { font-size: clamp(26px, 5.6vw, 34px); line-height: 1.7; }
+.q-note { text-align: center; color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+.q-count {
+  width: fit-content; margin: -4px auto 14px; padding: 4px 14px; border-radius: 99px;
+  background: var(--brand-50); border: 1px solid var(--brand-100); color: var(--accent);
+  font-size: 12.5px; font-weight: 700;
+}
+.q-prompt {
+  margin: 12px 0 6px; padding: 12px 16px; border-radius: 14px;
+  background: var(--paper); border: 1px solid var(--gold-soft); border-right: 4px solid var(--gold);
+  font-family: var(--font-quran); font-size: clamp(19px, 3.8vw, 24px); line-height: 2.15; text-align: center;
+}
+.q-ask { text-align: center; font-weight: 700; font-size: 14.5px; margin: 14px 0 12px; }
+.options { display: flex; flex-direction: column; gap: 12px; }
+.option {
+  width: 100%; padding: 12px 18px; border-radius: 16px;
+  background: var(--bg); border: 2px solid var(--border);
+  font-family: var(--font-quran); font-size: clamp(20px, 4vw, 26px);
+  line-height: 2.15; text-align: center; color: var(--text);
+  transition: transform .12s ease, border-color .15s ease, background .2s ease;
+}
+.option:hover:not(:disabled) { border-color: var(--accent); background: var(--brand-50); }
+.option:active:not(:disabled) { transform: scale(.985); }
+.option:disabled { cursor: default; }
+.option.correct { border-color: var(--ok); background: var(--ok-bg); }
+.option.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.option.dim { opacity: .75; }
+.option .tag { display: block; font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; line-height: 1.7; margin-top: 2px; }
+.option.correct .tag { color: var(--ok); }
+.option.wrong .tag, .option.dim .tag { color: var(--bad); }
+.feedback { text-align: center; margin: 16px 0 0; font-weight: 700; font-size: 15px; min-height: 24px; }
+.feedback.ok { color: var(--ok); }
+.feedback.bad { color: var(--bad); }
+.next-btn { margin-top: 14px; }
+
+.summary-head { text-align: center; margin-bottom: 20px; }
+.summary-emoji { font-size: 54px; line-height: 1; margin-bottom: 8px; }
+.summary-head h2 { margin: 0 0 6px; font-family: var(--font-display); font-weight: 600; font-size: 27px; }
+.summary-score { margin: 0; font-size: 15px; color: var(--muted); }
+.summary-score b { color: var(--accent); font-weight: 700; font-size: 19px; }
+.summary-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.sum-item { background: var(--bg); border-radius: 14px; padding: 12px 16px; border-right: 5px solid var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.sum-item.correct { border-right-color: var(--ok); }
+.sum-item.wrong { border-right-color: var(--bad); }
+.sum-head-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sum-name { font-weight: 700; font-size: 15px; }
+.sum-badge { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: 700; color: var(--on-ok); flex-shrink: 0; }
+.sum-item.correct .sum-badge { background: var(--ok); }
+.sum-item.wrong .sum-badge { background: var(--bad); }
+.sum-row { display: flex; gap: 8px; align-items: baseline; font-size: 13px; }
+.sum-label { color: var(--muted); font-weight: 600; flex-shrink: 0; min-width: 50px; }
+.sum-verse { font-family: var(--font-quran); font-size: 19px; line-height: 2.05; color: var(--text); }
+.sum-verse.correct-verse { color: var(--ok); }
+.sum-verse.wrong-verse { color: var(--bad); text-decoration: line-through; text-decoration-thickness: 1px; }
+.summary-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* الهواتف الضيقة: شريط اللعب لا يتسع لكل الأزرار، فيُخفى عدّاد الحركات (يظهر في شاشة النتيجة) */
+@media (max-width: 430px) {
+  #game .topbar { gap: 5px; padding: 8px; }
+  #game .stat[title="عدد الحركات"] { display: none; }
+}
+
+/* =========================================================
+   عرض القوالب المرقّمة (ثلاثة أعمدة) — tests/surah.html
+   ========================================================= */
+.grid-mode #game .wrap { max-width: 1240px; }
+.gboard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding-bottom: 40px; }
+.gtitle { margin: 0 0 8px; font-size: 13.5px; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.gcount { padding: 1px 10px; border-radius: 99px; background: var(--brand-50); color: var(--accent); border: 1px solid var(--brand-100); font-size: 12px; }
+.gpool-wrap {
+  position: sticky; top: 68px; z-index: 40; order: 1;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); padding: 10px 10px 12px;
+}
+.gslots-wrap { order: 2; min-width: 0; }
+.gpool, .gslots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.gpool { max-height: 30vh; overflow-y: auto; padding: 2px; align-content: start; }
+.gpool-empty { grid-column: 1 / -1; margin: 6px 0; text-align: center; color: var(--muted); font-size: 13px; }
+
+.slot {
+  position: relative; display: flex; align-items: stretch; gap: 6px; min-height: 58px; padding: 5px;
+  border: 1.5px dashed var(--gold); border-radius: 13px;
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+  transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.slot-num {
+  flex-shrink: 0; width: 28px; display: grid; place-items: center; border-radius: 9px;
+  background: var(--bg-2); color: var(--muted); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums;
+}
+.slot.filled { border-style: solid; border-color: var(--border); background: var(--paper); box-shadow: var(--shadow); }
+.slot.correct { border-color: var(--ok); background: var(--ok-bg); }
+.slot.correct .slot-num { background: var(--ok); color: var(--on-ok); }
+.picking .slot:not(.correct) { cursor: pointer; border-color: var(--accent); }
+.picking .slot:not(.correct):hover, .slot.over { background: var(--brand-50); box-shadow: 0 0 0 3px var(--brand-100); }
+
+.vchip {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 5px 8px 5px 5px;
+  background: var(--paper); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .12s ease;
+}
+.vchip:hover { border-color: var(--accent); }
+.vchip .ar {
+  flex: 1; min-width: 0; font-family: var(--font-quran); font-size: clamp(16px, 1.1vw + 9px, 21px);
+  line-height: 1.95; text-align: center; color: var(--text); word-break: break-word;
+}
+.slot .vchip { padding: 0 2px; border-color: transparent; background: transparent; box-shadow: none; }
+.vchip.selected, .slot .vchip.selected { border-color: var(--accent); background: var(--brand-50); box-shadow: 0 0 0 3px var(--brand-100); }
+.vchip.playing { border-color: var(--accent); }
+.vchip.lifting { opacity: .35; }
+.chip-ghost { position: fixed; z-index: 9999; pointer-events: none; box-shadow: var(--shadow-lg); transform: rotate(1deg) scale(1.03); background: var(--paper); border-color: var(--accent); }
+.chip-sound {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center;
+  background: var(--bg-2); color: var(--accent); transition: background .15s ease, color .15s ease;
+}
+.chip-sound:hover { background: var(--brand); color: #fff; }
+.chip-sound svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.muted-all .chip-sound { color: var(--muted); }
+.vchip.hint-flash, .slot.hint-flash { animation: hintFlash 1.4s ease; }
+
+/* الشاشات العريضة: القوالب يمينًا وصندوق البطاقات يسارًا ثابتًا */
+@media (min-width: 1000px) {
+  .gboard { grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); align-items: start; gap: 18px; }
+  .gslots-wrap { order: 1; }
+  .gpool-wrap { order: 2; top: 78px; }
+  .gpool { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: calc(100dvh - 160px); }
+}
+@media (max-width: 560px) {
+  .gpool, .gslots { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .gpool-wrap { top: 58px; }
+  .slot-num { width: 22px; font-size: 12px; }
+  .chip-sound { width: 24px; height: 24px; }
+}
+
+/* =========================================================
+   الألعاب التفاعلية — القائمة والقوالب (index.html)
+   ========================================================= */
+@media (min-width: 820px) { .mode-grid.three { grid-template-columns: repeat(3, 1fr); } }
+.templates-head { margin-top: 30px; }
+.section-head .sub { color: var(--muted); font-size: 13px; }
+.template-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.template-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px;
+  background: var(--card); border: 1.5px dashed var(--gold); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .2s ease, border-color .15s ease;
+}
+.template-card:hover { border-style: solid; border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.template-card .mode-icon { width: 52px; height: 52px; border-radius: 15px; flex-shrink: 0; }
+.template-card .mode-icon svg { width: 26px; height: 26px; }
+.tpl-info { flex: 1; min-width: 0; }
+.tpl-info h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 19px; }
+.tpl-info p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.65; }
+.tpl-plus { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; background: var(--brand); color: #fff; }
+.tpl-plus svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+
+.games-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.game-tile { padding: 0; gap: 0; }
+.game-tile .game-play { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 12px; }
+.game-tile .info strong { font-family: var(--font-ui); font-weight: 700; font-size: 15px; line-height: 1.5; }
+.game-ic {
+  width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; display: grid; place-items: center;
+  background: var(--brand-50); color: var(--accent); border: 1px solid var(--brand-100);
+}
+.done .game-ic { background: var(--ok-bg); color: var(--ok); border-color: color-mix(in srgb, var(--ok) 30%, transparent); }
+.game-ic svg, .game-edit svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.game-edit {
+  width: 36px; height: 36px; margin-inline-end: 10px; border-radius: 10px; flex-shrink: 0;
+  display: grid; place-items: center; color: var(--muted); background: var(--bg); border: 1px solid var(--border);
+  transition: color .15s ease, background .15s ease;
+}
+.game-edit:hover { color: var(--accent); background: var(--brand-50); }
+.game-edit svg { width: 17px; height: 17px; }
+.empty-games { text-align: center; padding: 30px 16px; color: var(--muted); }
+.empty-games p { margin: 0 0 16px; }
+.empty-games .btn { max-width: 280px; margin: 0 auto; }
+
+/* =========================================================
+   محرر الألعاب (maze-editor.html)
+   ========================================================= */
+.ed-panel { padding: 22px 18px 18px; }
+.ed-title { margin: 0 0 14px; font-family: var(--font-display); font-weight: 600; font-size: 19px; color: var(--accent); }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field > span { font-size: 13.5px; font-weight: 700; }
+.field > span small { color: var(--muted); font-weight: 500; }
+.inp {
+  width: 100%; padding: 11px 14px; border-radius: 12px; border: 1.5px solid var(--border);
+  background: var(--bg); color: var(--text); font-family: inherit; font-size: 15px; outline: none; resize: vertical;
+  transition: border-color .15s ease, background .15s ease;
+}
+.inp:focus { border-color: var(--accent); background: var(--card); }
+.inp.invalid { border-color: var(--bad); background: var(--bad-bg); }
+.quran-font .q-edit .inp { font-family: var(--font-quran); font-size: 20px; line-height: 1.9; padding-block: 6px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 10px 14px; flex-wrap: wrap; padding: 12px 0; border-top: 1px solid var(--border); }
+.set-row:first-of-type { border-top: 0; padding-top: 0; }
+.set-row:last-child { padding-bottom: 0; }
+.set-row > span { font-size: 13.5px; font-weight: 700; }
+.set-row > span small { display: block; color: var(--muted); font-weight: 500; font-size: 12px; }
+.ed-seg { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; border-radius: 12px; background: var(--bg-2); }
+.ed-seg button { padding: 7px 13px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); transition: background .15s ease, color .15s ease; }
+.ed-seg button:hover { color: var(--text); }
+.ed-seg button.on { background: var(--card); color: var(--accent); box-shadow: var(--shadow); }
+
+.q-head { display: flex; align-items: center; gap: 10px; margin: 26px 0 12px; }
+.q-head h2 { margin: 0; flex: 1; font-family: var(--font-display); font-weight: 600; font-size: 22px; color: var(--accent); }
+.q-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
+.q-edit {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); padding: 14px 16px 16px; transition: border-color .2s ease;
+}
+.q-edit.invalid { border-color: var(--bad); }
+.q-edit-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.q-edit-head .lbl { flex: 1; font-weight: 700; font-size: 14px; }
+.mini-btn {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; display: grid; place-items: center;
+  color: var(--muted); background: var(--bg); border: 1px solid var(--border);
+  transition: color .15s ease, background .15s ease;
+}
+.mini-btn:hover:not(:disabled) { color: var(--accent); background: var(--brand-50); }
+.mini-btn.del:hover:not(:disabled) { color: var(--bad); background: var(--bad-bg); }
+.mini-btn:disabled { opacity: .35; cursor: default; }
+.mini-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ans-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.ans-row { display: flex; align-items: center; gap: 8px; }
+.ans-mark { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.ans-row.ok .ans-mark { background: var(--ok); color: var(--on-ok); }
+.ans-row.bad .ans-mark { background: var(--bad-bg); color: var(--bad); border: 1px solid color-mix(in srgb, var(--bad) 35%, transparent); }
+.ans-row.ok .inp { border-color: color-mix(in srgb, var(--ok) 50%, var(--border)); }
+.ans-row.ok .inp.invalid { border-color: var(--bad); }
+.add-wrong {
+  align-self: flex-start; margin-top: 2px; padding: 6px 13px; border-radius: 99px;
+  font-size: 12.5px; font-weight: 700; color: var(--accent); background: var(--brand-50); border: 1px dashed var(--brand-100);
+}
+.add-wrong:disabled { opacity: .4; cursor: default; }
+.btn.add-q { border: 2px dashed var(--border); background: transparent; color: var(--accent); }
+.btn.add-q:hover { border-color: var(--accent); background: var(--brand-50); }
+.ed-bar {
+  position: sticky; bottom: 0; z-index: 50; display: flex; gap: 10px;
+  margin-top: 18px; padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--bg) 28%);
+}
+.ed-bar .btn { flex: 1; }
+.ed-bar .btn-ghost { flex: 0 0 auto; width: auto; padding-inline: 20px; }
+.folder-note { text-align: center; font-size: 12.5px; color: var(--muted); margin: 0; line-height: 1.8; }
+.folder-note b { color: var(--text); }
+.link-btn { color: var(--accent); font-weight: 700; font-size: 12.5px; text-decoration: underline; padding: 0 4px; }
+.del-game { display: block; margin: 18px auto 0; color: var(--bad); font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 99px; }
+.del-game:hover { background: var(--bad-bg); }
+
+/* =========================================================
+   لعبة المتاهة (maze.html)
+   ========================================================= */
+.wrap.wide { max-width: 1200px; }
+.maze-layout { display: grid; gap: 16px; grid-template-areas: "side" "stage" "cfg"; }
+.maze-side { grid-area: side; }
+.maze-stage { grid-area: stage; }
+.maze-cfg { grid-area: cfg; }
+@media (min-width: 900px) {
+  .maze-layout { grid-template-columns: 340px minmax(0, 1fr); grid-template-rows: auto 1fr; grid-template-areas: "side stage" "side cfg"; align-items: start; }
+  .maze-side { position: sticky; top: 76px; }
+}
+.q-box { padding: 18px 18px 16px; margin-bottom: 12px; }
+.q-box .q-num { font-size: 12.5px; font-weight: 700; color: var(--accent); }
+.q-box .q-text { margin: 6px 0 0; font-size: 19px; font-weight: 700; line-height: 1.7; }
+.ans-legend { display: grid; gap: 8px; grid-template-columns: 1fr; }
+@media (min-width: 560px) and (max-width: 899px) { .ans-legend { grid-template-columns: 1fr 1fr; } }
+.ans-key {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px; text-align: right;
+  background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow);
+  transition: border-color .15s ease, background .2s ease, opacity .2s ease;
+}
+.ans-key .num { width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 16px; }
+.ans-key .txt { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; line-height: 1.6; word-break: break-word; }
+.quran-font .ans-key .txt, .quran-font .q-box .q-text { font-family: var(--font-quran); font-weight: 400; font-size: 22px; line-height: 2; }
+.ans-key:hover, .ans-key.hl { border-color: var(--accent); }
+.ans-key.gone { opacity: .5; background: var(--bad-bg); border-color: var(--bad); }
+.ans-key.gone .txt { text-decoration: line-through; }
+.ans-key.win { background: var(--ok-bg); border-color: var(--ok); }
+.maze-stage { display: flex; flex-direction: column; align-items: center; }
+.maze-box {
+  position: relative; border-radius: 18px; overflow: hidden; touch-action: none;
+  background: var(--paper); border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+}
+.maze-box canvas { display: block; touch-action: none; cursor: pointer; }
+.maze-box.shake { animation: mazeShake .4s ease; }
+@keyframes mazeShake { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+.maze-msg { position: absolute; inset: 0; display: grid; place-items: start center; pointer-events: none; padding: 14px; }
+.maze-msg span {
+  padding: 10px 20px; border-radius: 99px; text-align: center; font-weight: 700; font-size: 15px;
+  background: color-mix(in srgb, var(--text) 85%, transparent); color: var(--bg); box-shadow: var(--shadow-lg);
+  opacity: 0; transform: scale(.85); transition: opacity .2s ease, transform .25s cubic-bezier(.2, .9, .3, 1.4);
+}
+.maze-msg.show span { opacity: 1; transform: none; }
+.maze-msg.ok span { background: var(--ok); color: var(--on-ok); }
+.maze-msg.bad span { background: var(--bad); color: #fff; }
+.hearts { color: var(--bad); letter-spacing: 1px; font-size: 14px; }
+.dpad { display: none; direction: ltr; grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(3, 58px); gap: 6px; justify-content: center; margin: 14px auto 0; user-select: none; -webkit-user-select: none; }
+@media (pointer: coarse) { .dpad { display: grid; } }
+.dpad button { border-radius: 16px; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow); display: grid; place-items: center; color: var(--accent); touch-action: none; }
+.dpad button:active { background: var(--brand-50); }
+.dpad svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.dpad .up { grid-area: 1 / 2; } .dpad .left { grid-area: 2 / 1; } .dpad .right { grid-area: 2 / 3; } .dpad .down { grid-area: 3 / 2; }
+.maze-summary { max-width: 640px; margin: 0 auto; }
+.sum-ans { font-size: 14px; font-weight: 600; color: var(--ok); }
+.quran-font .sum-ans { font-family: var(--font-quran); font-weight: 400; font-size: 19px; line-height: 2; }
+
+/* إعدادات اللعب تحت الأسئلة — المستوى والقلوب والمؤقت وشكل المتاهة */
+.maze-cfg { padding: 16px 16px 16px; margin: 0; box-shadow: var(--shadow); }
+.cfg-title { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--accent); }
+.cfg-title.mt { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.cfg-title svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.cfg-row { display: flex; flex-direction: column; gap: 8px; padding: 10px 0; border-top: 1px dashed var(--border); }
+.cfg-row:first-of-type { border-top: 0; padding-top: 2px; }
+.cfg-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13.5px; font-weight: 700; }
+.cfg-head small { color: var(--muted); font-weight: 500; font-size: 11.5px; }
+.cfg-row .ed-seg { align-self: flex-start; }
+/* على الشاشات العريضة: المستوى والقلوب والمؤقت في صف واحد تحت القوالب */
+@media (min-width: 720px) {
+  .cfg-rows { display: grid; grid-template-columns: minmax(0, 1.6fr) auto auto; gap: 0 22px; align-items: start; }
+  .cfg-rows .cfg-row { border-top: 0; padding-top: 2px; }
+}
+.lvl-badge { min-width: 34px; padding: 2px 10px; border-radius: 99px; background: var(--brand); color: #fff; text-align: center; font-size: 14px; }
+.lvl-range {
+  --fill: 22%;
+  -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 99px; margin: 6px 0 0; cursor: pointer;
+  background: linear-gradient(to left, var(--brand) var(--fill), var(--bg-2) var(--fill));
+}
+.lvl-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--card); border: 3px solid var(--brand); box-shadow: var(--shadow);
+}
+.lvl-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--card); border: 3px solid var(--brand); }
+.lvl-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.lvl-info { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: var(--bg); min-height: 54px; }
+.lvl-foes { display: flex; gap: 2px; flex-shrink: 0; }
+.lvl-foes canvas { width: 34px; height: 34px; display: block; }
+.lvl-calm { font-size: 24px; color: var(--ok); padding: 0 4px; }
+.lvl-text { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.lvl-text b { color: var(--text); }
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 10px; }
+.theme-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px 5px 6px;
+  border-radius: 12px; border: 2px solid var(--border); background: var(--bg);
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  transition: border-color .15s ease, color .15s ease, transform .12s ease;
+}
+.theme-btn:hover { border-color: var(--brand-100); color: var(--text); }
+.theme-btn:active { transform: scale(.96); }
+.theme-btn canvas { width: 100%; aspect-ratio: 4 / 3; border-radius: 8px; display: block; }
+.theme-btn.on { border-color: var(--accent); color: var(--accent); background: var(--brand-50); }
+#clockStat.urgent { color: var(--bad); border-color: var(--bad); animation: hintFlash 1s ease infinite; }
+@media (max-width: 640px) { #game #clockStat { padding: 5px 9px; } }
+.set-note { margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--bg); color: var(--muted); font-size: 12.5px; line-height: 1.7; }
+
+/* زر نسخ رابط اللعبة للطلاب */
+.share-btn { margin-top: 16px; }
+
+/* الهواتف: السؤال والإجابات مضغوطة حتى تظهر المتاهة بلا تمرير كثير */
+@media (max-width: 899px) {
+  .ans-legend { grid-template-columns: 1fr 1fr; gap: 6px; }
+}
+@media (max-width: 560px) {
+  .wrap.wide { padding: 10px 10px 30px; }
+  .maze-layout { gap: 10px; }
+  .q-box { padding: 12px 14px; margin-bottom: 8px; }
+  .q-box .q-text { font-size: 16px; line-height: 1.6; margin-top: 2px; }
+  .ans-key { padding: 6px 8px; gap: 7px; border-radius: 12px; }
+  .ans-key .num { width: 26px; height: 26px; font-size: 14px; border-radius: 8px; }
+  .ans-key .txt { font-size: 13.5px; }
+  .quran-font .ans-key .txt { font-size: 18px; line-height: 1.8; }
+  .quran-font .q-box .q-text { font-size: 19px; }
+  .dpad { grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(3, 64px); }
+}

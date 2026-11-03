@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ألعاب تفاعلية · IQRA Network</title>
+<link rel="icon" href="../assets/favicon.png">
+<script>try{var t=localStorage.getItem('iqra_theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Montserrat:wght@600;700&family=Reem+Kufi:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tests.css">
+</head>
+<body>
+
+<!-- قائمة الألعاب في نسخة الطلاب — للعب فقط، بلا تعديل ولا إعدادات -->
+<header class="topbar">
+  <span class="brand-logo"><img src="../assets/iqra-logo.svg" alt="IQRA Network"></span>
+  <div class="brand-text">
+    <strong>ألعاب تفاعلية</strong>
+    <small>IQRA NETWORK</small>
+  </div>
+  <button class="icon-btn btn-theme" title="الوضع الليلي" aria-label="الوضع الليلي">
+    <svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+  </button>
+</header>
+
+<main class="wrap">
+  <div class="search-box">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input type="search" id="gamesSearch" placeholder="ابحث باسم اللعبة…" autocomplete="off">
+  </div>
+  <div class="tile-grid games-grid" id="gamesGrid"></div>
+  <p class="empty-note hidden" id="gamesEmpty">لا توجد لعبة بهذا الاسم</p>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/tests-common.js"></script>
+<script src="js/games-common.js"></script>
+<script>
+'use strict';
+const fold = s => s.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ').trim();
+let GAMES = [];
+
+function buildGrid(filter = '') {
+  const grid = $('#gamesGrid');
+  grid.innerHTML = '';
+  const f = fold(filter);
+  const list = GAMES.filter(g => GAME_TYPES[g.type] && (!f || fold(g.name).includes(f) || fold(g.desc || '').includes(f)));
+  for (const g of list) {
+    const a = document.createElement('a');
+    a.className = 'tile game-tile';
+    a.href = `${GAME_TYPES[g.type].player}?id=${g.id}`;
+    a.innerHTML = `
+      <span class="game-play">
+        <span class="game-ic">${ICON_MAZE}</span>
+        <span class="info"><strong>${esc(g.name)}</strong><small>${GAME_TYPES[g.type].name} · ${qCount(g.count)}</small></span>
+      </span>`;
+    grid.appendChild(a);
+  }
+  $('#gamesEmpty').classList.toggle('hidden', list.length > 0 || !GAMES.length);
+}
+
+$('#gamesSearch').addEventListener('input', e => buildGrid(e.target.value));
+bindTheme();
+loadGamesIndex().then(list => { GAMES = list; buildGrid(); });
+</script>
+</body>
+</html>
