@@ -27,8 +27,8 @@ function runnerScene() {
   const g = 2100, jumpV = 800;
   const size = () => {
     S.W = wrap.clientWidth;
-    const cap = document.body.classList.contains('is-fs') ? window.innerHeight * .72 : 420;
-    S.H = Math.round(Math.min(cap, Math.max(280, S.W * .48)));
+    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 420;
+    S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(280, S.W * .48)));
     const dpr = window.devicePixelRatio || 1;
     cv.width = S.W * dpr;
     cv.height = S.H * dpr;

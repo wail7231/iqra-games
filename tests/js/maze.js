@@ -175,7 +175,10 @@ function buildMaze(cols, rows, start, n) {
 function newRound() {
   const q = GAME.questions[order[qi]];
   const portrait = $('.maze-stage').clientWidth < 560;
-  const cols = portrait ? 9 : 13, rows = portrait ? 11 : 9;
+  /* في ملء الشاشة على شاشة عريضة: متاهة أعرض تملأ عرض الشاشة */
+  const wide = document.body.classList.contains('is-fs') && !portrait;
+  const cols = portrait ? 9 : wide ? Math.max(13, Math.min(21, Math.round(9 * window.innerWidth / Math.max(300, window.innerHeight - 150)))) : 13;
+  const rows = portrait ? 11 : 9;
   const start = { x: cols >> 1, y: rows >> 1 };
   const corrects = answerList(q);
   const answers = shuffle([...corrects.map(text => ({ text, ok: true })), ...q.wrong.map(text => ({ text, ok: false }))]);
@@ -455,9 +458,10 @@ function fit() {
   const w = $('.maze-stage').clientWidth;
   /* ملء الشاشة: المتاهة فوق والأسئلة تحتها، فتأخذ المتاهة ما يبقى من الارتفاع */
   const h = document.body.classList.contains('is-fs')
-    ? window.innerHeight - $('.maze-side').offsetHeight - 44
+    ? window.innerHeight - $('.maze-side').offsetHeight - 30
     : window.innerWidth >= 900 ? window.innerHeight - 160 : window.innerHeight * .62;
-  cs = Math.max(18, Math.min(64, Math.floor(Math.min((w - 2) / R.cols, h / R.rows))));
+  const capCell = document.body.classList.contains('is-fs') ? 140 : 64;
+  cs = Math.max(18, Math.min(capCell, Math.floor(Math.min((w - 2) / R.cols, h / R.rows))));
   pad = Math.max(3, Math.round(cs * .1));
   dpr = window.devicePixelRatio || 1;
   const W = R.cols * cs + pad * 2, H = R.rows * cs + pad * 2;

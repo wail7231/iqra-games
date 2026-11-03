@@ -58,8 +58,8 @@ Play.register({
     const bow = { x: 0, y: 0 };
     const size = () => {
       W = wrap.clientWidth;
-      const cap = document.body.classList.contains('is-fs') ? window.innerHeight * .74 : 480;
-      H = Math.round(Math.min(cap, Math.max(300, W * .56)));
+      const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 480;
+      H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(300, W * .56)));
       const dpr = window.devicePixelRatio || 1;
       cv.width = W * dpr;
       cv.height = H * dpr;

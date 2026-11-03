@@ -1694,3 +1694,34 @@ a { color: inherit; text-decoration: none; }
 
 /* اصطد الصحيح: عند الضرب يتلوّن الشريط والشكل فقط، بلا مربع خلفهما */
 .whack-field .pop.right, .whack-field .pop.wrong { background: none; border: 0; box-shadow: none; }
+
+/* =========================================================
+   ملء الشاشة — المتاهة أكبر ما يمكن، وتحتها شريط مضغوط:
+   سطر السؤال، ثم الإجابات في صف واحد. لا شيء غير ذلك.
+   ========================================================= */
+.is-fs #playArea.maze-layout { gap: 8px; padding: 8px 12px; overflow: hidden; height: 100vh; }
+.is-fs #playArea .maze-side { display: flex; flex-direction: column; gap: 6px; width: var(--maze-w, 100%); }
+.is-fs #playArea .q-box { padding: 6px 14px; border-radius: 12px; box-shadow: none; }
+.is-fs #playArea .q-box::before { display: none; }
+.is-fs #playArea .q-box .q-num { display: inline; margin-inline-end: 10px; font-size: 13px; }
+.is-fs #playArea .q-box .q-text { display: inline; font-size: clamp(17px, 2vw, 22px); }
+.is-fs #playArea .ans-legend { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; }
+.is-fs #playArea .ans-key { padding: 5px 10px; box-shadow: none; }
+.is-fs #playArea .dpad, .is-fs #playArea .maze-tip { display: none !important; }
+
+/* بقية الألعاب: اللوحة تملأ الشاشة، وما في داخلها يكبر */
+.is-fs #board { padding: 14px 3vw 16px; gap: 12px; justify-content: flex-start; }
+.is-fs #board .round-head { gap: 2px; }
+.is-fs #board .round-q { font-size: clamp(22px, 2.6vw, 34px); }
+.is-fs .wheel-stage2 { width: min(66vh, 86vw); }
+.is-fs .hang-wrap { grid-template-columns: minmax(240px, 34vh) minmax(0, 1fr); }
+.is-fs .hang-art { max-height: 46vh; }
+.is-fs .hang-key { width: clamp(44px, 4vw, 64px); height: clamp(48px, 5vh, 62px); font-size: clamp(22px, 2.4vw, 30px); }
+.is-fs .whack-field .hole { height: 22vh; }
+.is-fs .whack-field .pop { height: 18vh; }
+.is-fs .whack-field .pop-shape { width: 11vh; height: 11vh; }
+.is-fs .plant-wrap { grid-template-columns: minmax(220px, 40vh) minmax(0, 1fr); }
+.is-fs .quiz-opt { min-height: 9vh; }
+.is-fs .qo-txt { font-size: clamp(18px, 2.2vw, 28px); }
+.is-fs .word-chip { font-size: clamp(22px, 3vw, 38px); }
+.is-fs .letter-slot, .is-fs .letter-tile { width: clamp(56px, 6vh, 80px); height: clamp(62px, 7vh, 88px); font-size: clamp(30px, 4vh, 44px); }

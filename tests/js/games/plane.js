@@ -22,8 +22,8 @@ function skyScene() {
   const S = { wrap, q: null, clouds: [], running: false, missed: false, answered: false, y: 0, ty: 0, W: 0, H: 0, keys: {}, t: 0 };
   const size = () => {
     S.W = wrap.clientWidth;
-    const cap = document.body.classList.contains('is-fs') ? window.innerHeight * .72 : 440;
-    S.H = Math.round(Math.min(cap, Math.max(300, S.W * .5)));
+    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 440;
+    S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(300, S.W * .5)));
     const dpr = window.devicePixelRatio || 1;
     cv.width = S.W * dpr;
     cv.height = S.H * dpr;

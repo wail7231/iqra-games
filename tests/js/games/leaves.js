@@ -21,8 +21,8 @@ function pondScene() {
   const S = { wrap, q: null, row: [], home: null, token: null, jump: null, scroll: null, W: 0, H: 0, t: 0, missed: false, splashes: [] };
   const size = () => {
     S.W = wrap.clientWidth;
-    const cap = document.body.classList.contains('is-fs') ? window.innerHeight * .72 : 460;
-    S.H = Math.round(Math.min(cap, Math.max(320, S.W * .55)));
+    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 460;
+    S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(320, S.W * .55)));
     const dpr = window.devicePixelRatio || 1;
     cv.width = S.W * dpr;
     cv.height = S.H * dpr;
