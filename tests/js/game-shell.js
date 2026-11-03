@@ -33,7 +33,7 @@ const Play = {
     clearTimeout(this._next);
     const order = [...this.game.questions.keys()];
     this.items = (this.game.settings || {}).order === 'random' ? shuffle(order).map(i => this.game.questions[i]) : order.map(i => this.game.questions[i]);
-    this.idx = 0; this.score = 0; this.results = []; this.t0 = 0; this.finished = false;
+    this.idx = 0; this.score = 0; this._shown = 0; this.streak = 0; this.results = []; this.t0 = 0; this.finished = false;
     this.max = this.items.reduce((s, it) => s + (this.def.points ? this.def.points(it) : 1), 0);
     this.lives = this.usesLives && this.cfg.lives > 0 ? this.cfg.lives : Infinity;
     $('#summary').classList.add('hidden');
@@ -43,7 +43,8 @@ const Play = {
   },
   round() {
     this.roundDone = false;
-    this.board.innerHTML = '';
+    /* طبقة زينة القالب تبقى، ويُمسح ما سواها */
+    [...this.board.children].forEach(c => { if (!c.classList.contains('fx-layer')) c.remove(); });
     this.board.classList.toggle('quran-text', this.quran);
     $('#progressBar').style.width = (this.idx / this.items.length * 100) + '%';
     this.def.round(this.item, this.idx);
@@ -97,7 +98,18 @@ const Play = {
   touch() { if (!this.t0 && !this.finished) this.t0 = performance.now(); },
   get usesLives() { return this.def.settings.includes('lives'); },
 
+  /* احتفال صغير بإجابة صحيحة: صوت وقصاصات و+١ */
+  good(el, points = 1) {
+    FX.play('ok');
+    if (el) { FX.burst(el, { count: 22 }); FX.floatText(el, '+' + toAr(points)); }
+  },
+  bad(el) {
+    FX.play('bad');
+    if (el) FX.floatText(el, '✗', '#C0392B');
+  },
   hud() {
+    if (this.score > (this._shown || 0)) FX.bump($('#scoreVal').parentNode);
+    this._shown = this.score;
     $('#scoreVal').textContent = toAr(this.score);
     $('#livesStat').classList.toggle('hidden', !this.usesLives);
     if (this.usesLives) {
@@ -124,6 +136,7 @@ const Play = {
     $('#sumTime').textContent = fmtClock(secs);
     $('#sumPct').textContent = toAr(Math.round(ratio * 100)) + '٪';
     $('#sumStars').innerHTML = [0, 1, 2].map(i => `<span class="star${i < stars ? ' on' : ''}">${STAR_SVG}</span>`).join('');
+    if (complete && stars) { FX.play('win'); setTimeout(() => FX.burst($('#sumStars'), { count: 40, spread: 200 }), 300); }
     const list = $('#sumList');
     list.innerHTML = '';
     this.items.forEach((it, i) => {
@@ -216,7 +229,7 @@ function dragItem(el, { targets, onDrop, onTap, onMove }) {
         document.body.appendChild(ghost);
         el.classList.add('drag-src');
       }
-      ghost.style.transform = `translate(${ev.clientX - sx + r.left}px, ${ev.clientY - sy + r.top}px)`;
+      ghost.style.transform = `translate(${ev.clientX - sx + r.left}px, ${ev.clientY - sy + r.top}px) rotate(-2.5deg) scale(1.06)`;
       const under = document.elementFromPoint(ev.clientX, ev.clientY);
       const t = under && targets ? under.closest(targets) : null;
       if (t !== over) { if (over) over.classList.remove('drop-over'); over = t; if (over) over.classList.add('drop-over'); }
@@ -259,7 +272,7 @@ function loadCfg() {
   }
   return cfg;
 }
-const applyTheme = () => { Play.board.dataset.theme = Play.cfg.theme; };
+const applyTheme = () => { Play.board.dataset.theme = Play.cfg.theme; FX.themeLayer(Play.board, Play.cfg.theme); };
 
 let savedCfg = '', pubState = 'unknown', canShare = false;
 const dirty = () => JSON.stringify(Play.cfg) !== savedCfg;
@@ -388,13 +401,15 @@ async function init() {
       Play.game = await loadGame(PARAMS.get('id'));
     }
     if (!GAME_TYPES[Play.game.type] || Play.game.type === 'maze') throw new Error('type');
-    await new Promise((res, rej) => {
+    const load = src => new Promise((res, rej) => {
       const s = document.createElement('script');
-      s.src = `js/games/${Play.game.type}.js`;
+      s.src = src;
       s.onload = res;
       s.onerror = rej;
       document.head.appendChild(s);
     });
+    if (Play.game.type === 'whack') await load('js/games/whack-shapes.js');
+    await load(`js/games/${Play.game.type}.js`);
   } catch (_) {
     showFatal('لم نجد ملف هذه اللعبة في مجلد games.', 'index.html#games');
     return;
@@ -423,4 +438,5 @@ async function init() {
 }
 
 bindTheme();
+FX.bindToggle($('#soundBtn'));
 init();

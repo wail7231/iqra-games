@@ -1,5 +1,5 @@
 /* ترتيب الكلمات — كلمات الجملة مبعثرة في بطاقات باهتة؛ يسحبها الطالب لترتيبها (أو يضغط بطاقتين لتبديلهما).
-   لا زر تأكيد: حين يصبح الترتيب صحيحًا تأخذ البطاقات ألوانها الحقيقية وتُحسب النقطة. */
+   كل كلمة تقف في مكانها الصحيح تأخذ لونها الحقيقي فورًا، وحين تكتمل الجملة تُحسب النقطة. */
 'use strict';
 
 const wordsOf = it => it.text.trim().split(/\s+/);
@@ -13,19 +13,29 @@ Play.register({
     Play.head(it.hint || '');
     const row = el('div', 'word-row');
     const order = scramble(words.map((w, i) => i), (a, b) => words[a] === words[b]);
-    let selected = null;
+    let selected = null, placedBefore = 0;
 
-    const check = () => {
-      const now = [...row.children].map(c => words[c.dataset.w]);
-      if (now.join(' ') !== words.join(' ')) return;
+    /* تلوين لحظي: البطاقة في موضعها الصحيح ملوّنة، وغيرها باهتة */
+    const check = (silent) => {
+      const chips = [...row.children];
+      let placed = 0;
+      chips.forEach((c, k) => {
+        const ok = c.textContent === words[k];
+        if (ok && !c.classList.contains('placed')) c.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 300 });
+        c.classList.toggle('placed', ok);
+        if (ok) placed++;
+      });
+      if (!silent && placed > placedBefore && placed < words.length) FX.play('good');
+      placedBefore = placed;
+      if (placed !== words.length) return;
       row.classList.add('solved');
-      row.querySelectorAll('.word-chip').forEach(c => c.classList.add('locked'));
-      Play.finish(1, { delay: 1700 });
+      chips.forEach(c => c.classList.add('locked'));
+      Play.good(row);
+      Play.finish(1, { delay: 1800 });
     };
     order.forEach(i => {
       const c = el('div', 'word-chip');
       c.textContent = words[i];
-      c.dataset.w = i;
       c.style.setProperty('--c', CHIP_COLORS[i % CHIP_COLORS.length]);
       dragItem(c, {
         /* أثناء السحب تتحرك البطاقة في الصف مباشرة: يمين منتصف البطاقة الأخرى = قبلها */
@@ -51,12 +61,6 @@ Play.register({
       row.appendChild(c);
     });
     Play.board.appendChild(row);
-
-    actionBar(actionBtn('تخطَّ', 'btn-ghost skip-btn', () => {
-      if (Play.roundDone) return;
-      words.forEach((w, i) => row.appendChild(row.querySelector(`[data-w="${i}"]`)));
-      row.classList.add('shown');
-      Play.finish(0, { delay: 2200 });
-    }));
+    check(true);
   },
 });

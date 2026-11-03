@@ -76,22 +76,25 @@ Play.register({
     }));
     refresh();
 
-    function grade() {
-      if (Play.roundDone) return;
+    /* النتيجة تظهر فراغًا بعد فراغ */
+    async function grade() {
+      if (Play.roundDone || text.classList.contains('grading')) return;
+      text.classList.add('grading');
+      confirm.remove();
+      $$('.bank-chip', Play.board).forEach(c => c.classList.add('locked'));
       let right = 0;
-      blanks.forEach(b => {
-        const chip = b.firstChild;
-        chip.classList.add('locked');
-        if (chip.textContent === b.dataset.answer) { right++; b.classList.add('right'); }
+      await FX.sequence(blanks, b => {
+        const ok = b.firstChild.textContent === b.dataset.answer;
+        b.classList.add(ok ? 'right' : 'wrong', 'revealed');
+        if (ok) { right++; FX.play('good'); FX.floatText(b, '+١'); }
         else {
-          b.classList.add('wrong');
+          FX.play('nope');
           const fix = el('span', 'blank-fix');
           fix.textContent = b.dataset.answer;
           b.appendChild(fix);
         }
-      });
-      $$('.bank-chip', bank).forEach(c => c.classList.add('locked'));
-      confirm.remove();
+      }, 520);
+      if (right === blanks.length) Play.good(text, right);
       Play.finish(right, { manual: true });
     }
   },

@@ -73,22 +73,25 @@ Play.register({
     }));
     refresh();
 
-    function grade() {
-      if (Play.roundDone) return;
+    /* النتيجة تظهر خانةً بعد خانة: أخضر للصحيحة وأحمر للخاطئة */
+    async function grade() {
+      if (Play.roundDone || wrap.classList.contains('grading')) return;
+      wrap.classList.add('grading', 'graded');
+      confirm.remove();
+      $$('.line-card', wrap).forEach(c => c.classList.add('locked'));
       let right = 0;
-      slotEls.forEach((s, k) => {
-        const c = dropOf(s).firstChild;
-        c.classList.add('locked');
-        if (+c.dataset.i === k) { right++; s.classList.add('right'); }
+      await FX.sequence(slotEls, (s, k) => {
+        const ok = +dropOf(s).firstChild.dataset.i === k;
+        s.classList.add(ok ? 'right' : 'wrong', 'revealed');
+        if (ok) { right++; FX.play('good'); FX.floatText(s.querySelector('.ls-num'), '+١'); }
         else {
-          s.classList.add('wrong');
+          FX.play('nope');
           const fix = el('div', 'ls-fix');
           fix.textContent = it.lines[k];
           s.appendChild(fix);
         }
-      });
-      confirm.remove();
-      wrap.classList.add('graded');
+      }, 520);
+      if (right === slotEls.length) Play.good(wrap, right);
       Play.finish(right, { manual: true });
     }
   },

@@ -11,14 +11,17 @@ const GAMES_DIR = '../games/';
 const STUDENT_SITE = 'https://wail7231.github.io/iqra-games/';
 /* القوالب: المتاهة لها صفحتها، وبقية القوالب تشترك في game.html (اللعب) و editor.html (الصناعة) */
 const GAME_TYPES = {
-  maze:    { name: 'متاهة', editor: 'maze-editor.html', player: 'maze.html' },
-  quiz:    { name: 'اختيار من متعدد', editor: 'editor.html', player: 'game.html' },
-  words:   { name: 'ترتيب الكلمات', editor: 'editor.html', player: 'game.html' },
-  lines:   { name: 'ترتيب الجمل', editor: 'editor.html', player: 'game.html' },
-  letters: { name: 'ترتيب الحروف', editor: 'editor.html', player: 'game.html' },
-  hangman: { name: 'البالونات', editor: 'editor.html', player: 'game.html' },
-  blanks:  { name: 'أكمل الفراغات', editor: 'editor.html', player: 'game.html' },
-  whack:   { name: 'اصطد الصحيح', editor: 'editor.html', player: 'game.html' },
+  maze:    { name: 'متاهة', editor: 'maze-editor.html', player: 'maze.html', desc: 'حرّك اللاعب داخل المتاهة وادخل باب الإجابة الصحيحة، وتجنّب المطاردين.' },
+  quiz:    { name: 'اختيار من متعدد', editor: 'editor.html', player: 'game.html', desc: 'سؤال وعدة إجابات ملوّنة، اختر الصحيحة منها.' },
+  words:   { name: 'ترتيب الكلمات', editor: 'editor.html', player: 'game.html', desc: 'رتّب الكلمات المبعثرة لتكوّن الجملة الصحيحة.' },
+  lines:   { name: 'ترتيب الجمل', editor: 'editor.html', player: 'game.html', desc: 'ضع الجمل أو الآيات في ترتيبها الصحيح ثم تأكّد.' },
+  letters: { name: 'ترتيب الحروف', editor: 'editor.html', player: 'game.html', desc: 'رتّب الحروف لتكوّن الكلمة، بين حروف زائدة متشابهة.' },
+  hangman: { name: 'البالونات', editor: 'editor.html', player: 'game.html', desc: 'خمّن حروف الكلمة المخفية قبل أن تنفجر البالونات.' },
+  blanks:  { name: 'أكمل الفراغات', editor: 'editor.html', player: 'game.html', desc: 'ضع الكلمات المناسبة في فراغات النص ثم تأكّد.' },
+  whack:   { name: 'اصطد الصحيح', editor: 'editor.html', player: 'game.html', desc: 'أشكال تخرج من الحفر، اضرب التي تحمل إجابة صحيحة.' },
+  spot:    { name: 'أين الخطأ؟', editor: 'editor.html', player: 'game.html', desc: 'كلمة في النص استُبدلت بغيرها، اكتشفها.' },
+  group:   { name: 'المصنِّف', editor: 'editor.html', player: 'game.html', desc: 'اسحب كل بطاقة إلى مجموعتها الصحيحة.' },
+  match:   { name: 'المطابقة', editor: 'editor.html', player: 'game.html', desc: 'صِل كل عنصر بما يناسبه من العمود الآخر.' },
 };
 const ICON_MAZE = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v8h4M16 8v12M8 16h4v4M12 8h4"/></svg>';
 

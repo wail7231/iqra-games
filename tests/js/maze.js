@@ -325,6 +325,7 @@ function onCell() {
   if (g.ok && R.got + 1 < R.need) {
     g.gone = g.collected = true;
     g.el.classList.add('win');
+    mazeCheer(g);
     R.got++;
     paintQNum();
     message(`✓ ${toAr(R.got)} من ${toAr(R.need)}`, 'ok');
@@ -332,6 +333,7 @@ function onCell() {
     R.got++;
     paintQNum();
     R.done = true;
+    mazeCheer(g);
     if (!R.missed) score++;
     results.push({ q: R.q, firstTry: !R.missed });
     g.el.classList.add('win');
@@ -348,6 +350,15 @@ function onCell() {
   return true;
 }
 
+/* احتفال بباب صحيح: من موضع الباب على اللوحة */
+function mazeCheer(g) {
+  FX.play('ok');
+  const r = canvas.getBoundingClientRect();
+  const p = { x: r.left + pad + (g.x + .5) * cs, y: r.top + pad + (g.y + .5) * cs };
+  FX.burst(p, { count: 24 });
+  FX.floatText(p, '✓');
+}
+
 function caught() {
   R.missed = true;
   mistakes++;
@@ -361,6 +372,7 @@ function caught() {
 }
 
 function loseLife(msg) {
+  FX.play('bad');
   const box = $('#mazeBox');
   box.classList.remove('shake');
   void box.offsetWidth;
@@ -433,7 +445,7 @@ function themeColors(name) {
   return t;
 }
 let T = {};
-const readColors = () => { T = themeColors(CFG.theme); $('#mazeBox').style.background = T.floor; };
+const readColors = () => { T = themeColors(CFG.theme); $('#mazeBox').style.background = T.floor; FX.themeLayer($('#mazeBox'), CFG.theme, { overlay: true }); };
 new MutationObserver(() => { if (CFG) { readColors(); paintThemePreviews(); } })
   .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
@@ -997,6 +1009,7 @@ function endGame(reason) {
   $('#sumMistakes').textContent = toAr(mistakes);
   const STAR = '<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.9L22 10l-5.5 4.8L18 22l-6-3.5L6 22l1.5-7.2L2 10l7.1-1.1z"/></svg>';
   $('#sumStars').innerHTML = [0, 1, 2].map(i => `<span class="star${i < stars ? ' on' : ''}">${STAR}</span>`).join('');
+  if (complete && stars) { FX.play('win'); setTimeout(() => FX.burst($('#sumStars'), { count: 40, spread: 200 }), 300); }
 
   const list = $('#sumList');
   list.innerHTML = '';
@@ -1063,4 +1076,5 @@ async function init() {
 }
 
 bindTheme();
+FX.bindToggle($('#soundBtn'));
 init();

@@ -1,5 +1,7 @@
 /* البالونات (Hangman) — كلمة مخفية بخانات وتلميح؛ يختار الطالب الحروف من لوحة حروف عربية
    (أو يكتبها بلوحة المفاتيح). كل حرف خاطئ يُفجّر بالونًا؛ إذا انفجرت كلها ظهرت الكلمة بلا نقطة.
+   شكل البالونات يتبع قالب الشكل في tests.css: بالونات، فوانيس مضيئة (ليل)، زهور تذبل (حديقة)،
+   بلورات تتحطم (جليد)، بالونات مرسومة بالقلم تُشطب (دفتر).
    بالونات بدل رسم إنسان، والتشكيل لا يُحسب (الحرف المشكول يُعامل كحرفه). */
 'use strict';
 
@@ -56,14 +58,17 @@ Play.register({
             cells.forEach(c => { if (c.dataset && c.dataset.ch === ch) { c.textContent = ch; c.classList.add('open'); } });
             if (!need.size) {
               word.classList.add('solved');
-              Play.finish(1, { delay: 1800 });
-            }
+              Play.good(word);
+              Play.finish(1, { delay: 1900 });
+            } else FX.play('good');
           } else {
             k.classList.add('wrong');
             balloons[popped++].classList.add('popped');
+            FX.play('pop');
             if (popped >= n) {
               cells.forEach(c => { if (c.dataset && c.dataset.ch && !c.textContent) { c.textContent = c.dataset.ch; c.classList.add('missed'); } });
               word.classList.add('lost');
+              FX.play('bad');
               Play.finish(0, { delay: 2400 });
             }
           }
