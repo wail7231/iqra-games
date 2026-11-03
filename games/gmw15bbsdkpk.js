@@ -15,8 +15,15 @@ window.__GAME__ = {
    "wrong": [
     "Yes it is"
    ]
+  },
+  {
+   "q": "Allah will forgive us if we did tawbah anytime close to the sin time",
+   "correct": "True",
+   "wrong": [
+    "False"
+   ]
   }
  ],
  "created": 1793738037613,
- "updated": 1793738080930
+ "updated": 1793738118761
 };

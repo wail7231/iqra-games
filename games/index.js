@@ -5,8 +5,8 @@ window.__GAMES_INDEX__ = [
   "type": "maze",
   "name": "Loyalty",
   "desc": "",
-  "count": 1,
-  "updated": 1793738080930
+  "count": 2,
+  "updated": 1793738118761
  },
  {
   "id": "gmw159ns60lt",
