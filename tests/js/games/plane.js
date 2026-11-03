@@ -38,15 +38,25 @@ function skyScene() {
   const speed = () => 110 + Play.cfg.speed * 20;
   const font = px => `${Play.quran ? 400 : 700} ${px}px ${Play.quran ? "'Amiri Quran'" : "'IBM Plex Sans Arabic'"}, sans-serif`;
 
-  /* موجة غيوم: غيمة لكل إجابة في ممر خاص، تدخل من اليسار متقاربة */
+  /* الغيوم تأتي واحدةً بعد أخرى متباعدة: بين كل غيمة والتي تليها مسافة واسعة،
+     وكل غيمة في ارتفاع بعيد عن سابقتها (أعلى / وسط / أسفل)، فيقرأ الطالب كل إجابة ويفكّر قبل الاختيار */
   S.spawn = () => {
     const answers = mixAnswers(S.q, 5);
-    const n = answers.length, lane = (S.H - 30) / n;
-    ctx.font = font(16);
-    answers.forEach((a, i) => {
-      const h = Math.min(70, lane - 12);
-      const w = Math.max(110, Math.min(S.W * .34, ctx.measureText(a.t).width + 56));
-      S.clouds.push({ ...a, x: -w - 20 - Math.random() * 80, y: 15 + lane * (i + .5), w, h, state: '', fade: 0, q: S.q });
+    const h = Math.max(54, Math.min(80, S.H * .17));
+    const levels = [.2, .5, .8].map(f => Math.round(S.H * f));
+    const gap = Math.max(300, S.W * .42);
+    ctx.font = font(17);
+    let x = -40, lastLevel = -1;
+    answers.forEach(a => {
+      const w = Math.max(120, Math.min(S.W * .3, ctx.measureText(a.t).width + 60));
+      /* ارتفاع مختلف عن الغيمة السابقة، ويُفضَّل الأبعد عنها */
+      const options = [0, 1, 2].filter(k => k !== lastLevel);
+      const far = lastLevel === 1 ? options : options.filter(k => Math.abs(k - lastLevel) === 2);
+      const k = (Math.random() < .65 && far.length ? far : options)[Math.random() * (Math.random() < .65 && far.length ? far : options).length | 0];
+      lastLevel = k;
+      x -= w;
+      S.clouds.push({ ...a, x, y: levels[k], w, h, state: '', fade: 0, q: S.q });
+      x -= gap;
     });
   };
   S.setQuestion = q => {
