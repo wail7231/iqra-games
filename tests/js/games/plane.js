@@ -5,11 +5,16 @@
 'use strict';
 
 const PLANE_THEMES = {
-  classic:  { cloud: '#FFF8E8', cloudEdge: '#E3B341', ink: '#2A1A0E', body: '#AB3920', wing: '#E3B341', glass: '#F7E7C0', trail: 'rgba(227,179,65,.35)' },
-  night:    { cloud: '#24346A', cloudEdge: '#59C3F0', ink: '#EAF4FF', body: '#DDE6F5', wing: '#59C3F0', glass: '#F6E7A8', trail: 'rgba(89,195,240,.35)', glow: true, lights: true },
-  garden:   { cloud: '#FFFFFF', cloudEdge: '#BFE3F3', ink: '#22361F', body: '#3F8A3A', wing: '#F7C948', glass: '#DDF1FB', trail: 'rgba(255,255,255,.7)' },
-  ice:      { cloud: '#F4FBFF', cloudEdge: '#9CD5F2', ink: '#12354A', body: '#FFFFFF', wing: '#2D7FB8', glass: '#9CD5F2', trail: 'rgba(156,213,242,.5)', sparkle: true },
-  notebook: { cloud: '#FFFFFF', cloudEdge: '#2B4C7E', ink: '#1F2F4D', body: '#FFFFFF', wing: '#DCE3EC', glass: '#FFFFFF', trail: 'rgba(43,76,126,.25)', paper: true },
+  classic:  { plane: 'prop', cloud: '#FFFDF6', cloud2: '#F5DEB8', cloudEdge: '#D9A23A', shine: 'rgba(255,255,255,.85)', shade: 'rgba(120,70,20,.1)', ink: '#3A1E0E',
+              body: '#AB3920', body2: '#D9573A', wing: '#E3B341', wing2: '#B8892A', glass: '#F7E7C0', trail: 'rgba(255,255,255,.9)' },
+  night:    { plane: 'jet', cloud: '#34508F', cloud2: '#1E2C5C', cloudEdge: '#59C3F0', shine: 'rgba(160,220,255,.22)', shade: 'rgba(0,0,0,.18)', ink: '#F2F8FF',
+              body: '#C9D6EE', wing: '#59C3F0', wing2: '#2F7DA6', glass: '#F6E7A8', trail: 'rgba(246,231,168,.7)', trailKind: 'jet', glow: true, stars: true },
+  garden:   { plane: 'biplane', cloud: '#FFFFFF', cloud2: '#D8EEFA', cloudEdge: '#9FD3EE', shine: 'rgba(255,255,255,.95)', shade: 'rgba(40,90,60,.1)', ink: '#1F3A1C',
+              body: '#3F8A3A', body2: '#6DBA5F', wing: '#F7C948', wing2: '#C99A22', glass: '#DDF1FB', trail: 'rgba(255,255,255,.95)' },
+  ice:      { plane: 'glider', cloud: '#FFFFFF', cloud2: '#C9E8F8', cloudEdge: '#7FC2E8', shine: 'rgba(255,255,255,1)', shade: 'rgba(45,127,184,.12)', ink: '#0F3550',
+              body: '#DDEFFA', wing: '#2D7FB8', wing2: '#1F5F8C', glass: '#7FC2E8', trail: '#FFFFFF', trailKind: 'sparkle', sparkle: true },
+  notebook: { plane: 'paper', cloud: '#FFFFFF', cloud2: '#FFFFFF', cloudEdge: '#2B4C7E', shine: 'transparent', shade: 'transparent', ink: '#1F2F4D',
+              body: '#FFFFFF', wing: '#DCE3EC', glass: '#FFFFFF', trail: 'rgba(43,76,126,.45)', trailKind: 'dash', paper: true },
 };
 let SKY = null;
 
@@ -19,11 +24,11 @@ function skyScene() {
   const start = el('div', 'run-start', '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>');
   wrap.append(cv, start);
   const ctx = cv.getContext('2d');
-  const S = { wrap, q: null, clouds: [], running: false, missed: false, answered: false, y: 0, ty: 0, W: 0, H: 0, keys: {}, t: 0 };
+  const S = { wrap, q: null, clouds: [], running: false, missed: false, answered: false, y: 0, ty: 0, W: 0, H: 0, keys: {}, t: 0, hist: [] };
   const size = () => {
     S.W = wrap.clientWidth;
-    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 440;
-    S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(300, S.W * .5)));
+    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 470;
+    S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(330, S.W * .54)));
     const dpr = window.devicePixelRatio || 1;
     cv.width = S.W * dpr;
     cv.height = S.H * dpr;
@@ -42,13 +47,13 @@ function skyScene() {
      وكل غيمة في ارتفاع بعيد عن سابقتها (أعلى / وسط / أسفل)، فيقرأ الطالب كل إجابة ويفكّر قبل الاختيار */
   S.spawn = () => {
     const answers = mixAnswers(S.q, 5);
-    const h = Math.max(54, Math.min(80, S.H * .17));
-    const levels = [.2, .5, .8].map(f => Math.round(S.H * f));
+    const h = Math.max(64, Math.min(92, S.H * .19));
+    const levels = [.24, .53, .8].map(f => Math.round(S.H * f));
     const gap = Math.max(300, S.W * .42);
-    ctx.font = font(17);
+    ctx.font = font(Math.round(Math.min(22, Math.max(16, h * .24))));
     let x = -40, lastLevel = -1;
     answers.forEach(a => {
-      const w = Math.max(120, Math.min(S.W * .3, ctx.measureText(a.t).width + 60));
+      const w = Math.max(150, Math.min(S.W * .34, ctx.measureText(a.t).width + h * .8 + 40));
       /* ارتفاع مختلف عن الغيمة السابقة، ويُفضَّل الأبعد عنها */
       const options = [0, 1, 2].filter(k => k !== lastLevel);
       const far = lastLevel === 1 ? options : options.filter(k => Math.abs(k - lastLevel) === 2);
@@ -306,6 +311,8 @@ function skyScene() {
     if (S.keys.ArrowUp || S.keys.KeyW) S.ty = Math.max(24, S.ty - 340 * dt);
     if (S.keys.ArrowDown || S.keys.KeyS) S.ty = Math.min(S.H - 24, S.ty + 340 * dt);
     S.y += (S.ty - S.y) * Math.min(1, dt * 7);
+    S.hist.push(S.y);
+    if (S.hist.length > 34) S.hist.shift();
     if (S.running && !Play.finished) {
       const v = speed() * dt;
       S.clouds.forEach(c => { c.x += v; if (c.state) c.fade = Math.min(1, c.fade + dt * .9); });
