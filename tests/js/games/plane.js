@@ -52,7 +52,8 @@ function skyScene() {
       /* ارتفاع مختلف عن الغيمة السابقة، ويُفضَّل الأبعد عنها */
       const options = [0, 1, 2].filter(k => k !== lastLevel);
       const far = lastLevel === 1 ? options : options.filter(k => Math.abs(k - lastLevel) === 2);
-      const k = (Math.random() < .65 && far.length ? far : options)[Math.random() * (Math.random() < .65 && far.length ? far : options).length | 0];
+      const pool = far.length && Math.random() < .65 ? far : options;
+      const k = pool[Math.random() * pool.length | 0];
       lastLevel = k;
       x -= w;
       S.clouds.push({ ...a, x, y: levels[k], w, h, state: '', fade: 0, q: S.q });
