@@ -39,6 +39,9 @@ function pondScene() {
   const T = () => POND_THEMES[Play.cfg.theme] || POND_THEMES.classic;
   const font = px => `${Play.quran ? 400 : 700} ${px}px ${Play.quran ? "'Amiri Quran'" : "'IBM Plex Sans Arabic'"}, sans-serif`;
   const sway = () => Play.cfg.speed;
+  const fontPx = r => Math.round(Math.min(26, Math.max(16, r * .36)));
+  S.drops = [];
+  const spray = (x, y, n, col) => { for (let k = 0; k < n; k++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 140; S.drops.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .6 - 90, t: 0, col, r: 2 + Math.random() * 3 }); } };
 
   S.setQuestion = q => {
     S.q = q;
@@ -79,13 +82,18 @@ function pondScene() {
       FX.floatText(pt, S.missed ? '✓' : '+١');
       FX.play('ok');
       leaf.good = true;
+      leaf.squash = 1;
+      S.splashes.push({ x: leaf.x, y: leaf.y, t: 0, r0: leaf.r, soft: true });
+      spray(leaf.x, leaf.y, 14, '#FFFFFF');
       /* المشهد يتحرك للأعلى: الورقة الصحيحة تصير ورقة البداية */
       S.scroll = { t: 0, leaf, from: leaf.y };
       Play.finish(S.missed ? 0 : 1, { delay: 1100 });
     } else {
       leaf.sink = .001;
       S.missed = true;
-      S.splashes.push({ x: leaf.x, y: leaf.y, t: 0 });
+      leaf.squash = 1;
+      S.splashes.push({ x: leaf.x, y: leaf.y, t: 0, r0: 10 });
+      spray(leaf.x, leaf.y, 22, 'rgba(255,255,255,.9)');
       FX.floatText(pt, '✗', '#C0392B');
       FX.play('bad');
       Play.mistake();
@@ -120,8 +128,11 @@ function pondScene() {
     if (l.sink >= 1) return;
     ctx.save();
     ctx.translate(l.x, l.y);
-    const s = 1 - l.sink * .7;
-    ctx.scale(s, s);
+    const s = (1 - l.sink * .7) * (1 + Math.sin(S.t * 1.6 + (l.phase || 0)) * .025), q = l.squash || 0;
+    /* ظل الورقة على الماء */
+    ctx.fillStyle = 'rgba(0,0,0,.14)';
+    ctx.beginPath(); ctx.ellipse(4, 7, l.r * s, l.r * s * .9, 0, 0, 7); ctx.fill();
+    ctx.scale(s * (1 + q * .14), s * (1 - q * .14));
     ctx.globalAlpha = 1 - l.sink;
     if (th.glow || l.good) { ctx.shadowColor = l.good ? '#7FD36B' : th.leafEdge; ctx.shadowBlur = 16; }
     ctx.fillStyle = l.good ? '#3F8A3A' : l.sink ? '#7A5A4A' : th.leaf;
@@ -142,17 +153,25 @@ function pondScene() {
     ctx.stroke();
     if (th.shape === 'pad' && !th.sketch) {
       ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 1.5;
-      for (let k = 1; k < 6; k++) { const a = l.rot + .25 + k * 1.0; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * l.r * .85, Math.sin(a) * l.r * .85); ctx.stroke(); }
+      /* العروق في الحافة فقط حتى تبقى الكتابة واضحة */
+      const r0 = l.t ? .66 : 0;
+      for (let k = 1; k < 6; k++) { const a = l.rot + .25 + k * 1.0; ctx.beginPath(); ctx.moveTo(Math.cos(a) * l.r * r0, Math.sin(a) * l.r * r0); ctx.lineTo(Math.cos(a) * l.r * .9, Math.sin(a) * l.r * .9); ctx.stroke(); }
     }
+    /* لمعة خفيفة */
+    if (!th.sketch) { ctx.fillStyle = 'rgba(255,255,255,.13)'; ctx.beginPath(); ctx.ellipse(-l.r * .3, -l.r * .38, l.r * .38, l.r * .16, -.5, 0, 7); ctx.fill(); }
     if (th.flowers && !l.t) { ctx.fillStyle = '#F4A6C1'; for (let k = 0; k < 5; k++) { const a = k * 1.256; ctx.beginPath(); ctx.arc(Math.cos(a) * 8, Math.sin(a) * 8, 6, 0, 7); ctx.fill(); } }
     if (l.t) {
-      ctx.fillStyle = l.good ? '#FFFFFF' : th.ink;
-      ctx.font = font(Math.min(18, Math.max(13, l.r * .36)));
+      const ink = l.good ? '#FFFFFF' : th.ink;
+      const light = parseInt(ink.slice(1), 16) > 0x999999;
+      ctx.font = font(fontPx(l.r));
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.shadowColor = th.ink === '#FFFFFF' ? 'rgba(0,0,0,.45)' : 'transparent';
-      ctx.shadowBlur = 3;
-      ctx.fillText(l.t, 0, 1, l.r * 1.7);
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = light ? 'rgba(0,0,0,.5)' : 'rgba(255,255,255,.88)';
+      ctx.strokeText(l.t, 0, 1, l.r * 1.72);
+      ctx.fillStyle = ink;
+      ctx.fillText(l.t, 0, 1, l.r * 1.72);
     }
     ctx.restore();
   }
@@ -189,8 +208,12 @@ function pondScene() {
     last = now;
     S.t += dt;
     const th = T();
+    [S.home, ...S.row].forEach(l => { if (l && l.squash) l.squash = Math.max(0, l.squash - dt * 3.2); });
+    S.drops = S.drops.filter(d => (d.t += dt) < .7);
+    S.drops.forEach(d => { d.x += d.vx * dt; d.y += d.vy * dt; d.vy += 420 * dt; });
     S.row.forEach(l => {
-      l.enter = Math.min(1, l.enter + dt * 2);
+      if (l.delay > 0) { l.delay -= dt; return; }
+      l.enter = Math.min(1, l.enter + dt * 2.4);
       const baseY = S.scroll && S.scroll.leaf === l ? l.y : S.rowY - 40 * (1 - l.enter);
       if (!(S.scroll && S.scroll.leaf === l)) { l.y = baseY; l.x = l.cx + Math.sin(S.t * (.5 + sway() * .12) + l.phase) * l.amp * sway() / 10; }
       if (l.sink) l.sink = Math.min(1, l.sink + dt * 1.4);
@@ -202,6 +225,7 @@ function pondScene() {
         S.jump = null;
         S.token.x = j.leaf.x;
         S.token.y = j.leaf.y;
+        j.leaf.squash = 1;
         if (j.back) FX.play('tick'); else landed(j.leaf);
       }
     } else if (!S.scroll) {
@@ -218,7 +242,7 @@ function pondScene() {
       S.token.y = l.y;
       S.row.forEach(o => { if (o !== l) o.sink = Math.max(o.sink, S.scroll.t); });
       if (S.scroll.t >= 1) {
-        S.home = { x: l.x, y: S.homeY, r: l.r, t: '', good: false, sink: 0, rot: l.rot };
+        S.home = { x: l.x, y: S.homeY, r: Math.min(l.r, 60), t: '', good: false, sink: 0, rot: l.rot, squash: 0, phase: l.phase };
         S.row = [];
         S.scroll = null;
       }
@@ -226,14 +250,20 @@ function pondScene() {
     S.splashes = S.splashes.filter(s => (s.t += dt) < .8);
     drawWater(th);
     drawLeaf(S.home, th);
-    S.row.forEach(l => drawLeaf(l, th));
     S.splashes.forEach(s => {
       ctx.strokeStyle = 'rgba(255,255,255,.8)';
-      ctx.lineWidth = 3;
-      ctx.globalAlpha = 1 - s.t / .8;
-      ctx.beginPath(); ctx.arc(s.x, s.y, 10 + s.t * 70, 0, 7); ctx.stroke();
+      ctx.lineWidth = s.soft ? 2.5 : 3;
+      for (let k = 0; k < 2; k++) {
+        const tt = s.t - k * .14;
+        if (tt <= 0) continue;
+        ctx.globalAlpha = Math.max(0, 1 - tt / .8) * (s.soft ? .7 : 1);
+        ctx.beginPath(); ctx.ellipse(s.x, s.y, (s.r0 || 10) + tt * 80, ((s.r0 || 10) + tt * 80) * .8, 0, 0, 7); ctx.stroke();
+      }
       ctx.globalAlpha = 1;
     });
+    S.row.forEach(l => { if (l.delay <= 0 || l.delay === undefined) drawLeaf(l, th); });
+    S.drops.forEach(d => { ctx.globalAlpha = 1 - d.t / .7; ctx.fillStyle = d.col; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, 7); ctx.fill(); });
+    ctx.globalAlpha = 1;
     drawToken(th);
     requestAnimationFrame(frame);
   }
