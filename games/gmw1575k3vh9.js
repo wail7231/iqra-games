@@ -32,12 +32,12 @@ window.__GAME__ = {
   },
   {
    "q": "we have 5 prayers",
-   "correct": "Treu",
+   "correct": "True",
    "wrong": [
     "False"
    ]
   }
  ],
  "created": 1793737842915,
- "updated": 1793737947780
+ "updated": 1793749010175
 };

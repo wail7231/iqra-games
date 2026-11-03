@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmw1575k3vh9",
+  "type": "archery",
+  "name": "5 pillars of islam",
+  "desc": "",
+  "count": 4,
+  "updated": 1793749010175
+ },
+ {
   "id": "gmw0lvw69q45",
   "type": "letters",
   "name": "silent noon letters",
@@ -39,13 +47,5 @@ window.__GAMES_INDEX__ = [
   "desc": "",
   "count": 3,
   "updated": 1793738033786
- },
- {
-  "id": "gmw1575k3vh9",
-  "type": "archery",
-  "name": "5 pillars of islam",
-  "desc": "",
-  "count": 4,
-  "updated": 1793737947780
  }
 ];
