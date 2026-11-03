@@ -391,7 +391,15 @@ function bindShare() {
     toast(await copyText(link) ? 'نُسخ الرابط ✓' : link);
   });
   paintShare();
-  onlineState().then(s => { pubState = s; paintShare(); });
+  /* إن لم تكن اللعبة على الموقع بعد (النشر التلقائي يعمل عليها) نعيد التحقق كل ١٠ ثوانٍ حتى تصل */
+  const check = () => onlineState().then(s => {
+    const was = pubState;
+    pubState = s;
+    paintShare();
+    if (s === 'missing' || s === 'old') setTimeout(check, 10000);
+    else if (was === 'missing' || was === 'old') toast('اللعبة على موقع الطلاب الآن ✓');
+  });
+  check();
 }
 
 /* ================= البداية ================= */

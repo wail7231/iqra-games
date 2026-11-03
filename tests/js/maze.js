@@ -864,7 +864,15 @@ function bindShare() {
     toast(ok ? `نُسخ الرابط ✓ · المستوى ${toAr(CFG.level)} · ${lives}` : link);
   });
   paintShare();
-  onlineState().then(s => { pubState = s; paintShare(); });
+  /* إن لم تكن اللعبة على الموقع بعد (النشر التلقائي يعمل عليها) نعيد التحقق كل ١٠ ثوانٍ حتى تصل */
+  const check = () => onlineState().then(s => {
+    const was = pubState;
+    pubState = s;
+    paintShare();
+    if (s === 'missing' || s === 'old') setTimeout(check, 10000);
+    else if (was === 'missing' || was === 'old') toast('اللعبة على موقع الطلاب الآن ✓');
+  });
+  check();
 }
 
 const studentLink = () => STUDENT_SITE + `tests/maze.html?id=${encodeURIComponent(GAME.id)}&lvl=${CFG.level}&lives=${CFG.lives}&timer=${CFG.timer}&theme=${CFG.theme}`;
