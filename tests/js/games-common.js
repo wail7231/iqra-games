@@ -45,10 +45,13 @@ function mixAnswers(q, limit = Infinity) {
   const bad = shuffle(q.wrong || []).slice(0, Math.max(0, limit - ok.length));
   const list = [...ok.map(t => ({ t, text: t, ok: true })), ...bad.map(t => ({ t, text: t, ok: false }))];
   const key = 'iqra_pos_' + [...String(q.q || q.label || '') + corrects[0]].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7);
-  const last = store.get(key);
+  /* عشوائي تمامًا، مع منع ظهور الصحيحة في الموضع نفسه ثلاث مرات متتالية
+     (ومع ثلاث إجابات فأكثر لا تتكرر في موضعها السابق) — بلا نمط ثابت يُحفظ */
+  const hist = String(store.get(key) || '').split(',').filter(Boolean);
+  const stuck = p => list.length > 1 && (list.length >= 3 ? hist[hist.length - 1] === p : hist.length >= 2 && hist.slice(-2).every(h => h === p));
   let out = shuffle(list);
-  for (let i = 0; i < 12 && list.length > 1 && String(out.findIndex(o => o.ok)) === last; i++) out = shuffle(list);
-  store.set(key, String(out.findIndex(o => o.ok)));
+  for (let i = 0; i < 12 && stuck(String(out.findIndex(o => o.ok))); i++) out = shuffle(list);
+  store.set(key, [...hist, String(out.findIndex(o => o.ok))].slice(-4).join(','));
   return out;
 }
 
