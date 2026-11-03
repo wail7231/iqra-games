@@ -67,7 +67,7 @@ function pondScene() {
     e.preventDefault();
     if (Play.roundDone || S.jump || S.scroll) return;
     const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
-    const leaf = S.row.find(l => !l.sink && Math.hypot(px - l.x, py - l.y) < l.r + 6);
+    const leaf = S.row.find(l => !l.sink && !(l.delay > 0) &&Math.hypot(px - l.x, py - l.y) < l.r + 6);
     if (!leaf) return;
     Play.touch();
     FX.play('pop');
