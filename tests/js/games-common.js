@@ -12,16 +12,23 @@ const STUDENT_SITE = 'https://wail7231.github.io/iqra-games/';
 /* القوالب: المتاهة لها صفحتها، وبقية القوالب تشترك في game.html (اللعب) و editor.html (الصناعة) */
 const GAME_TYPES = {
   maze:    { name: 'متاهة', editor: 'maze-editor.html', player: 'maze.html', desc: 'حرّك اللاعب داخل المتاهة وادخل باب الإجابة الصحيحة، وتجنّب المطاردين.' },
-  quiz:    { name: 'اختيار من متعدد', editor: 'editor.html', player: 'game.html', desc: 'سؤال وعدة إجابات ملوّنة، اختر الصحيحة منها.' },
+  /* القالب القديم: يبقى لتعمل ألعابه، ومخفي من بطاقات القوالب (حلّ محلّه «اختيار من متعدد» بالنبتة) */
+  quiz:    { name: 'اختيار سريع', editor: 'editor.html', player: 'game.html', desc: 'سؤال وعدة إجابات ملوّنة، اختر الصحيحة منها.', hidden: true },
   words:   { name: 'ترتيب الكلمات', editor: 'editor.html', player: 'game.html', desc: 'رتّب الكلمات المبعثرة لتكوّن الجملة الصحيحة.' },
   lines:   { name: 'ترتيب الجمل', editor: 'editor.html', player: 'game.html', desc: 'ضع الجمل أو الآيات في ترتيبها الصحيح ثم تأكّد.' },
   letters: { name: 'ترتيب الحروف', editor: 'editor.html', player: 'game.html', desc: 'رتّب الحروف لتكوّن الكلمة، بين حروف زائدة متشابهة.' },
-  hangman: { name: 'البالونات', editor: 'editor.html', player: 'game.html', desc: 'خمّن حروف الكلمة المخفية قبل أن تنفجر البالونات.' },
+  hangman: { name: 'هانج مان', editor: 'editor.html', player: 'game.html', desc: 'خمّن حروف الكلمة المخفية قبل أن يكتمل الرسم أو تنفجر البالونات.' },
   blanks:  { name: 'أكمل الفراغات', editor: 'editor.html', player: 'game.html', desc: 'ضع الكلمات المناسبة في فراغات النص ثم تأكّد.' },
   whack:   { name: 'اصطد الصحيح', editor: 'editor.html', player: 'game.html', desc: 'أشكال تخرج من الحفر، اضرب التي تحمل إجابة صحيحة.' },
   spot:    { name: 'أين الخطأ؟', editor: 'editor.html', player: 'game.html', desc: 'كلمة في النص استُبدلت بغيرها، اكتشفها.' },
   group:   { name: 'المصنِّف', editor: 'editor.html', player: 'game.html', desc: 'اسحب كل بطاقة إلى مجموعتها الصحيحة.' },
   match:   { name: 'المطابقة', editor: 'editor.html', player: 'game.html', desc: 'صِل كل عنصر بما يناسبه من العمود الآخر.' },
+  wheel:   { name: 'العجلة الدوّارة', editor: 'editor.html', player: 'game.html', desc: 'أدِر العجلة؛ القطاع المختار يُسأل عنه ثم يُحذف من العجلة.' },
+  plane:   { name: 'الطائرة والغيوم', editor: 'editor.html', player: 'game.html', desc: 'وجّه الطائرة إلى الغيمة التي تحمل الإجابة الصحيحة.' },
+  leaves:  { name: 'القفز على الأوراق', editor: 'editor.html', player: 'game.html', desc: 'اقفز على الورقة الطافية التي تحمل الإجابة الصحيحة.' },
+  archery: { name: 'الرماية', editor: 'editor.html', player: 'game.html', desc: 'اسحب القوس وأطلق السهم على هدف الإجابة الصحيحة.' },
+  plant:   { name: 'اختيار من متعدد', editor: 'editor.html', player: 'game.html', desc: 'سؤال وإجابات، وكل إجابة صحيحة تسقي النبتة فتكبر حتى تُثمر.' },
+  runner:  { name: 'الكرة القافزة', editor: 'editor.html', player: 'game.html', desc: 'اقفز بالكرة على المنصة التي تحمل الإجابة الصحيحة.' },
 };
 const ICON_MAZE = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v8h4M16 8v12M8 16h4v4M12 8h4"/></svg>';
 

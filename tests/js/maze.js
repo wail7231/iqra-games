@@ -453,7 +453,10 @@ let cs = 40, pad = 6, dpr = 1;
 function fit() {
   if (!R) return;
   const w = $('.maze-stage').clientWidth;
-  const h = window.innerWidth >= 900 ? window.innerHeight - 160 : window.innerHeight * .62;
+  /* ملء الشاشة: المتاهة فوق والأسئلة تحتها، فتأخذ المتاهة ما يبقى من الارتفاع */
+  const h = document.body.classList.contains('is-fs')
+    ? window.innerHeight - $('.maze-side').offsetHeight - 44
+    : window.innerWidth >= 900 ? window.innerHeight - 160 : window.innerHeight * .62;
   cs = Math.max(18, Math.min(64, Math.floor(Math.min((w - 2) / R.cols, h / R.rows))));
   pad = Math.max(3, Math.round(cs * .1));
   dpr = window.devicePixelRatio || 1;
@@ -462,6 +465,8 @@ function fit() {
   canvas.height = H * dpr;
   canvas.style.width = W + 'px';
   canvas.style.height = H + 'px';
+  /* في ملء الشاشة: السؤال والإجابات تحت المتاهة بعرضها نفسه */
+  $('#playArea').style.setProperty('--maze-w', W + 'px');
 }
 
 function roundRect(c, x, y, w, h, r) {
@@ -1066,6 +1071,8 @@ async function init() {
     $('#editLink').classList.add('hidden');
   } else {
     $('#editLink').href = `maze-editor.html?id=${GAME.id}`;
+    $('#editTopBtn').href = `maze-editor.html?id=${GAME.id}`;
+    $('#editTopBtn').classList.remove('hidden');
     gameFolderHash(GAME.id).then(h => { $('#backBtn').href = h; $('#summary a[href="index.html#games"]').href = h; });
     if (STUDENT_SITE) bindShare();
   }
@@ -1077,4 +1084,5 @@ async function init() {
 
 bindTheme();
 FX.bindToggle($('#soundBtn'));
+FX.bindFullscreen($('#fsBtn'), $('#playArea'));
 init();

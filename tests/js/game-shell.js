@@ -33,7 +33,7 @@ const Play = {
     clearTimeout(this._next);
     const order = [...this.game.questions.keys()];
     this.items = (this.game.settings || {}).order === 'random' ? shuffle(order).map(i => this.game.questions[i]) : order.map(i => this.game.questions[i]);
-    this.idx = 0; this.score = 0; this._shown = 0; this.streak = 0; this.results = []; this.t0 = 0; this.finished = false;
+    this.idx = 0; this.score = 0; this._shown = 0; this.maxOf = []; this.streak = 0; this.results = []; this.t0 = 0; this.finished = false;
     this.max = this.items.reduce((s, it) => s + (this.def.points ? this.def.points(it) : 1), 0);
     this.lives = this.usesLives && this.cfg.lives > 0 ? this.cfg.lives : Infinity;
     $('#summary').classList.add('hidden');
@@ -44,7 +44,7 @@ const Play = {
   round() {
     this.roundDone = false;
     /* طبقة زينة القالب تبقى، ويُمسح ما سواها */
-    [...this.board.children].forEach(c => { if (!c.classList.contains('fx-layer')) c.remove(); });
+    [...this.board.children].forEach(c => { if (!c.classList.contains('fx-layer') && !c.classList.contains('keep')) c.remove(); });
     this.board.classList.toggle('quran-text', this.quran);
     $('#progressBar').style.width = (this.idx / this.items.length * 100) + '%';
     this.def.round(this.item, this.idx);
@@ -60,16 +60,18 @@ const Play = {
     return h;
   },
   /* نهاية السؤال: تُسجَّل نقاطه، ثم السؤال التالي تلقائيًا (أو بزر «التالي» إن طُلب) */
-  finish(points, { delay = 1300, manual = false } = {}) {
+  /* max: أقصى نقاط هذا السؤال إن لم يُعرف إلا في نهايته (مثل «اصطد الصحيح» المؤقّتة) */
+  finish(points, { delay = 1300, manual = false, max, nextLabel } = {}) {
     if (this.roundDone || this.finished) return;
     this.roundDone = true;
     this.score += points;
     this.results[this.idx] = points;
+    if (max != null) { this.max += max - this.planned(this.item); (this.maxOf = this.maxOf || [])[this.idx] = max; }
     this.hud();
     if (manual) {
       const b = document.createElement('button');
       b.className = 'btn btn-primary next-round';
-      b.innerHTML = this.idx + 1 < this.items.length ? 'التالي <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>' : 'النتيجة';
+      b.innerHTML = this.idx + 1 < this.items.length ? (nextLabel || 'التالي') + ' <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>' : 'النتيجة';
       b.addEventListener('click', () => this.next());
       this.board.appendChild(b);
       b.focus({ preventScroll: true });
@@ -96,6 +98,7 @@ const Play = {
   },
   /* ابدأ المؤقت عند أول لمسة أو ضغطة في اللعبة */
   touch() { if (!this.t0 && !this.finished) this.t0 = performance.now(); },
+  planned(it) { return this.def.points ? this.def.points(it) : 1; },
   get usesLives() { return this.def.settings.includes('lives'); },
 
   /* احتفال صغير بإجابة صحيحة: صوت وقصاصات و+١ */
@@ -136,11 +139,12 @@ const Play = {
     $('#sumTime').textContent = fmtClock(secs);
     $('#sumPct').textContent = toAr(Math.round(ratio * 100)) + '٪';
     $('#sumStars').innerHTML = [0, 1, 2].map(i => `<span class="star${i < stars ? ' on' : ''}">${STAR_SVG}</span>`).join('');
+    if (this.def.onEnd) this.def.onEnd();
     if (complete && stars) { FX.play('win'); setTimeout(() => FX.burst($('#sumStars'), { count: 40, spread: 200 }), 300); }
     const list = $('#sumList');
     list.innerHTML = '';
     this.items.forEach((it, i) => {
-      const got = this.results[i], max = this.def.points ? this.def.points(it) : 1;
+      const got = this.results[i], max = (this.maxOf && this.maxOf[i] != null) ? this.maxOf[i] : this.planned(it);
       const el = document.createElement('div');
       el.className = 'sum-item ' + (got === max ? 'correct' : 'wrong');
       el.innerHTML = `
@@ -428,6 +432,8 @@ async function init() {
     $('#editLink').classList.add('hidden');
   } else {
     $('#editLink').href = `editor.html?id=${g.id}`;
+    $('#editTopBtn').href = `editor.html?id=${g.id}`;
+    $('#editTopBtn').classList.remove('hidden');
     gameFolderHash(g.id).then(h => { $('#backBtn').href = h; $('#listLink').href = h; });
     if (STUDENT_SITE) bindShare();
   }
@@ -439,4 +445,5 @@ async function init() {
 
 bindTheme();
 FX.bindToggle($('#soundBtn'));
+FX.bindFullscreen($('#fsBtn'), $('#board'));
 init();

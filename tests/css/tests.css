@@ -1454,3 +1454,243 @@ a { color: inherit; text-decoration: none; }
 .hole { height: 160px; }
 .pop { height: 140px; }
 @media (max-width: 560px) { .pop-shape { width: 58px; height: 58px; } .hole { height: 128px; } .pop { height: 112px; } .pop-label { margin-bottom: 18px; } }
+
+/* ملء الشاشة: اللعبة وحدها تملأ الشاشة */
+.fs-btn .ic-exit { display: none; }
+.is-fs .fs-btn .ic-enter { display: none; }
+.is-fs .fs-btn .ic-exit { display: block; }
+.is-fs #cfgPanel, .is-fs .tool-pill { display: none !important; }
+.is-fs .play-wrap { max-width: none; padding: 12px 18px 18px; }
+.is-fs .board { min-height: calc(100dvh - 110px); }
+.is-fs .wrap.wide { max-width: none; padding: 12px 18px; }
+@media (min-width: 900px) { .is-fs .maze-layout { grid-template-areas: "side stage"; grid-template-rows: auto; } }
+
+/* =========================================================
+   اصطد الصحيح: حفرة حقيقية — الشكل يخرج من داخل الفتحة
+   فتحة داكنة (hole-back) خلف الشكل، والشكل في إطار (pop-clip) يقصّه عند منتصف الفتحة،
+   وحافة أمامية (hole-lip) فوقه تغطي أسفله
+   ========================================================= */
+.whack-field .hole { position: relative; height: 172px; overflow: visible; border-radius: 0; }
+.whack-field .hole::after { display: none; }
+.hole-back {
+  position: absolute; left: 7%; right: 7%; bottom: 8px; height: 46px; border-radius: 50%; z-index: 0;
+  background: radial-gradient(ellipse at 50% 60%, #050505 0 45%, #1d1712 70%, #3a2a1e 100%);
+  box-shadow: inset 0 8px 14px rgba(0, 0, 0, .7);
+}
+.pop-clip { position: absolute; left: 0; right: 0; top: 0; bottom: 31px; overflow: hidden; z-index: 1; }
+.whack-field .pop { left: 6%; right: 6%; bottom: 0; top: auto; height: 132px; transform: translateY(102%); transition: transform .24s cubic-bezier(.3, 1.35, .5, 1); }
+.whack-field .hole.up .pop { transform: translateY(0); }
+.whack-field .pop-label { margin-bottom: 4px; }
+.whack-field .pop-shape { width: 80px; height: 80px; }
+.hole-lip {
+  position: absolute; left: 7%; right: 7%; bottom: 8px; height: 23px; z-index: 2; pointer-events: none;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  border: 5px solid #6B4A2E; border-top: 0;
+  background: linear-gradient(transparent 40%, rgba(0, 0, 0, .25));
+}
+/* ألوان الحفرة لكل قالب */
+.board[data-theme="classic"] .hole-back { background: radial-gradient(ellipse at 50% 60%, #120804 0 45%, #3A1A0C 75%, #7E2A17 100%); }
+.board[data-theme="classic"] .hole-lip { border-color: #C9A96A; }
+.board[data-theme="night"] .hole-back { background: radial-gradient(ellipse at 50% 60%, #02040C 0 45%, #121A3A 75%, #3A4A7A 100%); box-shadow: inset 0 8px 14px rgba(0, 0, 0, .8), 0 0 14px rgba(89, 195, 240, .35); }
+.board[data-theme="night"] .hole-lip { border-color: #59C3F0; filter: drop-shadow(0 0 4px #59C3F0); }
+.board[data-theme="garden"] .hole-back { background: radial-gradient(ellipse at 50% 60%, #1A0F06 0 45%, #4A2E16 75%, #7A5230 100%); }
+.board[data-theme="garden"] .hole-lip { border-color: #5FA052; border-width: 7px; }
+.board[data-theme="ice"] .hole-back { background: radial-gradient(ellipse at 50% 60%, #04213A 0 45%, #0E4A75 75%, #5AA9D6 100%); }
+.board[data-theme="ice"] .hole-lip { border-color: #FFFFFF; filter: drop-shadow(0 0 3px #9CD5F2); }
+.board[data-theme="notebook"] .hole-back { background: repeating-linear-gradient(45deg, #2B4C7E 0 2px, #DCE3EC 2px 7px); box-shadow: none; border: 2.5px solid #2B4C7E; }
+.board[data-theme="notebook"] .hole-lip { border-color: #2B4C7E; border-width: 3px; background: none; }
+@media (max-width: 560px) {
+  .whack-field .hole { height: 136px; }
+  .hole-back { height: 36px; }
+  .hole-lip { height: 18px; border-width: 4px; }
+  .pop-clip { bottom: 26px; }
+  .whack-field .pop { height: 108px; }
+  .whack-field .pop-shape { width: 56px; height: 56px; }
+}
+
+/* =========================================================
+   هانج مان: الرسم جزءًا بعد جزء، بتفاصيل كل قالب
+   ========================================================= */
+.hang-wrap { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 18px; align-items: center; }
+.hang-stage.balloons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; align-content: center; min-height: 120px; }
+.hang-left { display: flex; flex-direction: column; gap: 18px; }
+@media (max-width: 700px) { .hang-wrap { grid-template-columns: 1fr; } .hang-art { max-height: 190px; } }
+.hang-art { width: 100%; height: auto; max-height: 260px; display: block; overflow: visible; }
+.hang-art .hp path, .hang-art .hp circle { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.hang-art .hp.on path, .hang-art .hp.on circle { animation: drawPart .55s ease forwards; }
+@keyframes drawPart { to { stroke-dashoffset: 0; } }
+.hang-art .hx { opacity: 0; display: none; transition: opacity .5s ease .3s; }
+.hang-art .hx.on { opacity: 1; }
+/* الأجزاء: خشب، حبل، رسم */
+.hp-wood path { stroke: #6B4A2E; stroke-width: 9; }
+.hp-wood path.grain { stroke: #A97C50; stroke-width: 3; }
+.hp-rope path { stroke: #B8925A; stroke-width: 4; stroke-dasharray: 1; }
+.hp-fig path, .hp-fig circle { stroke: var(--b-ink); stroke-width: 6; }
+.hang-stage.lost .hp-fig path, .hang-stage.lost .hp-fig circle { stroke: #C0392B; }
+.hang-stage.saved .hang-all { animation: celebrate .6s cubic-bezier(.3, 1.5, .5, 1); }
+/* كلاسيكي: خشب داكن وحبل ذهبي ومسامير */
+.board[data-theme="classic"] .hx-classic { display: inline; }
+.board[data-theme="classic"] .hx-classic path { stroke: #4A3220; stroke-width: 3; stroke-linecap: round; }
+.board[data-theme="classic"] .hp-fig path, .board[data-theme="classic"] .hp-fig circle { stroke: #7E2A17; }
+/* ليل: نيون مضيء */
+.board[data-theme="night"] .hang-all { filter: url(#hmGlow); }
+.board[data-theme="night"] .hp-wood path { stroke: #59C3F0; stroke-width: 5; }
+.board[data-theme="night"] .hp-wood path.grain { stroke: #DDF4FF; stroke-width: 1.5; }
+.board[data-theme="night"] .hp-rope path { stroke: #F6E7A8; }
+.board[data-theme="night"] .hp-fig path, .board[data-theme="night"] .hp-fig circle { stroke: #F6E7A8; stroke-width: 5; }
+/* حديقة: خشب فاتح وعشب وأوراق */
+.board[data-theme="garden"] .hx-garden { display: inline; }
+.board[data-theme="garden"] .hx-garden path { fill: none; stroke: #4C9A4A; stroke-width: 3; stroke-linecap: round; }
+.board[data-theme="garden"] .hx-garden ellipse { fill: #5FA052; }
+.board[data-theme="garden"] .hp-wood path { stroke: #8A5A30; }
+.board[data-theme="garden"] .hp-fig path, .board[data-theme="garden"] .hp-fig circle { stroke: #22361F; }
+/* جليد: أخشاب مثلجة وثلج وأعمدة جليد */
+.board[data-theme="ice"] .hx-ice { display: inline; }
+.board[data-theme="ice"] .hx-ice path { fill: #FFFFFF; stroke: #BFE3F3; stroke-width: 1.5; }
+.board[data-theme="ice"] .hx-ice .icicle { fill: #CDEBF7; }
+.board[data-theme="ice"] .hp-wood path { stroke: #4A9CCB; }
+.board[data-theme="ice"] .hp-wood path.grain { stroke: #DDF1FB; }
+.board[data-theme="ice"] .hp-fig path, .board[data-theme="ice"] .hp-fig circle { stroke: #12354A; }
+/* دفتر: رسم بالقلم مرتعش */
+.board[data-theme="notebook"] .hang-all { filter: url(#hmSketch); }
+.board[data-theme="notebook"] .hp-wood path { stroke: #2B4C7E; stroke-width: 3.5; }
+.board[data-theme="notebook"] .hp-wood path.grain { stroke: #5A7BB0; stroke-width: 1.5; transform: translate(2px, 2px); }
+.board[data-theme="notebook"] .hp-rope path { stroke: #2B4C7E; stroke-width: 2.5; }
+.board[data-theme="notebook"] .hp-fig path, .board[data-theme="notebook"] .hp-fig circle { stroke: #1F2F4D; stroke-width: 3.5; }
+
+/* تفاصيل إضافية للقوالب: فوانيس، سحب، شمس، أعمدة جليد، مشبك وشريط لاصق */
+.fx-lantern { top: -4px; width: 28px; height: 66px; transform-origin: top center; animation: lanternSway 3.5s ease-in-out infinite alternate; filter: drop-shadow(0 0 10px rgba(227, 179, 65, .5)); }
+.fx-lantern.l1 { right: 90px; } .fx-lantern.l2 { right: 150px; height: 52px; width: 22px; animation-delay: -1.5s; }
+.fx-cloud { top: 14px; width: 130px; height: 54px; animation: cloudDrift 60s linear infinite; }
+.fx-cloud.c2 { top: 70px; width: 90px; height: 38px; animation-duration: 85s; }
+@keyframes cloudDrift { from { left: -140px; } to { left: 100%; } }
+.fx-sun { top: 12px; left: 16px; width: 74px; height: 74px; animation: spin 40s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.fx-icicles { top: 0; left: 0; right: 0; height: 30px; filter: drop-shadow(0 2px 2px rgba(45, 127, 184, .3)); }
+.fx-clip { top: -10px; left: 60px; width: 22px; height: 56px; transform: rotate(8deg); }
+.fx-tape { top: 10px; right: 90px; width: 90px; height: 24px; background: rgba(247, 201, 72, .45); transform: rotate(-6deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+
+/* الرماية */
+.arch-wrap { position: relative; width: 100%; }
+.arch-canvas { display: block; width: 100%; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
+
+/* =========================================================
+   السقاية: الأصيص والنبتة والإبريق
+   ========================================================= */
+.plant-wrap { display: grid; grid-template-columns: minmax(180px, 280px) minmax(0, 1fr); gap: 20px; align-items: center; }
+.plant-answers { grid-template-columns: 1fr; }
+@media (max-width: 700px) { .plant-wrap { grid-template-columns: 1fr; } .plant-scene { max-width: 200px; margin: 0 auto; } }
+.plant-scene { width: 100%; }
+.plant-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.plant-svg [data-stage] { opacity: 0; transform: scale(0); transition: transform .6s cubic-bezier(.3, 1.5, .5, 1), opacity .3s ease; }
+.plant-svg [data-stage].on { opacity: 1; transform: scale(1); }
+.pl-stem { fill: none; stroke: #4C9A4A; stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1; transition: stroke-dashoffset .9s ease; }
+.pl-leaf { fill: #5FA052; stroke: #3D7F3B; stroke-width: 1.5; }
+.pl-flower ellipse { fill: #F4A6C1; }
+.pl-core { fill: #F7C948; }
+.pl-fruit { fill: #E5554F; stroke: #B23A2E; stroke-width: 1.5; }
+.pl-seed { fill: #7A4A1F; }
+.pl-pot { fill: #C0643C; }
+.pl-rim { fill: #A9502C; }
+.pl-soil { fill: #4A2E16; }
+.pl-can { fill: #8E9AAB; transform-origin: 170px 60px; opacity: 0; transition: opacity .3s ease; }
+.pl-can .pl-handle { stroke: #8E9AAB; stroke-width: 5; }
+.pl-drops circle { fill: #59A8E0; opacity: 0; }
+.plant-svg.pour .pl-can { opacity: 1; animation: pourCan 1.4s ease forwards; }
+.plant-svg.pour .pl-drops circle { animation: drop 1s ease-in .35s 2; }
+.plant-svg.pour .pl-drops circle:nth-child(2) { animation-delay: .5s; } .plant-svg.pour .pl-drops circle:nth-child(3) { animation-delay: .62s; }
+.plant-svg.pour .pl-drops circle:nth-child(4) { animation-delay: .75s; }
+@keyframes pourCan { 0% { transform: rotate(0); opacity: 0; } 15% { opacity: 1; } 35%, 75% { transform: rotate(-28deg); opacity: 1; } 100% { transform: rotate(0); opacity: 0; } }
+@keyframes drop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(150px); } }
+.plant-svg.wilt .pl-leaf.on, .plant-svg.wilt .pl-flower.on { transform: rotate(18deg) scale(.92); filter: saturate(.3) brightness(.9); transition-duration: .4s; }
+.plant-final { min-height: 0; max-width: 260px; margin: 0 auto 18px; padding: 14px; border-radius: 20px; }
+.plant-final .plant-svg { max-height: 240px; }
+/* حسب القالب */
+.board[data-theme="classic"] .pl-pot { fill: #C0643C; } .board[data-theme="classic"] .pl-rim { fill: #E3B341; }
+.board[data-theme="night"] .pl-pot { fill: #24346A; } .board[data-theme="night"] .pl-rim { fill: #59C3F0; filter: drop-shadow(0 0 6px #59C3F0); }
+.board[data-theme="night"] .pl-flower ellipse { fill: #F6E7A8; filter: drop-shadow(0 0 5px #F6E7A8); }
+.board[data-theme="night"] .pl-leaf { fill: #3FA34D; } .board[data-theme="night"] .pl-fruit { fill: #59C3F0; filter: drop-shadow(0 0 5px #59C3F0); }
+.board[data-theme="garden"] .pl-pot { fill: #8A5A30; } .board[data-theme="garden"] .pl-rim { fill: #6B4A2E; }
+.board[data-theme="garden"] .pl-flower ellipse { fill: #E5559A; }
+.board[data-theme="ice"] .pl-pot { fill: #DDEFF8; stroke: #4A9CCB; stroke-width: 2; } .board[data-theme="ice"] .pl-rim { fill: #FFFFFF; stroke: #9CD5F2; stroke-width: 2; }
+.board[data-theme="ice"] .pl-flower ellipse { fill: #9CD5F2; } .board[data-theme="ice"] .pl-soil { fill: #6E5640; }
+.board[data-theme="notebook"] .pl-pot, .board[data-theme="notebook"] .pl-rim, .board[data-theme="notebook"] .pl-leaf, .board[data-theme="notebook"] .pl-flower ellipse { fill: #FFFFFF; stroke: #2B4C7E; stroke-width: 2.5; }
+.board[data-theme="notebook"] .pl-stem { stroke: #2B4C7E; stroke-width: 4; }
+.board[data-theme="notebook"] .pl-fruit { fill: #E8A3A3; stroke: #2B4C7E; }
+
+/* =========================================================
+   زر ملء الشاشة داخل إطار اللعبة، وشكل ملء الشاشة:
+   اللعبة كبيرة فوق، والسؤال وإجاباته بحجم متوسط تحتها، ولا شيء غيرهما
+   ========================================================= */
+.fs-btn {
+  position: absolute; top: 10px; left: 10px; z-index: 6; width: 40px; height: 40px; border-radius: 12px;
+  display: grid; place-items: center; background: rgba(255, 255, 255, .88); color: #2A211C;
+  border: 1px solid rgba(0, 0, 0, .1); box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+  transition: transform .12s ease, background .15s ease;
+}
+.board > .fs-btn { position: absolute; z-index: 6; }
+.fs-btn:hover { background: #fff; transform: scale(1.07); }
+.fs-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.maze-box .fs-btn { z-index: 5; }
+
+/* المتاهة: المتاهة ثم السؤال والإجابات أسفلها */
+.is-fs #playArea.maze-layout { display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; background: var(--bg) var(--pattern); overflow: auto; }
+.is-fs #playArea .maze-stage { order: 1; }
+.is-fs #playArea .maze-side { order: 2; position: static; width: 100%; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: minmax(220px, 1fr) 2fr; gap: 10px; align-items: stretch; }
+.is-fs #playArea .maze-cfg { display: none; }
+.is-fs #playArea .q-box { margin: 0; padding: 10px 16px; }
+.is-fs #playArea .q-box .q-text { font-size: 18px; margin-top: 2px; }
+.is-fs #playArea .ans-legend { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); align-content: center; }
+.is-fs #playArea .ans-key { padding: 6px 10px; }
+@media (max-width: 700px) { .is-fs #playArea .maze-side { grid-template-columns: 1fr; } }
+
+/* بقية الألعاب: اللوحة وحدها تملأ الشاشة */
+.is-fs #board { min-height: 100vh; max-height: 100vh; border-radius: 0; border: 0; overflow: auto; justify-content: center; padding: 56px 4vw 24px; }
+
+/* الكرة القافزة */
+.run-wrap { position: relative; width: 100%; }
+.run-canvas { display: block; width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
+.run-start {
+  position: absolute; inset: 0; margin: auto; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--b-accent); color: #fff; box-shadow: 0 10px 26px rgba(0, 0, 0, .3); cursor: pointer; animation: startPulse 1.4s ease-in-out infinite;
+}
+.run-start svg { width: 38px; height: 38px; fill: currentColor; margin-left: 5px; }
+@keyframes startPulse { 50% { transform: scale(1.08); } }
+
+/* إصلاح ملء الشاشة للمتاهة: المتاهة بعرض كامل في الوسط، والسؤال والإجابات تحتها بنفس العرض */
+.is-fs #playArea.maze-layout { align-items: stretch; justify-content: flex-start; }
+.is-fs #playArea .maze-stage { width: 100%; align-items: center; }
+.is-fs #playArea .maze-side { width: var(--maze-w, 100%); max-width: 100%; align-self: center; }
+
+/* هانج مان: رسم الجزء بانتقال يصل دائمًا إلى نهايته */
+.hang-art .hp path, .hang-art .hp circle { transition: stroke-dashoffset .6s ease; }
+.hang-art .hp.on path, .hang-art .hp.on circle { animation: none; stroke-dashoffset: 0; }
+
+/* =========================================================
+   العجلة الدوّارة
+   ========================================================= */
+.wheel-stage2 { position: relative; width: min(86vw, 440px); margin: 0 auto; }
+.wheel-holder { position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%; filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .28)); }
+.wheel-disc { width: 100%; height: 100%; display: block; font-family: var(--font-ui); }
+.quran-font .wheel-disc text { font-family: var(--font-quran); font-weight: 400; }
+.wheel-hub { position: absolute; inset: 0; margin: auto; width: 17%; height: 17%; border-radius: 50%; background: radial-gradient(circle, #FFF8DA, #E3B341); border: 4px solid var(--b-card); box-shadow: 0 3px 8px rgba(0, 0, 0, .3); }
+.wheel-pin { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 3; width: 38px; height: 46px; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .35)); }
+.wheel-pin path { fill: var(--b-accent); stroke: #FFF8DA; stroke-width: 2; }
+.wheel-pin circle { fill: #FFF8DA; }
+.board[data-theme="night"] .wheel-holder { filter: drop-shadow(0 0 18px rgba(89, 195, 240, .45)); }
+.board[data-theme="notebook"] .wheel-disc path { stroke: #2B4C7E; stroke-width: 2.5; }
+.board[data-theme="notebook"] .wheel-disc text { fill: #1F2F4D; }
+.wheel-spin { min-width: 180px; font-size: 17px; }
+.wheel-result { display: flex; flex-direction: column; align-items: center; gap: 12px; animation: fadeUp .4s ease; }
+.wr-label { padding: 8px 26px; border-radius: 16px; background: var(--b-accent); color: #fff; font-family: var(--font-display); font-size: clamp(24px, 4.6vw, 36px); font-weight: 600; box-shadow: var(--shadow-lg); animation: celebrate .6s cubic-bezier(.3, 1.5, .5, 1); }
+.quran-font .wr-label, .quran-font .wr-q { font-family: var(--font-quran); font-weight: 400; }
+.wr-q { font-size: clamp(18px, 3vw, 24px); font-weight: 700; text-align: center; line-height: 1.8; }
+.wheel-answers { width: 100%; }
+.wr-judge { display: flex; gap: 12px; }
+.wr-judge .btn { width: auto; min-width: 140px; }
+.wr-yes { background: #3F8A3A; color: #fff; }
+.wr-no { background: #C0392B; color: #fff; }
+.ask-seg { margin: 8px 0 2px; }
+
+/* اصطد الصحيح: عند الضرب يتلوّن الشريط والشكل فقط، بلا مربع خلفهما */
+.whack-field .pop.right, .whack-field .pop.wrong { background: none; border: 0; box-shadow: none; }

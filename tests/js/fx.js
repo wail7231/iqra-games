@@ -101,6 +101,13 @@ const FX = (() => {
     '<svg viewBox="0 0 40 40"><path d="M8 32 32 8M26 8h6v6M10 12l4-4M30 28l-4 4"/></svg>',
   ];
 
+  /* تفاصيل إضافية لكل قالب (في اللوحة فقط، لا فوق المتاهة) */
+  const LANTERN = '<svg viewBox="0 0 30 70"><path d="M15 0v14" stroke="#B8925A" stroke-width="1.5"/><path d="M10 14h10v4H10z" fill="#7E2A17"/><path d="M7 18h16l3 26H4z" fill="#E3B341"/><path d="M10 21h10l2 20H8z" fill="#FFF3C4"/><path d="M4 44h22v5H4z" fill="#7E2A17"/><path d="M12 49h6l-1 4h-4z" fill="#7E2A17"/></svg>';
+  const CLOUD = c => `<svg viewBox="0 0 120 50"><path d="M20 44a16 16 0 0 1 4-31 22 22 0 0 1 40-6 18 18 0 0 1 34 10 14 14 0 0 1 2 27z" fill="${c}"/></svg>`;
+  const SUN = '<svg viewBox="0 0 100 100"><g stroke="#F7C948" stroke-width="5" stroke-linecap="round">' + [...Array(12)].map((_, i) => `<path d="M50 8v12" transform="rotate(${i * 30} 50 50)"/>`).join('') + '</g><circle cx="50" cy="50" r="22" fill="#F7C948"/><circle cx="50" cy="50" r="22" fill="none" stroke="#F2A516" stroke-width="3"/></svg>';
+  const ICICLES = '<svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 0h400v6l-8 0-4 24-4-24h-14l-3 14-3-14h-20l-5 30-5-30h-16l-3 12-3-12h-22l-4 22-4-22h-18l-3 16-3-16h-24l-5 28-5-28h-14l-3 12-3-12h-22l-4 20-4-20h-18l-3 14-3-14h-20l-5 26-5-26h-16l-3 10-3-10h-22l-4 22-4-22H40l-3 14-3-14H14l-4 18-4-18H0z" fill="#E8F7FF"/></svg>';
+  const CLIP = '<svg viewBox="0 0 30 70"><path d="M10 60V14a7 7 0 0 1 14 0v40a4 4 0 0 1-8 0V18" fill="none" stroke="#8A97AB" stroke-width="3" stroke-linecap="round"/></svg>';
+
   function themeLayer(host, theme, { overlay = false } = {}) {
     let layer = host.querySelector(':scope > .fx-layer');
     if (!layer) {
@@ -121,25 +128,38 @@ const FX = (() => {
     if (theme === 'night') {
       for (let i = 0; i < (overlay ? 24 : 46); i++) add('fx-star', { left: rnd(0, 100) + '%', top: rnd(0, 100) + '%', '--s': rnd(1.5, 3.5) + 'px', 'animation-delay': rnd(0, 4) + 's', 'animation-duration': rnd(2, 4.5) + 's' });
       for (let i = 0; i < 2; i++) add('fx-shoot', { top: rnd(4, 40) + '%', right: rnd(0, 50) + '%', 'animation-delay': rnd(1, 9) + 's' });
-      if (!overlay) add('fx-moon');
+      if (!overlay) {
+        add('fx-moon');
+        add('fx-cloud c1', { 'animation-delay': -rnd(0, 40) + 's' }, CLOUD('rgba(157,179,217,.18)'));
+        add('fx-cloud c2', { 'animation-delay': -rnd(0, 40) + 's' }, CLOUD('rgba(157,179,217,.12)'));
+      }
     } else if (theme === 'garden') {
       const cols = ['#F4A6C1', '#F7C948', '#FFFFFF', '#E5559A', '#B6E388'];
       for (let i = 0; i < (overlay ? 9 : 14); i++) add('fx-petal', { left: rnd(0, 100) + '%', '--c': cols[i % cols.length], 'animation-delay': -rnd(0, 12) + 's', 'animation-duration': rnd(8, 15) + 's', '--sway': rnd(20, 70) + 'px' });
       if (!overlay) {
+        add('fx-sun', {}, SUN);
+        add('fx-cloud c1', { 'animation-delay': -rnd(0, 40) + 's' }, CLOUD('rgba(255,255,255,.9)'));
+        add('fx-cloud c2', { 'animation-delay': -rnd(0, 40) + 's' }, CLOUD('rgba(255,255,255,.75)'));
         add('fx-grass', {}, GRASS);
         for (let i = 0; i < 6; i++) add('fx-flower', { left: rnd(2, 95) + '%', '--sz': rnd(16, 26) + 'px', 'animation-delay': rnd(0, 3) + 's' }, FLOWER(cols[i % 4]));
       }
     } else if (theme === 'ice') {
       for (let i = 0; i < (overlay ? 18 : 30); i++) add('fx-flake', { left: rnd(0, 100) + '%', '--sz': rnd(8, 20) + 'px', 'animation-delay': -rnd(0, 12) + 's', 'animation-duration': rnd(7, 14) + 's', '--sway': rnd(15, 50) + 'px' }, FLAKE);
-      if (!overlay) { add('fx-frost tl'); add('fx-frost br'); }
+      if (!overlay) { add('fx-frost tl'); add('fx-frost br'); add('fx-icicles', {}, ICICLES); }
     } else if (theme === 'notebook') {
       if (!overlay) {
         add('fx-holes');
+        add('fx-clip', {}, CLIP);
+        add('fx-tape');
         DOODLES.forEach((d, i) => add('fx-doodle d' + i, { 'animation-delay': i * .4 + 's' }, d));
       }
     } else {
       for (let i = 0; i < (overlay ? 10 : 16); i++) add('fx-spark', { left: rnd(0, 100) + '%', top: rnd(10, 100) + '%', 'animation-delay': -rnd(0, 6) + 's', 'animation-duration': rnd(4, 8) + 's' });
-      if (!overlay) { add('fx-corner tl'); add('fx-corner tr'); add('fx-corner bl'); add('fx-corner br'); }
+      if (!overlay) {
+        add('fx-corner tl'); add('fx-corner tr'); add('fx-corner bl'); add('fx-corner br');
+        add('fx-lantern l1', {}, LANTERN);
+        add('fx-lantern l2', {}, LANTERN);
+      }
     }
     return layer;
   }
@@ -152,5 +172,27 @@ const FX = (() => {
     paint();
   }
 
-  return { play, burst, floatText, bump, sequence, themeLayer, bindToggle };
+  /* زر ملء الشاشة: تختفي الإعدادات وتكبر اللعبة (body.is-fs). يُخفى الزر حيث لا يدعمه المتصفح (آيفون) */
+  function bindFullscreen(btn, target) {
+    if (!btn) return;
+    const root = target || document.documentElement;
+    const req = root.requestFullscreen || root.webkitRequestFullscreen;
+    if (!req) { btn.classList.add('hidden'); return; }
+    const active = () => document.fullscreenElement || document.webkitFullscreenElement;
+    btn.addEventListener('click', () => {
+      if (active()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      else req.call(root);
+      btn.blur();
+    });
+    const sync = () => {
+      document.body.classList.toggle('is-fs', !!active());
+      btn.title = active() ? 'الخروج من ملء الشاشة' : 'ملء الشاشة';
+      window.dispatchEvent(new Event('resize'));
+    };
+    document.addEventListener('fullscreenchange', sync);
+    document.addEventListener('webkitfullscreenchange', sync);
+    sync();
+  }
+
+  return { play, burst, floatText, bump, sequence, themeLayer, bindToggle, bindFullscreen };
 })();

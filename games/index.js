@@ -1,11 +1,11 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
-  "id": "gmw0jg82l0qx",
+  "id": "gmw0n6syqysa",
   "type": "maze",
-  "name": "شبعرفني",
+  "name": "جرب المساحة",
   "desc": "",
-  "count": 1,
-  "updated": 1793701402647
+  "count": 3,
+  "updated": 1793707672007
  }
 ];
