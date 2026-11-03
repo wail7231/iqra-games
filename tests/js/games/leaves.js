@@ -21,15 +21,15 @@ function pondScene() {
   const S = { wrap, q: null, row: [], home: null, token: null, jump: null, scroll: null, W: 0, H: 0, t: 0, missed: false, splashes: [] };
   const size = () => {
     S.W = wrap.clientWidth;
-    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 460;
-    S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(320, S.W * .55)));
+    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 540;
+    S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(380, S.W * .64)));
     const dpr = window.devicePixelRatio || 1;
     cv.width = S.W * dpr;
     cv.height = S.H * dpr;
     cv.style.height = S.H + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    S.homeY = S.H - 66;
-    S.rowY = S.H * .36;
+    S.homeY = S.H - 78;
+    S.rowY = S.H * .37;
     if (S.home) S.home.y = S.homeY;
     S.row.forEach(l => { l.y = S.rowY; });
     if (S.token && !S.jump) { S.token.x = S.home.x; S.token.y = S.home.y; }
@@ -43,16 +43,20 @@ function pondScene() {
   S.setQuestion = q => {
     S.q = q;
     S.missed = false;
-    if (!S.home) S.home = { x: S.W / 2, y: S.homeY, r: 38, t: '', start: true };
+    if (!S.home) S.home = { x: S.W / 2, y: S.homeY, r: 52, t: '', start: true, squash: 0, phase: 0 };
     if (!S.token) S.token = { x: S.home.x, y: S.home.y };
     const answers = mixAnswers(q, 5);
     const n = answers.length, slot = S.W / n;
-    ctx.font = font(16);
-    S.row = answers.map((a, i) => ({
-      ...a, cx: slot * (i + .5), x: slot * (i + .5), y: S.rowY - 40, enter: 0,
-      r: Math.max(34, Math.min(slot * .4, 70, ctx.measureText(a.t).width / 2 + 22)),
-      phase: Math.random() * 6.28, amp: Math.max(0, slot * .5 - Math.max(34, Math.min(slot * .4, 70))) * .9, sink: 0, rot: Math.random() * 6.28,
-    }));
+    const maxR = Math.min(slot * .47, 104, S.H * .2);
+    ctx.font = font(fontPx(maxR));
+    S.row = answers.map((a, i) => {
+      const r = Math.max(Math.min(50, maxR), Math.min(maxR, ctx.measureText(a.t).width / 2 + 30));
+      return {
+        ...a, cx: slot * (i + .5), x: slot * (i + .5), y: S.rowY - 40, enter: 0, r,
+        phase: Math.random() * 6.28, amp: Math.max(0, slot * .5 - r - 6) * .8, sink: 0, rot: Math.random() * 6.28,
+        squash: 0, delay: i * .09,
+      };
+    });
   };
 
   /* اختيار ورقة بالضغط عليها */
