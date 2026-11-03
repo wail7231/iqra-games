@@ -47,7 +47,7 @@ function runnerScene() {
   /* منصات السؤال: واحدة لكل إجابة، تبدأ خارج اللوحة يسارًا وتتباعد */
   S.spawn = () => {
     const q = S.q;
-    const answers = shuffle([...answersOf(q).map(t => ({ t, ok: true })), ...q.wrong.map(t => ({ t, ok: false }))]);
+    const answers = mixAnswers(q);
     ctx.font = font(16);
     let x = -40;
     answers.forEach(a => {

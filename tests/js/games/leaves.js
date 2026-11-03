@@ -45,7 +45,7 @@ function pondScene() {
     S.missed = false;
     if (!S.home) S.home = { x: S.W / 2, y: S.homeY, r: 38, t: '', start: true };
     if (!S.token) S.token = { x: S.home.x, y: S.home.y };
-    const answers = shuffle([...answersOf(q).map(t => ({ t, ok: true })), ...q.wrong.map(t => ({ t, ok: false }))]).slice(0, 5);
+    const answers = mixAnswers(q, 5);
     const n = answers.length, slot = S.W / n;
     ctx.font = font(16);
     S.row = answers.map((a, i) => ({

@@ -34,7 +34,7 @@ Play.register({
 
     /* لكل هدف عمود وممر خاص به في الجهة اليسرى: صف واحد حتى ٣ أهداف وصفّان لأكثر،
        ويتحرك الهدف داخل ممره فقط، وعرض شريطه لا يتجاوز عموده — فلا تتداخل الأهداف أبدًا */
-    const answers = shuffle([...answersOf(q).map(t => ({ t, ok: true })), ...q.wrong.map(t => ({ t, ok: false }))]).slice(0, 6);
+    const answers = mixAnswers(q, 6);
     const rows = answers.length <= 3 ? 1 : 2, cols = Math.ceil(answers.length / rows);
     const targets = answers.map((a, i) => ({
       ...a, col: i % cols, row: Math.floor(i / cols), phase: Math.random() * 6.28,

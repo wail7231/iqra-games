@@ -99,7 +99,7 @@ Play.register({
         const q = el('div', 'wr-q');
         q.textContent = chosen.q;
         const grid = el('div', 'quiz-grid wheel-answers');
-        const opts = shuffle([...answersOf(chosen).map(t => ({ t, ok: true })), ...(chosen.wrong || []).map(t => ({ t, ok: false }))]);
+        const opts = mixAnswers(chosen);
         const bs = opts.map((o, x) => {
           const b = el('button', 'quiz-opt', `<span class="qo-num">${toAr(x + 1)}</span><span class="qo-txt"></span><span class="qo-mark"></span>`);
           b.style.setProperty('--c', CHIP_COLORS[x % CHIP_COLORS.length]);

@@ -36,6 +36,22 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const qCount = n => n === 1 ? 'سؤال واحد' : n === 2 ? 'سؤالان' : `${toAr(n)} ${n <= 10 ? 'أسئلة' : 'سؤالًا'}`;
 const newGameId =() => 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
+/* خلط الإجابات لكل الألعاب: ترتيب عشوائي جديد في كل مرة، والإجابة الصحيحة لا تبقى في موضعها
+   نفسه من المرة السابقة لهذا السؤال (حتى لا يحفظ الطالب «الأولى يمين»).
+   limit: أقصى عدد يُعرض — تُختصر الخاطئة فقط، والصحيحة لا تُستبعد أبدًا. كل عنصر فيه t و text و ok. */
+function mixAnswers(q, limit = Infinity) {
+  const corrects = Array.isArray(q.correct) ? q.correct : [q.correct];
+  const ok = corrects.slice(0, Math.max(1, Math.min(corrects.length, limit - 1)));
+  const bad = shuffle(q.wrong || []).slice(0, Math.max(0, limit - ok.length));
+  const list = [...ok.map(t => ({ t, text: t, ok: true })), ...bad.map(t => ({ t, text: t, ok: false }))];
+  const key = 'iqra_pos_' + [...String(q.q || q.label || '') + corrects[0]].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7);
+  const last = store.get(key);
+  let out = shuffle(list);
+  for (let i = 0; i < 12 && list.length > 1 && String(out.findIndex(o => o.ok)) === last; i++) out = shuffle(list);
+  store.set(key, String(out.findIndex(o => o.ok)));
+  return out;
+}
+
 function loadScriptFresh(src) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');

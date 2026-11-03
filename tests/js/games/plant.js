@@ -51,7 +51,7 @@ Play.register({
     Play.board.appendChild(wrap);
 
     const corrects = answersOf(q);
-    const opts = shuffle([...corrects.map(t => ({ t, ok: true })), ...q.wrong.map(t => ({ t, ok: false }))]);
+    const opts = mixAnswers(q);
     const buttons = opts.map((o, k) => {
       const b = el('button', 'quiz-opt', `<span class="qo-num">${toAr(k + 1)}</span><span class="qo-txt"></span><span class="qo-mark"></span>`);
       b.style.setProperty('--c', CHIP_COLORS[k % CHIP_COLORS.length]);

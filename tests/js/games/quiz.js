@@ -33,7 +33,7 @@ Play.register({
     paintSub();
     showStreak();
 
-    const opts = shuffle([...corrects.map(t => ({ t, ok: true })), ...q.wrong.map(t => ({ t, ok: false }))]);
+    const opts = mixAnswers(q);
     const grid = el('div', 'quiz-grid' + (opts.length > 4 ? ' many' : ''));
     const reveal = () => quizButtons.forEach((b, i) => {
       b.disabled = true;

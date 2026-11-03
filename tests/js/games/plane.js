@@ -40,7 +40,7 @@ function skyScene() {
 
   /* موجة غيوم: غيمة لكل إجابة في ممر خاص، تدخل من اليسار متقاربة */
   S.spawn = () => {
-    const answers = shuffle([...answersOf(S.q).map(t => ({ t, ok: true })), ...S.q.wrong.map(t => ({ t, ok: false }))]).slice(0, 5);
+    const answers = mixAnswers(S.q, 5);
     const n = answers.length, lane = (S.H - 30) / n;
     ctx.font = font(16);
     answers.forEach((a, i) => {

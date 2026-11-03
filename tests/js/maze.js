@@ -181,7 +181,7 @@ function newRound() {
   const rows = portrait ? 11 : 9;
   const start = { x: cols >> 1, y: rows >> 1 };
   const corrects = answerList(q);
-  const answers = shuffle([...corrects.map(text => ({ text, ok: true })), ...q.wrong.map(text => ({ text, ok: false }))]);
+  const answers = mixAnswers(q, 6);
   const { open, cells } = buildMaze(cols, rows, start, answers.length);
   const gates = answers.map((a, i) => ({ ...a, x: cells[i].x, y: cells[i].y, color: GATE_COLORS[i], num: toAr(i + 1), gone: false }));
 
