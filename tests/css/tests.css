@@ -758,7 +758,8 @@ a { color: inherit; text-decoration: none; }
 .cfg-row .ed-seg { align-self: flex-start; }
 /* على الشاشات العريضة: المستوى والقلوب والمؤقت في صف واحد تحت القوالب */
 @media (min-width: 720px) {
-  .cfg-rows { display: grid; grid-template-columns: minmax(0, 1.6fr) auto auto; gap: 0 22px; align-items: start; }
+  .cfg-rows { display: flex; flex-wrap: wrap; gap: 0 22px; align-items: flex-start; }
+  .cfg-rows .cfg-level { flex: 1 1 280px; }
   .cfg-rows .cfg-row { border-top: 0; padding-top: 2px; }
 }
 .lvl-badge { min-width: 34px; padding: 2px 10px; border-radius: 99px; background: var(--brand); color: #fff; text-align: center; font-size: 14px; }
@@ -818,3 +819,7 @@ a { color: inherit; text-decoration: none; }
 .add-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
 .add-wrong.add-ok { color: var(--ok); background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
 .need-seg { margin-top: 6px; align-self: flex-start; }
+
+/* حفظ الإعدادات ثم نسخ الرابط */
+.share-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.share-row .btn { flex: 1 1 200px; width: auto; }

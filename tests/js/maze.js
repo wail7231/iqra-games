@@ -808,6 +808,44 @@ function loadCfg() {
 }
 const saveCfg = () => { if (!STUDENT) store.set(cfgKey(), JSON.stringify(CFG)); };
 
+/* حفظ الإعدادات ونسخ الرابط: التغييرات تُجرَّب فورًا في اللعبة، لكن الرابط لا يُنسخ إلا بعد «حفظ التغييرات»،
+   حتى يحمل الرابط دائمًا ما يراه المعلم. حالة النشر تُفحص مسبقًا فيُنسخ الرابط فور الضغط. */
+let savedCfg = '', pubState = 'unknown', canShare = false;
+const dirty = () => JSON.stringify(CFG) !== savedCfg;
+function markDirty() {
+  if (canShare) paintShare();
+  else saveCfg();               // المسودة: تُحفظ تلقائيًا كما كانت
+}
+function paintShare() {
+  const save = $('#saveCfgBtn'), share = $('#shareBtn');
+  save.disabled = !dirty();
+  save.lastElementChild.textContent = dirty() ? 'حفظ التغييرات' : 'محفوظة ✓';
+  share.disabled = dirty() || pubState === 'missing' || pubState === 'old';
+  share.lastElementChild.textContent =
+    pubState === 'missing' ? 'اللعبة غير منشورة بعد'
+    : pubState === 'old' ? 'على الموقع نسخة قديمة من اللعبة'
+    : 'نسخ رابط اللعبة للطلاب';
+}
+function bindShare() {
+  canShare = true;
+  savedCfg = JSON.stringify(CFG);
+  $('#shareRow').classList.remove('hidden');
+  $('#saveCfgBtn').addEventListener('click', () => {
+    saveCfg();
+    savedCfg = JSON.stringify(CFG);
+    paintShare();
+    toast('حُفظت الإعدادات ✓');
+  });
+  $('#shareBtn').addEventListener('click', async () => {
+    const link = studentLink();
+    const ok = await copyText(link);
+    const lives = CFG.lives > 0 ? toAr(CFG.lives) + ' قلوب' : 'قلوب بلا حد';
+    toast(ok ? `نُسخ الرابط ✓ · المستوى ${toAr(CFG.level)} · ${lives}` : link);
+  });
+  paintShare();
+  onlineState().then(s => { pubState = s; paintShare(); });
+}
+
 const studentLink = () => STUDENT_SITE + `tests/maze.html?id=${encodeURIComponent(GAME.id)}&lvl=${CFG.level}&lives=${CFG.lives}&timer=${CFG.timer}&theme=${CFG.theme}`;
 /* 'ok' منشورة بآخر تعديل، 'old' منشورة بنسخة أقدم، 'missing' غير منشورة، 'unknown' تعذّر التحقق (بلا إنترنت) */
 async function onlineState() {
@@ -885,7 +923,7 @@ function bindSettings() {
   range.addEventListener('input', () => {
     CFG.level = +range.value;
     paintLevel();
-    saveCfg();
+    markDirty();
     if (R && !finished) spawnEnemies();       // يُطبَّق فورًا على الجولة الحالية
   });
   range.addEventListener('change', () => range.blur());   // حتى تعود الأسهم لتحريك اللاعب
@@ -899,7 +937,7 @@ function bindSettings() {
       if (!b) return;
       CFG[key] = +b.dataset.v;
       paint();
-      saveCfg();
+      markDirty();
       apply();
       b.blur();
     });
@@ -916,7 +954,7 @@ function bindSettings() {
     b.innerHTML = `<canvas></canvas><span>${t.name}</span>`;
     b.addEventListener('click', () => {
       CFG.theme = id;
-      saveCfg();
+      markDirty();
       readColors();
       $$('.theme-btn').forEach(x => x.classList.toggle('on', x === b));
       b.blur();
@@ -1015,15 +1053,7 @@ async function init() {
     $('#editLink').classList.add('hidden');
   } else {
     $('#editLink').href = `maze-editor.html?id=${GAME.id}`;
-    if (STUDENT_SITE) {
-      $('#shareBtn').classList.remove('hidden');
-      $('#shareBtn').addEventListener('click', async () => {
-        const state = await onlineState();
-        if (state === 'missing') return toast('هذه اللعبة غير منشورة بعد ✗');
-        if (state === 'old') return toast('على موقع الطلاب نسخة قديمة من هذه اللعبة ✗');
-        toast(await copyText(studentLink()) ? 'نُسخ الرابط ✓' : studentLink());
-      });
-    }
+    if (STUDENT_SITE) bindShare();
   }
   readColors();
   bindSettings();
