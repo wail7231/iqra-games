@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmw0zdt5sei1",
+  "type": "words",
+  "name": "شسيب",
+  "desc": "",
+  "count": 1,
+  "updated": 1793728084077
+ },
+ {
   "id": "gmw0vhncqois",
   "type": "leaves",
   "name": "القفز",
