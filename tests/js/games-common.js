@@ -9,8 +9,16 @@
 const GAMES_DIR = '../games/';
 /* عنوان نسخة الطلاب المنشورة (GitHub Pages) — منه يُبنى رابط «نسخ رابط اللعبة للطلاب» */
 const STUDENT_SITE = 'https://wail7231.github.io/iqra-games/';
+/* القوالب: المتاهة لها صفحتها، وبقية القوالب تشترك في game.html (اللعب) و editor.html (الصناعة) */
 const GAME_TYPES = {
-  maze: { name: 'متاهة', editor: 'maze-editor.html', player: 'maze.html' },
+  maze:    { name: 'متاهة', editor: 'maze-editor.html', player: 'maze.html' },
+  quiz:    { name: 'اختيار من متعدد', editor: 'editor.html', player: 'game.html' },
+  words:   { name: 'ترتيب الكلمات', editor: 'editor.html', player: 'game.html' },
+  lines:   { name: 'ترتيب الجمل', editor: 'editor.html', player: 'game.html' },
+  letters: { name: 'ترتيب الحروف', editor: 'editor.html', player: 'game.html' },
+  hangman: { name: 'البالونات', editor: 'editor.html', player: 'game.html' },
+  blanks:  { name: 'أكمل الفراغات', editor: 'editor.html', player: 'game.html' },
+  whack:   { name: 'اصطد الصحيح', editor: 'editor.html', player: 'game.html' },
 };
 const ICON_MAZE = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v8h4M16 8v12M8 16h4v4M12 8h4"/></svg>';
 
@@ -119,7 +127,7 @@ async function writeText(dir, name, text) {
 async function rebuildIndex(dir) {
   const list = [];
   for await (const [name, h] of dir.entries()) {
-    if (h.kind !== 'file' || !name.endsWith('.js') || name === 'index.js') continue;
+    if (h.kind !== 'file' || !name.endsWith('.js') || name === 'index.js' || name === 'folders.js') continue;
     const g = parseGameFile(await (await h.getFile()).text());
     if (g && g.id && Array.isArray(g.questions)) list.push(indexEntry(g));
   }
@@ -149,6 +157,37 @@ async function saveGame(game) {
   downloadText(game.id + '.js', gameFileText(game));
   setTimeout(() => downloadText('index.js', indexFileText(list)), 400);
   return 'download';
+}
+
+/* ================= مجلدات الألعاب =================
+   ترتيب داخل الأداة فقط، في ملف واحد لا يغيّر ملفات الألعاب نفسها (فالنقل لا يحتاج نشرًا):
+   games/folders.js ← window.__GAME_FOLDERS__ = { folders: [{ id, name, parent }], games: { معرّف_اللعبة: معرّف_المجلد } } */
+const newFolderId = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+const foldersFileText = f =>
+  `/* مجلدات الألعاب التفاعلية — ترتيب الألعاب داخل الأداة */\nwindow.__GAME_FOLDERS__ = ${JSON.stringify(f, null, 1)};\n`;
+
+async function loadFolders() {
+  window.__GAME_FOLDERS__ = null;
+  try { await loadScriptFresh(GAMES_DIR + 'folders.js'); } catch (_) {}
+  const f = window.__GAME_FOLDERS__ || {};
+  return {
+    folders: Array.isArray(f.folders) ? f.folders : [],
+    games: f.games && typeof f.games === 'object' ? f.games : {},
+  };
+}
+
+async function saveFolders(f) {
+  if (!canPickFolder) { downloadText('folders.js', foldersFileText(f)); return 'download'; }
+  const dir = await gamesFolder();
+  await writeText(dir, 'folders.js', foldersFileText(f));
+  return 'folder';
+}
+
+/* مجلد اللعبة إن وُجد — لرجوع صفحات اللعبة والمحرر إلى المجلد نفسه */
+async function gameFolderHash(id) {
+  const f = await loadFolders();
+  const fid = f.games[id];
+  return fid && f.folders.some(x => x.id === fid) ? `index.html#games/${fid}` : 'index.html#games';
 }
 
 async function deleteGame(id) {

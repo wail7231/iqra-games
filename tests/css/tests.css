@@ -823,3 +823,349 @@ a { color: inherit; text-decoration: none; }
 /* حفظ الإعدادات ثم نسخ الرابط */
 .share-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 .share-row .btn { flex: 1 1 200px; width: auto; }
+
+/* =========================================================
+   مجلدات الألعاب (index.html#games)
+   ========================================================= */
+.games-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -4px 0 14px; }
+.crumbs { flex: 1; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 2px; font-size: 14px; font-weight: 700; }
+.crumbs .crumb { padding: 6px 10px; border-radius: 10px; color: var(--muted); border: 1.5px dashed transparent; transition: background .15s ease, color .15s ease; }
+.crumbs .crumb:hover { background: var(--brand-50); color: var(--accent); }
+.crumbs .crumb.drop { border-color: var(--accent); background: var(--brand-50); color: var(--accent); }
+.crumbs .cur { padding: 6px 10px; color: var(--text); }
+.crumbs .sep { color: var(--muted); opacity: .6; }
+.bar-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 12px;
+  font-size: 13px; font-weight: 700; background: var(--card); border: 1px solid var(--border); color: var(--text); box-shadow: var(--shadow);
+  transition: border-color .15s ease, color .15s ease;
+}
+.bar-btn:hover { border-color: var(--accent); color: var(--accent); }
+.bar-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.bar-btn.primary:hover { background: var(--brand-700); color: #fff; }
+.bar-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.folder-ic {
+  width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--gold) 20%, transparent); color: #9A7430; border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+}
+.dark .folder-ic { color: var(--gold); }
+.folder-ic svg { width: 22px; height: 22px; fill: color-mix(in srgb, currentColor 18%, transparent); stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.folder-tile { padding: 0; gap: 0; }
+.folder-tile .game-play { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 12px; }
+.folder-tile .info strong { font-family: var(--font-ui); font-weight: 700; font-size: 15px; line-height: 1.5; }
+.folder-tile.drop { border-color: var(--accent); background: var(--brand-50); transform: scale(1.02); }
+.folder-tile.editing { padding: 10px 12px; gap: 8px; border-color: var(--accent); }
+.folder-tile.editing .inp { flex: 1; min-width: 0; padding: 8px 10px; }
+.folder-tile.editing .game-edit { margin: 0; }
+.folder-tile.editing .game-edit.ok { color: var(--on-ok); background: var(--ok); border-color: var(--ok); }
+.tile[draggable="true"] { cursor: grab; }
+.tile.dragging { opacity: .4; }
+.tile-actions { display: flex; gap: 6px; margin-inline-end: 10px; flex-shrink: 0; }
+.tile-actions .game-edit { margin: 0; }
+
+.pop-menu {
+  position: fixed; z-index: 200; min-width: 210px; max-width: 300px; max-height: 60vh; overflow: auto; padding: 6px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.pop-menu .pm-title { padding: 6px 10px 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.pop-menu button { display: flex; align-items: center; gap: 8px; text-align: right; padding: 8px 10px; border-radius: 9px; font-size: 13.5px; font-weight: 600; }
+.pop-menu button:hover:not(:disabled) { background: var(--brand-50); color: var(--accent); }
+.pop-menu button.danger { color: var(--bad); }
+.pop-menu button.danger:hover { background: var(--bad-bg); color: var(--bad); }
+.pop-menu button:disabled { opacity: .4; cursor: default; }
+.pop-menu svg { width: 16px; height: 16px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- بطاقات المجلدات: كبيرة وملوّنة، فوق الألعاب ---------- */
+.folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; }
+.folder-grid:not(:empty) { margin-bottom: 22px; }
+.folder-card {
+  --fc: #C77D16;
+  position: relative; border-radius: 20px; overflow: hidden;
+  background: color-mix(in srgb, var(--fc) 10%, var(--card));
+  border: 1.5px solid color-mix(in srgb, var(--fc) 30%, var(--border));
+  box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .2s ease, border-color .15s ease;
+}
+.folder-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--fc); }
+.folder-card.drop { border-color: var(--fc); border-style: dashed; transform: scale(1.04); box-shadow: 0 0 0 4px color-mix(in srgb, var(--fc) 25%, transparent); }
+.folder-card[draggable="true"] { cursor: grab; }
+.folder-card.dragging { opacity: .4; }
+.fc-open { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 20px 14px 16px; text-align: center; }
+.fc-icon svg { width: 76px; height: 62px; display: block; filter: drop-shadow(0 6px 8px color-mix(in srgb, var(--fc) 35%, transparent)); }
+.fc-icon .back { fill: color-mix(in srgb, var(--fc) 70%, #000); }
+.fc-icon .front { fill: var(--fc); }
+.fc-name { margin-top: 6px; font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.4; color: var(--text); word-break: break-word; }
+.fc-count { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.fc-where { font-size: 11.5px; color: color-mix(in srgb, var(--fc) 75%, var(--text)); }
+.fc-menu {
+  position: absolute; top: 8px; inset-inline-end: 8px; width: 32px; height: 32px; border-radius: 10px;
+  display: grid; place-items: center; color: var(--muted); background: color-mix(in srgb, var(--card) 70%, transparent);
+  transition: background .15s ease, color .15s ease;
+}
+.fc-menu:hover { background: var(--card); color: var(--text); }
+.fc-menu svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; }
+
+/* بطاقة إنشاء المجلد أو تعديله */
+.folder-card.editing { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 12px 12px; border-color: var(--fc); cursor: default; }
+.folder-card.editing:hover { transform: none; }
+.folder-card.editing .fc-icon svg { width: 60px; height: 49px; }
+.folder-card.editing .inp { text-align: center; padding: 8px 10px; font-weight: 700; }
+.swatches { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.swatch { width: 24px; height: 24px; border-radius: 50%; background: var(--sw); border: 2px solid var(--card); box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--sw) 50%, transparent); transition: transform .12s ease; }
+.swatch:hover { transform: scale(1.15); }
+.swatch.on { box-shadow: 0 0 0 2.5px var(--text); transform: scale(1.1); }
+.fe-actions { display: flex; gap: 6px; width: 100%; }
+.fe-ok { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border-radius: 11px; background: var(--fc); color: #fff; font-weight: 700; font-size: 13.5px; }
+.fe-cancel { width: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--bg); border: 1px solid var(--border); color: var(--muted); }
+.fe-ok svg, .fe-cancel svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- بطاقات الألعاب: غلاف المتاهة ثم الاسم ---------- */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.game-card {
+  display: flex; flex-direction: column; border-radius: 16px; overflow: hidden;
+  background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .2s ease, border-color .15s ease;
+}
+.game-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--accent); }
+.game-card[draggable="true"] { cursor: grab; }
+.game-card.dragging { opacity: .4; }
+.gc-thumb { position: relative; display: block; aspect-ratio: 5 / 3; background: var(--bg-2); border-bottom: 1px solid var(--border); }
+.gc-thumb canvas { width: 100%; height: 100%; display: block; }
+.gc-type {
+  position: absolute; top: 8px; inset-inline-start: 8px; padding: 3px 10px; border-radius: 99px;
+  background: rgba(33, 27, 23, .72); color: #fff; font-size: 11.5px; font-weight: 700; backdrop-filter: blur(4px);
+}
+.gc-body { padding: 10px 12px 4px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gc-name { font-weight: 700; font-size: 15.5px; line-height: 1.5; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gc-name:hover { color: var(--accent); }
+.gc-body small { color: var(--muted); font-size: 12px; }
+.done .gc-body small { color: var(--ok); }
+.gc-actions { display: flex; gap: 6px; justify-content: flex-end; padding: 6px 10px 10px; margin-top: auto; }
+.gc-actions .game-edit { margin: 0; width: 34px; height: 34px; }
+
+.gc-actions .game-edit.del:hover { color: var(--bad); background: var(--bad-bg); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
+
+/* =========================================================
+   قوالب الألعاب المشتركة (game.html) — اللوحة وقوالب الشكل
+   ========================================================= */
+.play-wrap { max-width: 980px; }
+#playArea { display: flex; flex-direction: column; gap: 16px; }
+.board {
+  --b-bg: var(--paper); --b-ink: var(--text); --b-muted: var(--muted); --b-card: var(--card);
+  --b-line: var(--border); --b-accent: var(--brand); --b-dead: #CFC6B8; --b-dead-ink: #6E655A;
+  position: relative; min-height: 420px; padding: 22px 20px 20px; border-radius: 24px;
+  background: var(--b-bg); color: var(--b-ink); border: 1px solid var(--b-line); box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; gap: 18px; overflow: hidden;
+}
+.dark .board[data-theme="classic"] { --b-dead: #4A3F37; --b-dead-ink: #B0A294; }
+.board[data-theme="night"] {
+  --b-bg: #111933; --b-ink: #EAF4FF; --b-muted: #9DB3D9; --b-card: #1B2752; --b-line: #2E4A8A; --b-accent: #59C3F0; --b-dead: #2A3866; --b-dead-ink: #9DB3D9;
+  background: radial-gradient(120% 100% at 80% 0%, #1B2A5C 0%, #111933 60%);
+}
+.board[data-theme="garden"] { --b-bg: #F4EED9; --b-ink: #22361F; --b-muted: #5D7354; --b-card: #FFFDF4; --b-line: #C9DDB8; --b-accent: #3F7D3A; --b-dead: #D8D3BE; --b-dead-ink: #6C6A58; }
+.board[data-theme="ice"] { --b-bg: #EEF8FC; --b-ink: #12354A; --b-muted: #4E7387; --b-card: #FFFFFF; --b-line: #BFE3F3; --b-accent: #2D7FB8; --b-dead: #D3E3EB; --b-dead-ink: #5B7584; }
+.board[data-theme="notebook"] {
+  --b-bg: #FDFBF3; --b-ink: #1F2F4D; --b-muted: #5A6B88; --b-card: #FFFFFF; --b-line: #BFD3EA; --b-accent: #2B4C7E; --b-dead: #DCE3EC; --b-dead-ink: #5A6B88;
+  background: repeating-linear-gradient(#FDFBF3 0 27px, #D6E3F2 27px 28px);
+  border-right: 3px solid #E8A3A3;
+}
+.board.shake { animation: mazeShake .4s ease; }
+.quran-font .board .round-q, .quran-font .board .word-chip, .quran-font .board .line-card, .quran-font .board .quiz-opt .qo-txt,
+.quran-font .board .blanks-text, .quran-font .board .bank-chip, .quran-font .board .letters-word, .quran-font .whack-field .pop span {
+  font-family: var(--font-quran); font-weight: 400;
+}
+.round-head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.round-num { font-size: 12.5px; font-weight: 700; color: var(--b-muted); padding: 3px 12px; border-radius: 99px; background: color-mix(in srgb, var(--b-ink) 7%, transparent); }
+.round-q:empty, .round-sub:empty { display: none; }
+.round-q { font-size: clamp(20px, 3.6vw, 28px); font-weight: 700; line-height: 1.7; max-width: 760px; }
+.quran-font .round-q { font-size: clamp(24px, 4.4vw, 34px); line-height: 2; }
+.round-sub { font-size: 13.5px; font-weight: 700; color: var(--b-accent); }
+.round-actions { display: flex; justify-content: center; gap: 10px; margin-top: auto; }
+.round-actions .btn, .next-round { width: auto; min-width: 160px; }
+.next-round { align-self: center; margin-top: 4px; }
+.next-round svg { width: 18px; height: 18px; }
+.skip-btn { background: color-mix(in srgb, var(--b-ink) 8%, transparent); color: var(--b-muted); box-shadow: none; }
+.drag-ghost { position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none; opacity: .92; box-shadow: var(--shadow-lg); transform-origin: center; }
+.drag-src { opacity: .3; }
+.drop-over { outline: 3px dashed var(--b-accent, var(--accent)); outline-offset: 2px; }
+.theme-prev { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; width: 100%; aspect-ratio: 4 / 3; padding: 14px 8px; border-radius: 8px; background: var(--b-bg); align-content: center; }
+.theme-prev i { height: 14px; border-radius: 4px; background: var(--b-card); border: 1.5px solid var(--b-accent); }
+.theme-prev i:nth-child(2) { background: var(--b-accent); }
+.theme-prev[data-theme="classic"] { --b-bg: var(--paper); --b-card: var(--card); --b-accent: var(--brand); }
+.theme-prev[data-theme="night"] { --b-bg: #111933; --b-card: #1B2752; --b-accent: #59C3F0; }
+.theme-prev[data-theme="garden"] { --b-bg: #F4EED9; --b-card: #FFFDF4; --b-accent: #3F7D3A; }
+.theme-prev[data-theme="ice"] { --b-bg: #EEF8FC; --b-card: #FFFFFF; --b-accent: #2D7FB8; }
+.theme-prev[data-theme="notebook"] { --b-bg: #FDFBF3; --b-card: #FFFFFF; --b-accent: #2B4C7E; background: repeating-linear-gradient(#FDFBF3 0 8px, #D6E3F2 8px 9px); }
+
+/* ---------- اختيار من متعدد ---------- */
+.quiz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.quiz-opt {
+  display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 12px 16px; border-radius: 18px; text-align: right;
+  background: var(--c); color: #fff; box-shadow: 0 6px 0 color-mix(in srgb, var(--c) 65%, #000);
+  transition: transform .1s ease, box-shadow .1s ease, opacity .2s ease, filter .2s ease;
+}
+.quiz-opt:hover:not(:disabled) { filter: brightness(1.07); }
+.quiz-opt:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 65%, #000); }
+.qo-num { width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; display: grid; place-items: center; background: rgba(255, 255, 255, .22); font-weight: 700; font-size: 16px; }
+.qo-txt { flex: 1; font-size: clamp(16px, 2.4vw, 20px); font-weight: 700; line-height: 1.6; word-break: break-word; }
+.quran-font .qo-txt { font-size: clamp(20px, 3vw, 26px); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.right { box-shadow: 0 0 0 4px var(--b-bg), 0 0 0 7px #3F8A3A; }
+.quiz-opt.right .qo-num { background: #fff; color: #3F8A3A; }
+
+.quiz-opt.wrong { animation: mazeShake .35s ease; filter: grayscale(.6); box-shadow: 0 0 0 4px var(--b-bg), 0 0 0 7px #C0392B; }
+.quiz-opt.dim { opacity: .35; filter: grayscale(.7); }
+@media (max-width: 560px) { .quiz-grid:not(.many) { grid-template-columns: 1fr; } .quiz-opt { min-height: 60px; } }
+
+/* ---------- اصطد الصحيح ---------- */
+.round-timebar { height: 8px; border-radius: 99px; background: color-mix(in srgb, var(--b-ink) 10%, transparent); overflow: hidden; }
+.round-timebar span { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--b-accent), #E3B341); border-radius: 99px; transition: width .1s linear; }
+.whack-field { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 18px; padding: 6px 4px 10px; user-select: none; -webkit-user-select: none; }
+.hole { position: relative; height: 112px; border-radius: 16px; overflow: hidden; cursor: pointer; touch-action: manipulation; }
+.hole::after {
+  content: ""; position: absolute; left: 6%; right: 6%; bottom: 2px; height: 24px; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 30%, rgba(0, 0, 0, .62) 0 52%, rgba(0, 0, 0, .28) 64%, transparent 71%);
+  z-index: 2; pointer-events: none;
+}
+.pop {
+  position: absolute; left: 10%; right: 10%; bottom: 12px; height: 80px; border-radius: 14px; z-index: 1;
+  display: grid; place-items: center; padding: 6px; text-align: center;
+  background: var(--b-card); border: 2px solid var(--b-accent); color: var(--b-ink); box-shadow: var(--shadow);
+  transform: translateY(115%); transition: transform .22s cubic-bezier(.3, 1.4, .5, 1);
+}
+.hole.up .pop { transform: translateY(0); }
+.pop span { font-size: clamp(14px, 2.3vw, 19px); font-weight: 700; line-height: 1.4; word-break: break-word; }
+.pop.right { background: #3F8A3A; border-color: #3F8A3A; color: #fff; }
+.pop.wrong { background: #C0392B; border-color: #C0392B; color: #fff; }
+.hole.struck .pop { animation: popHit .3s ease; }
+@keyframes popHit { 40% { transform: translateY(0) scale(.9); } }
+.whack-count { position: absolute; inset: 0; display: grid; place-items: center; z-index: 5; font-size: 72px; font-weight: 700; color: var(--b-accent); text-shadow: 0 4px 0 color-mix(in srgb, var(--b-ink) 15%, transparent); }
+@media (max-width: 560px) { .hole { height: 92px; } .pop { height: 64px; bottom: 14px; } .whack-field { gap: 10px; } }
+
+/* ---------- ترتيب الكلمات ---------- */
+.word-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 18px 6px; min-height: 120px; align-content: center; }
+.word-chip {
+  padding: 12px 20px; border-radius: 16px; font-size: clamp(18px, 3vw, 24px); font-weight: 700; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  background: var(--b-dead); color: var(--b-dead-ink); box-shadow: 0 5px 0 color-mix(in srgb, var(--b-dead) 70%, #000);
+  transition: background .35s ease, color .35s ease, box-shadow .35s ease, transform .1s ease;
+}
+.quran-font .word-chip { font-size: clamp(22px, 3.6vw, 30px); padding: 6px 18px; }
+.word-chip.sel { transform: translateY(-4px); outline: 3px solid var(--b-accent); outline-offset: 2px; }
+.word-row.solved .word-chip, .word-row.shown .word-chip { background: var(--c); color: #fff; box-shadow: 0 5px 0 color-mix(in srgb, var(--c) 65%, #000); cursor: default; }
+.word-row.solved { animation: solvedPop .6s ease; }
+.word-row.shown .word-chip { opacity: .75; }
+@keyframes solvedPop { 40% { transform: scale(1.04); } }
+
+/* ---------- ترتيب الجمل ---------- */
+.lines-wrap { display: grid; grid-template-columns: 1fr 1.15fr; gap: 18px; align-items: start; }
+.line-pool { display: flex; flex-direction: column; gap: 10px; min-height: 120px; padding: 10px; border-radius: 16px; background: color-mix(in srgb, var(--b-ink) 5%, transparent); border: 1.5px dashed var(--b-line); }
+.line-slots { display: flex; flex-direction: column; gap: 10px; }
+.line-card {
+  padding: 10px 14px; border-radius: 12px; background: var(--b-card); color: var(--b-ink); border: 1.5px solid var(--b-line);
+  font-size: clamp(16px, 2.4vw, 19px); font-weight: 600; line-height: 1.8; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: var(--shadow);
+}
+.quran-font .line-card { font-size: clamp(20px, 3vw, 25px); line-height: 2; }
+.line-card.locked { cursor: default; }
+.line-slot { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; padding: 6px; border-radius: 14px; border: 1.5px dashed var(--b-line); min-height: 58px; transition: border-color .15s ease, background .15s ease; }
+.line-slot.sel { border-color: var(--b-accent); border-style: solid; background: color-mix(in srgb, var(--b-accent) 8%, transparent); }
+.line-slot.filled { border-style: solid; }
+.ls-num { width: 34px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, var(--b-ink) 8%, transparent); color: var(--b-muted); font-weight: 700; }
+.ls-drop { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ls-drop .line-card { box-shadow: none; }
+.line-slot.right { border-color: #3F8A3A; background: color-mix(in srgb, #3F8A3A 12%, transparent); }
+.line-slot.right .ls-num { background: #3F8A3A; color: #fff; }
+.line-slot.wrong { border-color: #C0392B; background: color-mix(in srgb, #C0392B 10%, transparent); }
+.line-slot.wrong .ls-num { background: #C0392B; color: #fff; }
+.line-slot.wrong .line-card { text-decoration: line-through; opacity: .7; }
+.ls-fix { flex-basis: 100%; padding: 4px 44px 2px 8px; font-size: 14px; font-weight: 700; color: #3F8A3A; }
+.quran-font .ls-fix { font-family: var(--font-quran); font-weight: 400; font-size: 19px; }
+.lines-wrap.graded .line-pool { display: none; }
+.lines-wrap.graded { grid-template-columns: 1fr; }
+@media (max-width: 700px) { .lines-wrap { grid-template-columns: 1fr; } .line-slots { order: -1; } }
+
+/* ---------- ترتيب الحروف ---------- */
+.letter-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 10px 0; }
+.letter-slot { width: 58px; height: 64px; border-radius: 14px; border: 2px dashed var(--b-line); display: grid; place-items: center; background: color-mix(in srgb, var(--b-ink) 4%, transparent); }
+.letter-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; min-height: 70px; }
+.letter-tile {
+  width: 56px; height: 60px; border-radius: 14px; font-size: 30px; font-weight: 700; display: grid; place-items: center;
+  background: var(--b-card); color: var(--b-ink); border: 2px solid var(--b-line); box-shadow: 0 5px 0 color-mix(in srgb, var(--b-line) 80%, #000);
+  transition: transform .1s ease;
+}
+.letter-tile:active { transform: translateY(3px); }
+.letter-slot .letter-tile { box-shadow: none; border-color: transparent; background: transparent; }
+.letter-slots.solved .letter-slot { border-style: solid; border-color: #3F8A3A; background: #3F8A3A; }
+.letter-slots.solved .letter-tile { color: #fff; }
+.letter-slots.nope { animation: mazeShake .4s ease; }
+.letter-slots.nope .letter-slot { border-color: #C0392B; }
+.letter-tile.shown { color: var(--b-accent); }
+.letters-word { text-align: center; font-size: clamp(26px, 5vw, 38px); font-weight: 700; color: var(--b-accent); font-family: var(--font-quran); }
+@media (max-width: 560px) { .letter-slot { width: 44px; height: 50px; } .letter-tile { width: 46px; height: 50px; font-size: 24px; } }
+
+/* ---------- البالونات ---------- */
+.balloons { display: flex; justify-content: center; gap: 10px; min-height: 110px; padding-top: 4px; flex-wrap: wrap; }
+.balloon { position: relative; width: 46px; height: 100px; animation: floaty 3s ease-in-out infinite; animation-delay: var(--d); }
+.bl-body {
+  position: absolute; top: 0; left: 0; width: 46px; height: 56px; border-radius: 50% 50% 48% 48%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .55) 0 12%, transparent 13%), var(--c);
+  box-shadow: inset -6px -8px 0 rgba(0, 0, 0, .12);
+}
+.bl-body::after { content: ""; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-bottom-color: var(--c); border-top-width: 0; }
+.bl-string { position: absolute; top: 60px; left: 50%; width: 1.5px; height: 40px; background: color-mix(in srgb, var(--b-ink) 40%, transparent); }
+.balloon.popped { animation: pop .35s ease forwards; }
+@keyframes floaty { 50% { transform: translateY(-6px); } }
+@keyframes pop { 30% { transform: scale(1.35); opacity: 1; } 100% { transform: scale(.2); opacity: 0; } }
+.hang-word { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; direction: rtl; }
+.hang-cell { width: 44px; height: 54px; border-bottom: 4px solid var(--b-ink); display: grid; place-items: center; font-size: 30px; font-weight: 700; }
+.hang-cell.open { color: var(--b-accent); }
+.hang-cell.missed { color: #C0392B; }
+.hang-gap { width: 22px; }
+.hang-word.solved .hang-cell { border-color: #3F8A3A; color: #3F8A3A; }
+.hang-keys { display: flex; flex-direction: column; gap: 7px; align-items: center; }
+.hk-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.hang-key {
+  width: 44px; height: 48px; border-radius: 11px; font-size: 22px; font-weight: 700;
+  background: var(--b-card); color: var(--b-ink); border: 1.5px solid var(--b-line); box-shadow: 0 3px 0 color-mix(in srgb, var(--b-line) 80%, #000);
+}
+.hang-key:disabled { cursor: default; box-shadow: none; }
+.hang-key.right { background: #3F8A3A; color: #fff; border-color: #3F8A3A; }
+.hang-key.wrong { opacity: .3; }
+@media (max-width: 560px) { .hang-key { width: 30px; height: 42px; font-size: 18px; } .hk-row { gap: 4px; } .hang-cell { width: 32px; height: 44px; font-size: 24px; } .balloon { width: 34px; } .bl-body { width: 34px; height: 42px; } .bl-string { top: 46px; } }
+
+/* ---------- أكمل الفراغات ---------- */
+.blanks-text { font-size: clamp(18px, 3vw, 24px); line-height: 2.6; text-align: center; padding: 6px 4px; }
+.quran-font .blanks-text { font-size: clamp(22px, 3.8vw, 30px); line-height: 2.7; }
+.blank {
+  display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; min-width: 110px; min-height: 48px; padding: 2px 4px;
+  border-bottom: 3px dashed var(--b-accent); border-radius: 10px 10px 0 0; background: color-mix(in srgb, var(--b-accent) 7%, transparent); cursor: pointer;
+}
+.blank.sel { background: color-mix(in srgb, var(--b-accent) 20%, transparent); border-bottom-style: solid; }
+.blank.right { border-bottom: 3px solid #3F8A3A; background: color-mix(in srgb, #3F8A3A 15%, transparent); }
+.blank.wrong { border-bottom: 3px solid #C0392B; background: color-mix(in srgb, #C0392B 12%, transparent); }
+.blank.wrong .bank-chip { text-decoration: line-through; opacity: .65; }
+.blank-fix { order: -1; font-size: .7em; line-height: 1.6; font-weight: 700; color: #3F8A3A; }
+.word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; min-height: 60px; padding: 12px; border-radius: 16px; background: color-mix(in srgb, var(--b-ink) 5%, transparent); border: 1.5px dashed var(--b-line); }
+.bank-chip {
+  display: inline-block; padding: 6px 16px; border-radius: 12px; font-size: clamp(16px, 2.6vw, 21px); font-weight: 700; line-height: 1.7;
+  background: var(--c); color: #fff; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: 0 4px 0 color-mix(in srgb, var(--c) 65%, #000);
+}
+.blank .bank-chip { box-shadow: none; }
+.bank-chip.locked { cursor: default; }
+
+/* محرر القوالب: اختيار الكلمات المخفية في «أكمل الفراغات» */
+.blank-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding: 10px; border-radius: 12px; background: var(--bg); border: 1.5px dashed var(--border); min-height: 46px; }
+.blank-picker:empty { display: none; }
+.blank-picker.invalid { border-color: var(--bad); background: var(--bad-bg); }
+.pick-word { padding: 4px 10px; border-radius: 9px; font-size: 15px; font-weight: 600; background: var(--card); border: 1.5px solid var(--border); transition: background .15s ease, color .15s ease; }
+.quran-font .pick-word { font-family: var(--font-quran); font-weight: 400; font-size: 19px; }
+.pick-word.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.ans-row.num .ans-mark { background: var(--brand-50); color: var(--accent); border: 1px solid var(--brand-100); }
+
+/* شبكة القوالب في الصفحة الرئيسية: بطاقات أصغر لتتسع الثمانية */
+.template-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.template-card { padding: 12px 14px; gap: 12px; }
+.template-card .mode-icon { width: 46px; height: 46px; border-radius: 13px; }
+.template-card .mode-icon svg { width: 23px; height: 23px; }
+.tpl-info h3 { font-size: 16.5px; }
+.tpl-plus { width: 30px; height: 30px; }

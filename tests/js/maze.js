@@ -1053,6 +1053,7 @@ async function init() {
     $('#editLink').classList.add('hidden');
   } else {
     $('#editLink').href = `maze-editor.html?id=${GAME.id}`;
+    gameFolderHash(GAME.id).then(h => { $('#backBtn').href = h; $('#summary a[href="index.html#games"]').href = h; });
     if (STUDENT_SITE) bindShare();
   }
   readColors();
