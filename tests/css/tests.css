@@ -813,3 +813,8 @@ a { color: inherit; text-decoration: none; }
   .quran-font .q-box .q-text { font-size: 19px; }
   .dpad { grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(3, 64px); }
 }
+
+/* أكثر من إجابة صحيحة في المحرر */
+.add-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.add-wrong.add-ok { color: var(--ok); background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+.need-seg { margin-top: 6px; align-self: flex-start; }

@@ -177,7 +177,8 @@ function newRound() {
   const portrait = $('.maze-stage').clientWidth < 560;
   const cols = portrait ? 9 : 13, rows = portrait ? 11 : 9;
   const start = { x: cols >> 1, y: rows >> 1 };
-  const answers = shuffle([{ text: q.correct, ok: true }, ...q.wrong.map(text => ({ text, ok: false }))]);
+  const corrects = answerList(q);
+  const answers = shuffle([...corrects.map(text => ({ text, ok: true })), ...q.wrong.map(text => ({ text, ok: false }))]);
   const { open, cells } = buildMaze(cols, rows, start, answers.length);
   const gates = answers.map((a, i) => ({ ...a, x: cells[i].x, y: cells[i].y, color: GATE_COLORS[i], num: toAr(i + 1), gone: false }));
 
@@ -185,13 +186,14 @@ function newRound() {
     q, cols, rows, open, start, gates,
     gateAt: (x, y) => gates.find(g => !g.gone && g.x === x && g.y === y),
     p: { x: start.x, y: start.y, nx: start.x, ny: start.y, t: 0, moving: false, dir: null },
+    need: corrects.length > 1 && q.need === 'all' ? corrects.length : 1, got: 0,
     enemies: [], chaseMap: null, started: false, done: false, missed: false, invuln: 0, hl: -1, hlUntil: 0, clock: 0,
   };
   R.chaseMap = bfs(open, cols, rows, start.x, start.y);
   spawnEnemies();
   resetInput();
 
-  $('#qNum').textContent = `السؤال ${toAr(qi + 1)} من ${toAr(order.length)}`;
+  paintQNum();
   $('#qText').textContent = q.q;
   const legend = $('#legend');
   legend.innerHTML = '';
@@ -213,6 +215,12 @@ function newRound() {
   fit();
   message('');
 }
+
+/* عند وجوب جمع كل الإجابات الصحيحة يظهر العدّاد بجانب رقم السؤال */
+function paintQNum() {
+  $('#qNum').textContent = `السؤال ${toAr(qi + 1)} من ${toAr(order.length)}` + (R.need > 1 ? ` · ✓ ${toAr(R.got)} من ${toAr(R.need)}` : '');
+}
+const answerList = q => Array.isArray(q.correct) ? q.correct : [q.correct];
 
 /* المطاردون يظهرون في أبعد الأماكن عن اللاعب، متباعدين، وخارج الأبواب */
 function spawnEnemies() {
@@ -314,7 +322,15 @@ function onCell() {
   const g = R.gateAt(R.p.x, R.p.y);
   if (!g) return false;
   resetInput();
-  if (g.ok) {
+  if (g.ok && R.got + 1 < R.need) {
+    g.gone = g.collected = true;
+    g.el.classList.add('win');
+    R.got++;
+    paintQNum();
+    message(`✓ ${toAr(R.got)} من ${toAr(R.need)}`, 'ok');
+  } else if (g.ok) {
+    R.got++;
+    paintQNum();
     R.done = true;
     if (!R.missed) score++;
     results.push({ q: R.q, firstTry: !R.missed });
@@ -653,6 +669,17 @@ function draw() {
   if (R.hlUntil && R.hlUntil < R.clock && R.hl >= 0 && !R.gates[R.hl].el.matches(':hover')) { R.hl = -1; R.hlUntil = 0; }
   R.gates.forEach((g, i) => {
     const x = pad + g.x * cs, y = pad + g.y * cs, m = cs * .12;
+    if (g.collected) {
+      ctx.strokeStyle = '#3F8A3A';
+      ctx.globalAlpha = .7;
+      ctx.lineWidth = Math.max(2.5, cs * .09);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + cs * .28, y + cs * .52); ctx.lineTo(x + cs * .44, y + cs * .68); ctx.lineTo(x + cs * .74, y + cs * .34);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      return;
+    }
     if (g.gone) {
       ctx.strokeStyle = T.bad;
       ctx.globalAlpha = .45;
@@ -782,6 +809,17 @@ function loadCfg() {
 const saveCfg = () => { if (!STUDENT) store.set(cfgKey(), JSON.stringify(CFG)); };
 
 const studentLink = () => STUDENT_SITE + `tests/maze.html?id=${encodeURIComponent(GAME.id)}&lvl=${CFG.level}&lives=${CFG.lives}&timer=${CFG.timer}&theme=${CFG.theme}`;
+/* 'ok' منشورة بآخر تعديل، 'old' منشورة بنسخة أقدم، 'missing' غير منشورة، 'unknown' تعذّر التحقق (بلا إنترنت) */
+async function onlineState() {
+  try {
+    const res = await fetch(`${STUDENT_SITE}games/index.js?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return 'unknown';
+    const text = await res.text();
+    const list = JSON.parse(text.slice(text.indexOf('['), text.lastIndexOf(']') + 1));
+    const entry = list.find(e => e.id === GAME.id);
+    return !entry ? 'missing' : entry.updated < GAME.updated ? 'old' : 'ok';
+  } catch (_) { return 'unknown'; }
+}
 async function copyText(text) {
   try { await navigator.clipboard.writeText(text); return true; } catch (_) {}
   const ta = document.createElement('textarea');
@@ -933,7 +971,7 @@ function endGame(reason) {
       <div class="sum-head-row"><span class="sum-name"></span><span class="sum-badge">${r ? (r.firstTry ? '✓' : '↻') : '–'}</span></div>
       <div class="sum-row"><span class="sum-label">الإجابة</span><span class="sum-ans"></span></div>`;
     $('.sum-name', item).textContent = q.q;
-    $('.sum-ans', item).textContent = q.correct;
+    $('.sum-ans', item).textContent = answerList(q).join('، ');
     list.appendChild(item);
   });
 
@@ -971,15 +1009,20 @@ async function init() {
     $('#cfgPanel').classList.add('hidden');
     $('#editLink').classList.add('hidden');
     $('.tool-pill').classList.add('hidden');
-    $('#backBtn').href = 'play.html';
-    $('#summary a[href="index.html#games"]').href = 'play.html';
+    $('#backBtn').classList.add('hidden');
+    $('#summary a[href="index.html#games"]').classList.add('hidden');
   } else if (isDraft) {
     $('#editLink').classList.add('hidden');
   } else {
     $('#editLink').href = `maze-editor.html?id=${GAME.id}`;
     if (STUDENT_SITE) {
       $('#shareBtn').classList.remove('hidden');
-      $('#shareBtn').addEventListener('click', async () => toast(await copyText(studentLink()) ? 'نُسخ الرابط ✓' : studentLink()));
+      $('#shareBtn').addEventListener('click', async () => {
+        const state = await onlineState();
+        if (state === 'missing') return toast('هذه اللعبة غير منشورة بعد ✗');
+        if (state === 'old') return toast('على موقع الطلاب نسخة قديمة من هذه اللعبة ✗');
+        toast(await copyText(studentLink()) ? 'نُسخ الرابط ✓' : studentLink());
+      });
     }
   }
   readColors();
