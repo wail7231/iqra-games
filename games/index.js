@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmw0l04wr628",
+  "type": "whack",
+  "name": "halal and haram",
+  "desc": "",
+  "count": 1,
+  "updated": 1793742958623
+ },
+ {
   "id": "gmw0v6zuavoj",
   "type": "plane",
   "name": "Intention",
