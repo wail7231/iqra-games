@@ -230,6 +230,6 @@ function build(stage, im, it) {
     if (stage.clientWidth !== lastW && !drag && !done) { lastW = stage.clientWidth; layout(); }
   });
   ro.observe(stage);
-  const onFs = () => { if (!stage.isConnected) return document.removeEventListener('fullscreenchange', onFs); setTimeout(layout, 120); };
+  const onFs = () => { if (!stage.isConnected) return document.removeEventListener('fullscreenchange', onFs); if (!done) setTimeout(layout, 120); };
   document.addEventListener('fullscreenchange', onFs);
 }
