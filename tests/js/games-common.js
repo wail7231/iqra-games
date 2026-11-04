@@ -56,6 +56,44 @@ function mixAnswers(q, limit = Infinity) {
   return out;
 }
 
+/* ================= شكل قطع البازل (مشترك بين اللعبة وغلافها) =================
+   كل حدّ داخلي بين قطعتين له اتجاه ثابت: لسان بارز في واحدة وتجويف في جارتها.
+   puzzleEdges → { top, right, bottom, left } قيمها ١ (لسان للخارج) أو −١ (تجويف) أو ٠ (حافة الصورة). */
+function puzzleEdges(seed, cols, rows, i, j) {
+  const sign = (kind, a, b) => {
+    let h = 2166136261;
+    for (const ch of seed + kind + a + ',' + b) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    return (h >>> 0) % 2 ? 1 : -1;
+  };
+  return {
+    top: j === 0 ? 0 : -sign('h', i, j - 1),
+    bottom: j === rows - 1 ? 0 : sign('h', i, j),
+    left: i === 0 ? 0 : -sign('v', i - 1, j),
+    right: i === cols - 1 ? 0 : sign('v', i, j),
+  };
+}
+/* مسار القطعة باتجاه عقارب الساعة؛ اللسان بحجم ثابت نسبةً إلى أصغر ضلعي القطعة */
+function puzzlePiecePath(ctx, x, y, w, h, e) {
+  const m = Math.min(w, h);
+  const edge = (ax, ay, bx, by, k) => {
+    const L = Math.hypot(bx - ax, by - ay), dx = (bx - ax) / L, dy = (by - ay) / L, nx = dy, ny = -dx;
+    const P = (t, o) => [ax + dx * (L / 2 + (t - .5) * m) + nx * o * m * k, ay + dy * (L / 2 + (t - .5) * m) + ny * o * m * k];
+    if (!k) { ctx.lineTo(bx, by); return; }
+    ctx.lineTo(...P(.36, 0));
+    ctx.bezierCurveTo(...P(.41, 0), ...P(.44, .06), ...P(.41, .11));
+    ctx.bezierCurveTo(...P(.35, .2), ...P(.4, .28), ...P(.5, .28));
+    ctx.bezierCurveTo(...P(.6, .28), ...P(.65, .2), ...P(.59, .11));
+    ctx.bezierCurveTo(...P(.56, .06), ...P(.59, 0), ...P(.64, 0));
+    ctx.lineTo(bx, by);
+  };
+  ctx.moveTo(x, y);
+  edge(x, y, x + w, y, e.top);
+  edge(x + w, y, x + w, y + h, e.right);
+  edge(x + w, y + h, x, y + h, e.bottom);
+  edge(x, y + h, x, y, e.left);
+  ctx.closePath();
+}
+
 function loadScriptFresh(src) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
