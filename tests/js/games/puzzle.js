@@ -78,7 +78,7 @@ function build(stage, im, it) {
       /* الصينية تتسع لكل القطع متفرقة (كل قطعة في خانة أكبر منها قليلًا) */
       cellW = pw + pad * .9; cellH = ph + pad * .9;
       fitH = w => Math.ceil(n / Math.max(1, Math.floor(w / cellW))) * cellH + pad * .6;
-      if (!wide || fitH(W - fw - 30) <= fh * 1.15) break;
+      if (!wide || fitH(W - fw - 30) <= Math.max(fh * 1.2, 360)) break;
     }
     let fx, fy, tr;
     if (wide) {
@@ -97,7 +97,10 @@ function build(stage, im, it) {
     Object.assign(count.style, { left: (fx + fw - 8) + 'px', top: (fy + 8) + 'px' });
     drawGhost();
     /* خانات الصينية: شبكة تملأ مساحتها، وكل قطعة في خانتها مع إزاحة بسيطة */
-    const tcols = Math.max(1, Math.min(n, Math.floor(tr.w / cellW))), trows = Math.ceil(n / tcols);
+    /* القطع تتوزع على كامل الصينية طولًا وعرضًا */
+    const fitCols = Math.max(1, Math.min(n, Math.floor(tr.w / cellW)));
+    const byRows = Math.ceil(n / Math.max(1, Math.min(n, Math.floor(tr.h / cellH))));
+    const tcols = Math.min(fitCols, Math.max(1, byRows)), trows = Math.ceil(n / tcols);
     const cw = tr.w / tcols, ch = tr.h / trows;
     pieces.forEach(p => {
       drawPiece(p);
