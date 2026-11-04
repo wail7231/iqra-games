@@ -9,14 +9,6 @@ window.__GAMES_INDEX__ = [
   "updated": 1793749010175
  },
  {
-  "id": "gmw0lvw69q45",
-  "type": "letters",
-  "name": "silent noon letters",
-  "desc": "",
-  "count": 4,
-  "updated": 1793743385935
- },
- {
   "id": "gmw0l04wr628",
   "type": "whack",
   "name": "halal and haram",
