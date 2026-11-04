@@ -1746,7 +1746,7 @@ a { color: inherit; text-decoration: none; }
 .pz-peek { position: absolute; z-index: 950; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--b-line); background: var(--b-card); color: var(--b-ink); display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0, 0, 0, .18); cursor: pointer; touch-action: none; }
 .pz-peek svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pz-peek:active { background: var(--b-accent); color: #fff; }
-.pz-count { position: absolute; z-index: 950; transform: translateX(-100%); padding: 4px 12px; border-radius: 999px; background: var(--b-card); color: var(--b-ink); border: 1px solid var(--b-line); font-weight: 700; font-size: .95rem; box-shadow: 0 4px 12px rgba(0, 0, 0, .12); pointer-events: none; }
+.pz-count { position: absolute; z-index: 950; transform: translateX(-100%); white-space: nowrap; direction: rtl; padding: 4px 12px; border-radius: 999px; background: var(--b-card); color: var(--b-ink); border: 1px solid var(--b-line); font-weight: 700; font-size: .95rem; box-shadow: 0 4px 12px rgba(0, 0, 0, .12); pointer-events: none; }
 .pz-frame.done ~ .pz-count { background: var(--b-accent); color: #fff; border-color: transparent; }
 .pz-title { text-align: center; font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 700; color: var(--b-ink); margin: 14px 12px 4px; animation: pzTitle .6s ease both; }
 @keyframes pzTitle { from { opacity: 0; transform: translateY(10px) scale(.96); } }

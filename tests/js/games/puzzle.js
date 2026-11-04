@@ -67,18 +67,21 @@ function build(stage, im, it) {
     if (!W) return;
     const fs = document.body.classList.contains('is-fs');
     const wide = W >= 640;
-    const maxW = wide ? W * .56 : W - 16, maxH = fs ? Math.max(260, window.innerHeight - 190) : wide ? 480 : 380;
+    const maxW = wide ? W * .52 : W - 16, maxH = fs ? Math.max(260, window.innerHeight - 190) : wide ? 480 : 380;
     const s = Math.min(maxW / im.naturalWidth, maxH / im.naturalHeight);
     const fw = Math.round(im.naturalWidth * s), fh = Math.round(im.naturalHeight * s);
     const pw = fw / cols, ph = fh / rows, m = Math.min(pw, ph), pad = Math.ceil(m * .3);
     let fx, fy, tr;
+    /* الصينية تتسع لكل القطع متفرقة (كل قطعة في خانة أكبر منها قليلًا) */
+    const cellW = pw + pad * 1.1, cellH = ph + pad * 1.1;
+    const fitH = w => Math.ceil(n / Math.max(1, Math.floor(w / cellW))) * cellH + pad * .6;
     if (wide) {
       fx = W - fw - 8; fy = 8;
-      tr = { x: 8, y: 8, w: W - fw - 30, h: fh };
+      const w = W - fw - 30;
+      tr = { x: 8, y: 8, w, h: Math.max(fh, fitH(w)) };
     } else {
       fx = (W - fw) / 2; fy = 8;
-      const tcols = Math.max(1, Math.floor((W - 16) / (pw + pad)));
-      tr = { x: 8, y: fh + 28, w: W - 16, h: Math.ceil(n / tcols) * (ph + pad * .9) + pad };
+      tr = { x: 8, y: fh + 28, w: W - 16, h: fitH(W - 16) };
     }
     L = { W, fw, fh, pw, ph, m, pad, fx, fy, tr };
     stage.style.height = Math.max(fy + fh, tr.y + tr.h) + 12 + 'px';
@@ -88,7 +91,7 @@ function build(stage, im, it) {
     Object.assign(count.style, { left: (fx + fw - 8) + 'px', top: (fy + 8) + 'px' });
     drawGhost();
     /* خانات الصينية: شبكة تملأ مساحتها، وكل قطعة في خانتها مع إزاحة بسيطة */
-    const tcols = Math.max(1, Math.round(Math.sqrt(n * tr.w / tr.h))), trows = Math.ceil(n / tcols);
+    const tcols = Math.max(1, Math.min(n, Math.floor(tr.w / cellW))), trows = Math.ceil(n / tcols);
     const cw = tr.w / tcols, ch = tr.h / trows;
     pieces.forEach(p => {
       drawPiece(p);
