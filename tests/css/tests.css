@@ -1725,3 +1725,37 @@ a { color: inherit; text-decoration: none; }
 .is-fs .qo-txt { font-size: clamp(18px, 2.2vw, 28px); }
 .is-fs .word-chip { font-size: clamp(22px, 3vw, 38px); }
 .is-fs .letter-slot, .is-fs .letter-tile { width: clamp(56px, 6vh, 80px); height: clamp(62px, 7vh, 88px); font-size: clamp(30px, 4vh, 44px); }
+
+/* ================= البازل ================= */
+.pz-stage { position: relative; width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; margin-top: 6px; }
+.pz-frame, .pz-tray { position: absolute; border-radius: 6px; }
+.pz-frame { background: color-mix(in srgb, var(--b-card) 75%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--b-ink) 18%, transparent), 0 8px 24px rgba(0, 0, 0, .12); transition: box-shadow .4s; }
+.pz-frame canvas { display: block; width: 100%; height: 100%; }
+.pz-full { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .35s; pointer-events: none; border-radius: inherit; }
+.pz-frame.peek .pz-full { opacity: .95; z-index: 900; }
+.pz-frame.peek { z-index: 900; }
+.pz-frame.done .pz-full { opacity: 1; transition: opacity .8s; }
+.pz-frame.done { z-index: 5; box-shadow: 0 0 0 4px var(--b-accent), 0 14px 36px rgba(0, 0, 0, .25); animation: pzWin .7s ease; }
+@keyframes pzWin { 40% { transform: scale(1.035); } }
+.pz-tray { background: color-mix(in srgb, var(--b-ink) 5%, transparent); border: 2px dashed color-mix(in srgb, var(--b-ink) 16%, transparent); border-radius: 18px; transition: opacity .5s; }
+.pz-piece { position: absolute; left: 0; top: 0; pointer-events: none; transform-origin: center; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .3)); will-change: transform; transition: opacity .6s, filter .2s; }
+.pz-piece.lift { filter: drop-shadow(0 12px 12px rgba(0, 0, 0, .35)); }
+.pz-piece.snap { transition: transform .18s ease-out, opacity .6s, filter .2s; }
+.pz-piece.placed { filter: none; }
+.pz-piece.gone, .pz-tray.gone { opacity: 0; }
+.pz-peek { position: absolute; z-index: 950; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--b-line); background: var(--b-card); color: var(--b-ink); display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0, 0, 0, .18); cursor: pointer; touch-action: none; }
+.pz-peek svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pz-peek:active { background: var(--b-accent); color: #fff; }
+.pz-count { position: absolute; z-index: 950; transform: translateX(-100%); padding: 4px 12px; border-radius: 999px; background: var(--b-card); color: var(--b-ink); border: 1px solid var(--b-line); font-weight: 700; font-size: .95rem; box-shadow: 0 4px 12px rgba(0, 0, 0, .12); pointer-events: none; }
+.pz-frame.done ~ .pz-count { background: var(--b-accent); color: #fff; border-color: transparent; }
+.pz-title { text-align: center; font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 700; color: var(--b-ink); margin: 14px 12px 4px; animation: pzTitle .6s ease both; }
+@keyframes pzTitle { from { opacity: 0; transform: translateY(10px) scale(.96); } }
+
+/* محرر البازل: خانة رفع الصورة */
+.pz-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 150px; margin-bottom: 10px; border: 2px dashed var(--line); border-radius: 14px; color: var(--muted); cursor: pointer; overflow: hidden; transition: border-color .2s, background .2s; }
+.pz-drop:hover, .pz-drop.over { border-color: var(--accent, #AB3920); background: color-mix(in srgb, var(--accent, #AB3920) 6%, transparent); }
+.pz-drop svg { width: 42px; height: 42px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.pz-drop span { font-weight: 700; }
+.pz-drop.has { border-style: solid; padding: 0; }
+.pz-drop img { display: block; max-width: 100%; max-height: 260px; object-fit: contain; }
+.pz-drop.invalid { border-color: #C0392B; }
