@@ -206,6 +206,12 @@ function build(stage, im, it) {
     pieces.forEach(p => p.el.classList.add('gone'));
     tray.classList.add('gone');
     peek.remove();
+    count.remove();
+    /* الصورة المكتملة تنتقل إلى الوسط وتختفي الصينية */
+    const fx = (L.W - L.fw) / 2;
+    stage.classList.add('pz-finished');
+    frame.style.left = fx + 'px';
+    stage.style.height = L.fy + L.fh + 12 + 'px';
     FX.play('win');
     FX.burst(frame, { count: 46, spread: 220 });
     if (it.title) {
@@ -221,7 +227,7 @@ function build(stage, im, it) {
   let lastW = stage.clientWidth;
   const ro = new ResizeObserver(() => {
     if (!stage.isConnected) { ro.disconnect(); return; }
-    if (stage.clientWidth !== lastW && !drag) { lastW = stage.clientWidth; layout(); }
+    if (stage.clientWidth !== lastW && !drag && !done) { lastW = stage.clientWidth; layout(); }
   });
   ro.observe(stage);
   const onFs = () => { if (!stage.isConnected) return document.removeEventListener('fullscreenchange', onFs); setTimeout(layout, 120); };
