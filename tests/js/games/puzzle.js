@@ -67,14 +67,20 @@ function build(stage, im, it) {
     if (!W) return;
     const fs = document.body.classList.contains('is-fs');
     const wide = W >= 640;
-    const maxW = wide ? W * .52 : W - 16, maxH = fs ? Math.max(260, window.innerHeight - 190) : wide ? 480 : 380;
-    const s = Math.min(maxW / im.naturalWidth, maxH / im.naturalHeight);
-    const fw = Math.round(im.naturalWidth * s), fh = Math.round(im.naturalHeight * s);
-    const pw = fw / cols, ph = fh / rows, m = Math.min(pw, ph), pad = Math.ceil(m * .3);
+    const maxH = fs ? Math.max(260, window.innerHeight - 190) : wide ? 480 : 380;
+    /* على الشاشة العريضة: نصغّر الإطار تدريجيًا حتى تتسع الصينية بجانبه لكل القطع دون أن تطول كثيرًا */
+    let fw, fh, pw, ph, m, pad, cellW, cellH, fitH;
+    for (const share of wide ? [.56, .52, .48, .44, .4, .36] : [1]) {
+      const maxW = wide ? W * share : W - 16;
+      const s = Math.min(maxW / im.naturalWidth, maxH / im.naturalHeight);
+      fw = Math.round(im.naturalWidth * s); fh = Math.round(im.naturalHeight * s);
+      pw = fw / cols; ph = fh / rows; m = Math.min(pw, ph); pad = Math.ceil(m * .3);
+      /* الصينية تتسع لكل القطع متفرقة (كل قطعة في خانة أكبر منها قليلًا) */
+      cellW = pw + pad * .9; cellH = ph + pad * .9;
+      fitH = w => Math.ceil(n / Math.max(1, Math.floor(w / cellW))) * cellH + pad * .6;
+      if (!wide || fitH(W - fw - 30) <= fh * 1.15) break;
+    }
     let fx, fy, tr;
-    /* الصينية تتسع لكل القطع متفرقة (كل قطعة في خانة أكبر منها قليلًا) */
-    const cellW = pw + pad * 1.1, cellH = ph + pad * 1.1;
-    const fitH = w => Math.ceil(n / Math.max(1, Math.floor(w / cellW))) * cellH + pad * .6;
     if (wide) {
       fx = W - fw - 8; fy = 8;
       const w = W - fw - 30;
