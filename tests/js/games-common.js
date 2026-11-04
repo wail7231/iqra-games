@@ -28,6 +28,7 @@ const GAME_TYPES = {
   leaves:  { name: 'القفز على الأوراق', editor: 'editor.html', player: 'game.html', desc: 'اقفز على الورقة الطافية التي تحمل الإجابة الصحيحة.' },
   archery: { name: 'الرماية', editor: 'editor.html', player: 'game.html', desc: 'اسحب القوس وأطلق السهم على هدف الإجابة الصحيحة.' },
   plant:   { name: 'اختيار من متعدد', editor: 'editor.html', player: 'game.html', desc: 'سؤال وإجابات، وكل إجابة صحيحة تسقي النبتة فتكبر حتى تُثمر.' },
+  puzzle:  { name: 'البازل', editor: 'editor.html', player: 'game.html', desc: 'ارفع صورة فتُقسَّم قطعًا، ويركّبها الطالب في مكانها.' },
   runner:  { name: 'الكرة القافزة', editor: 'editor.html', player: 'game.html', desc: 'اقفز بالكرة على المنصة التي تحمل الإجابة الصحيحة.' },
 };
 const ICON_MAZE = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v8h4M16 8v12M8 16h4v4M12 8h4"/></svg>';
@@ -80,7 +81,7 @@ async function loadGame(id) {
 }
 
 /* ================= كتابة الملفات ================= */
-const indexEntry = g => ({ id: g.id, type: g.type, name: g.name, desc: g.desc || '', count: g.questions.length, updated: g.updated });
+const indexEntry = g => ({ id: g.id, type: g.type, name: g.name, desc: g.desc || '', count: g.questions.length, updated: g.updated, ...(g.cover ? { cover: g.cover } : {}) });
 const gameFileText = g =>
   `/* لعبة «${g.name.replace(/\*\//g, '')}» — صُنعت بأداة الألعاب التفاعلية، IQRA Network */\nwindow.__GAME__ = ${JSON.stringify(g, null, 1)};\n`;
 const indexFileText = list =>
