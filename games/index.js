@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmw7uefzaopw",
+  "type": "archery",
+  "name": "تفسير سورة الاخلاص",
+  "desc": "",
+  "count": 2,
+  "updated": 1794143080879
+ },
+ {
   "id": "gmw1575k3vh9",
   "type": "archery",
   "name": "5 pillars of islam",
