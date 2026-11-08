@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmw0nhjuhpuh",
+  "type": "plant",
+  "name": "تفسير سورة المسد",
+  "desc": "",
+  "count": 3,
+  "updated": 1794144367058
+ },
+ {
   "id": "gmw7uefzaopw",
   "type": "archery",
   "name": "تفسير سورة الاخلاص",
