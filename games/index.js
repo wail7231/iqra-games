@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmw9wd6r3exr",
+  "type": "lines",
+  "name": "سورة الشمس",
+  "desc": "",
+  "count": 2,
+  "updated": 1794267340702
+ },
+ {
   "id": "gmw0nhjuhpuh",
   "type": "plant",
   "name": "تفسير سورة المسد",
