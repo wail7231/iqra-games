@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwb7ferdoyz",
+  "type": "archery",
+  "name": "Pillars of faith",
+  "desc": "",
+  "count": 3,
+  "updated": 1794346340430
+ },
+ {
   "id": "gmwb7c24mj1n",
   "type": "plane",
   "name": "Angels",
