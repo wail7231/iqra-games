@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwb77y9yiow",
+  "type": "maze",
+  "name": "الملائكة",
+  "desc": "",
+  "count": 3,
+  "updated": 1794346070679
+ },
+ {
   "id": "gmw9wd6r3exr",
   "type": "lines",
   "name": "سورة الشمس",
