@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwb7c24mj1n",
+  "type": "plane",
+  "name": "Angels",
+  "desc": "",
+  "count": 3,
+  "updated": 1794346217471
+ },
+ {
   "id": "gmwb77y9yiow",
   "type": "maze",
   "name": "الملائكة",
