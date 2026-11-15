@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwhumuk34s5",
+  "type": "maze",
+  "name": "general meaning for first 7 surahs",
+  "desc": "",
+  "count": 5,
+  "updated": 1794748243387
+ },
+ {
   "id": "gmw0mu813c4s",
   "type": "match",
   "name": "سورة الكوثر",
