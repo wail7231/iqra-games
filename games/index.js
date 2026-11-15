@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwiasn3b4rm",
+  "type": "lines",
+  "name": "سورة الليل",
+  "desc": "",
+  "count": 2,
+  "updated": 1794775317962
+ },
+ {
   "id": "gmwhumuk34s5",
   "type": "maze",
   "name": "general meaning for first 7 surahs",
