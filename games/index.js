@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmw0mu813c4s",
+  "type": "match",
+  "name": "سورة الكوثر",
+  "desc": "",
+  "count": 1,
+  "updated": 1794747972385
+ },
+ {
   "id": "gmwb7ferdoyz",
   "type": "archery",
   "name": "Pillars of faith",
