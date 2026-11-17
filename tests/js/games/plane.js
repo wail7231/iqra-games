@@ -358,7 +358,8 @@ Play.register({
       Play.board.appendChild(SKY.wrap);
       SKY.size();
     }
-    Play.board.insertBefore(Play.head(q.q), SKY.wrap);
+    SKY.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
+    Play.board.insertBefore(SKY.paint.el, SKY.wrap);
     SKY.setQuestion(q);
   },
 });
