@@ -41,7 +41,9 @@ Play.register({
   answer: q => answersOf(q).join('، '),
   round(q, i) {
     if (i === 0) plantGrown = 0;
-    Play.head(q.q);
+    const need = needAll(q) ? answersOf(q).length : 1;
+    const paintNeed = needHead(q.q, need);
+    let got = 0, missed = false;
     const wrap = el('div', 'plant-wrap');
     const scene = el('div', 'plant-scene', plantSVG(stageOf()));
     const svg = scene.firstElementChild;
@@ -50,16 +52,23 @@ Play.register({
     wrap.append(scene, grid);
     Play.board.appendChild(wrap);
 
-    const corrects = answersOf(q);
     const opts = mixAnswers(q);
     const buttons = opts.map((o, k) => {
       const b = el('button', 'quiz-opt', `<span class="qo-num">${toAr(k + 1)}</span><span class="qo-txt"></span><span class="qo-mark"></span>`);
       b.style.setProperty('--c', CHIP_COLORS[k % CHIP_COLORS.length]);
       b.querySelector('.qo-txt').textContent = o.t;
       b.addEventListener('click', () => {
-        if (Play.roundDone) return;
+        if (Play.roundDone || b.disabled) return;
         Play.touch();
-        buttons.forEach((x, j) => { x.disabled = true; if (opts[j].ok) x.classList.add('right'); else if (x !== b) x.classList.add('dim'); });
+        /* «يجب جمعها كلها»: كل صحيحة تُعلَّم وتبقى الأسئلة مفتوحة حتى تكتمل، والخطأ يُحسب ولا يُنهي السؤال */
+        if (need > 1 && !(o.ok && got + 1 === need)) {
+          b.disabled = true;
+          if (o.ok) { got++; paintNeed(got); b.classList.add('right', 'celebrate'); FX.play('good'); }
+          else { missed = true; b.classList.add('wrong'); Play.bad(b); svg.classList.add('wilt'); setTimeout(() => svg.classList.remove('wilt'), 900); }
+          return;
+        }
+        if (o.ok && need > 1) { got++; paintNeed(got); }
+        buttons.forEach((x, j) => { x.disabled = true; if (opts[j].ok) x.classList.add('right'); else if (x !== b && !x.classList.contains('wrong')) x.classList.add('dim'); });
         if (o.ok) {
           b.classList.add('celebrate');
           plantGrown++;
@@ -68,7 +77,7 @@ Play.register({
           svg.classList.add('pour');
           FX.play('good');
           setTimeout(() => { paintPlant(svg, stageOf()); Play.good(scene); }, 650);
-          Play.finish(1, { delay: 2000 });
+          Play.finish(missed ? 0 : 1, { delay: 2000 });
         } else {
           b.classList.add('wrong');
           svg.classList.add('wilt');

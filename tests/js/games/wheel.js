@@ -100,20 +100,31 @@ Play.register({
         q.textContent = chosen.q;
         const grid = el('div', 'quiz-grid wheel-answers');
         const opts = mixAnswers(chosen);
+        const need = needAll(chosen) ? answersOf(chosen).length : 1;
+        let got = 0, missed = false;
+        if (need > 1) { const sub = el('div', 'round-sub'); q.after(sub); var paintSub = () => { sub.textContent = `✓ ${toAr(got)} من ${toAr(need)}`; }; }
         const bs = opts.map((o, x) => {
           const b = el('button', 'quiz-opt', `<span class="qo-num">${toAr(x + 1)}</span><span class="qo-txt"></span><span class="qo-mark"></span>`);
           b.style.setProperty('--c', CHIP_COLORS[x % CHIP_COLORS.length]);
           b.querySelector('.qo-txt').textContent = o.t;
           b.addEventListener('click', () => {
-            if (Play.roundDone) return;
-            bs.forEach((y, z) => { y.disabled = true; if (opts[z].ok) y.classList.add('right'); else if (y !== b) y.classList.add('dim'); });
-            if (o.ok) { b.classList.add('celebrate'); Play.good(b); Play.finish(1, next); }
+            if (Play.roundDone || b.disabled) return;
+            if (need > 1 && !(o.ok && got + 1 === need)) {
+              b.disabled = true;
+              if (o.ok) { got++; paintSub(); b.classList.add('right', 'celebrate'); FX.play('good'); }
+              else { missed = true; b.classList.add('wrong'); Play.bad(b); }
+              return;
+            }
+            if (o.ok && need > 1) { got++; paintSub(); }
+            bs.forEach((y, z) => { y.disabled = true; if (opts[z].ok) y.classList.add('right'); else if (y !== b && !y.classList.contains('wrong')) y.classList.add('dim'); });
+            if (o.ok) { b.classList.add('celebrate'); Play.good(b); Play.finish(missed ? 0 : 1, next); }
             else { b.classList.add('wrong'); Play.bad(b); Play.finish(0, next); }
           });
           grid.appendChild(b);
           return b;
         });
-        result.append(q, grid);
+        result.insertBefore(q, result.children[1] || null);
+        result.appendChild(grid);
       } else {
         /* بلا سؤال: المعلم يسأل ويسجّل */
         const judge = el('div', 'wr-judge');
