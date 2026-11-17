@@ -34,6 +34,9 @@ const THEMES = {
   garden:  { name: 'حديقة', floor: '#F4EED9', wall: '#3F7D3A', inner: '#6DAA5C', wallW: .2, player: 'flower', playerColor: '#E5559A' },
   ice:     { name: 'جليد', floor: '#EEF8FC', wall: '#4A9CCB', inner: '#CDEBF7', wallW: .16, player: 'snowflake', playerColor: '#2D7FB8' },
   notebook: { name: 'دفتر', floor: '#FDFBF3', wall: '#2B4C7E', wallW: .09, ruled: '#BFD3EA', margin: '#E8A3A3', player: 'plane', playerColor: '#FFFFFF' },
+  ocean:   { name: 'بحر', floor: '#E3F6F8', wall: '#0E7C86', inner: '#9ED8DE', wallW: .16, player: 'bubble', playerColor: '#3FB0B8' },
+  space:   { name: 'فضاء', floor: '#140C33', wall: '#B48CFF', glow: true, player: 'planet', playerColor: '#8E6CF0', dark: true },
+  autumn:  { name: 'خريف', floor: '#FBF1E1', wall: '#8A5226', inner: '#E8B07A', wallW: .18, player: 'leaf', playerColor: '#E8761E' },
 };
 
 let GAME, isDraft = false, CFG;
@@ -545,6 +548,31 @@ function drawPlayer(c, t, cx, cy, r, clock, dir) {
       c.fillStyle = col; c.fill(); c.stroke();
       c.beginPath(); c.moveTo(r * 1.05, 0); c.lineTo(-r * .85, r * .8); c.lineTo(-r * .45, 0); c.closePath();
       c.fillStyle = '#DCE7F5'; c.fill(); c.stroke();
+      break;
+    case 'bubble': {
+      const g = c.createRadialGradient(-r * .3, -r * .35, r * .1, 0, 0, r);
+      g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(.6, 'rgba(158,216,222,.55)'); g.addColorStop(1, col);
+      c.beginPath(); c.arc(0, Math.sin(clock * 3) * r * .06, r, 0, 7); c.fillStyle = g; c.fill();
+      c.strokeStyle = '#0E7C86'; c.lineWidth = Math.max(1.5, r * .1); c.stroke();
+      c.strokeStyle = '#FFFFFF'; c.lineWidth = r * .14;
+      c.beginPath(); c.arc(0, 0, r * .62, Math.PI * 1.1, Math.PI * 1.45); c.stroke();
+      break;
+    }
+    case 'planet':
+      c.shadowColor = '#B48CFF'; c.shadowBlur = r * .7;
+      c.fillStyle = col; c.beginPath(); c.arc(0, 0, r * .72, 0, 7); c.fill();
+      c.shadowBlur = 0;
+      c.strokeStyle = '#C9B4FF'; c.lineWidth = r * .16;
+      c.beginPath(); c.moveTo(-r * .62, -r * .22); c.lineTo(r * .62, -r * .22); c.moveTo(-r * .6, r * .2); c.lineTo(r * .6, r * .2); c.stroke();
+      c.rotate(-.35 + Math.sin(clock * 2) * .08);
+      c.strokeStyle = '#F6E7A8'; c.lineWidth = Math.max(1.5, r * .13);
+      c.beginPath(); c.ellipse(0, 0, r * 1.15, r * .34, 0, 0, 7); c.stroke();
+      break;
+    case 'leaf':
+      c.rotate(Math.sin(clock * 3) * .25);
+      c.fillStyle = col; c.strokeStyle = '#8A5226'; c.lineWidth = Math.max(1.5, r * .1);
+      c.beginPath(); c.moveTo(0, -r); c.bezierCurveTo(r * .9, -r * .4, r * .7, r * .6, 0, r * .8); c.bezierCurveTo(-r * .7, r * .6, -r * .9, -r * .4, 0, -r); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(0, -r * .7); c.lineTo(0, r * 1.05); c.stroke();
       break;
     case 'moon':
       c.shadowColor = col; c.shadowBlur = r * .9;

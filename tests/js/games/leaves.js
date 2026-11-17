@@ -10,6 +10,9 @@ const POND_THEMES = {
   garden:   { water: '#4FA3C7', water2: '#6BB8D6', ripple: 'rgba(255,255,255,.3)', leaf: '#5FA052', leafEdge: '#3D7F3B', ink: '#FFFFFF', token: '#8A5A30', tokenEdge: '#F7C948', shape: 'pad', flowers: true },
   ice:      { water: '#1F5F8B', water2: '#2D7FB8', ripple: 'rgba(255,255,255,.2)', leaf: '#F4FBFF', leafEdge: '#9CD5F2', ink: '#12354A', token: '#FFFFFF', tokenEdge: '#9CCFEA', shape: 'floe' },
   notebook: { water: '#FDFBF3', water2: '#EEF3FA', ripple: 'rgba(43,76,126,.25)', leaf: '#FFFFFF', leafEdge: '#2B4C7E', ink: '#1F2F4D', token: '#2B4C7E', tokenEdge: '#1F2F4D', shape: 'pad', sketch: true },
+  ocean:    { water: '#1B8A9A', water2: '#0E6E80', ripple: 'rgba(255,255,255,.28)', leaf: '#F2DDB0', leafEdge: '#C9A96A', ink: '#3A2A12', shape: 'floe', kind: 'pearl' },
+  space:    { water: '#120A2E', water2: '#24145A', ripple: 'rgba(180,140,255,.25)', leaf: '#6E6A86', leafEdge: '#B48CFF', ink: '#FFFFFF', shape: 'floe', glow: true, moon: true, kind: 'planet' },
+  autumn:   { water: '#5E8C7A', water2: '#4C7A68', ripple: 'rgba(255,255,255,.22)', leaf: '#E8761E', leafEdge: '#8A5226', ink: '#FFFFFF', shape: 'pad', rim: '#B5793E', kind: 'acorn' },
 };
 let POND = null;
 

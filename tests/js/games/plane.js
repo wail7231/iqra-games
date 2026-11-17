@@ -15,6 +15,12 @@ const PLANE_THEMES = {
               body: '#DDEFFA', wing: '#2D7FB8', wing2: '#1F5F8C', glass: '#7FC2E8', trail: '#5FB3E3', trailKind: 'sparkle', sparkle: true },
   notebook: { plane: 'paper', cloud: '#FFFFFF', cloud2: '#FFFFFF', cloudEdge: '#2B4C7E', shine: 'transparent', shade: 'transparent', ink: '#1F2F4D',
               body: '#FFFFFF', wing: '#DCE3EC', glass: '#FFFFFF', trail: 'rgba(43,76,126,.45)', trailKind: 'dash', paper: true },
+  ocean:    { plane: 'seaplane', cloud: '#FFFFFF', cloud2: '#D3F0F4', cloudEdge: '#7CC7CF', shine: 'rgba(255,255,255,.9)', shade: 'rgba(14,124,134,.12)', ink: '#0B3B47',
+              body: '#0E7C86', body2: '#3FB0B8', wing: '#F7C948', wing2: '#C99A22', glass: '#DDF6FA', trail: 'rgba(255,255,255,.95)' },
+  space:    { plane: 'rocket', cloud: '#3A2A7A', cloud2: '#22164A', cloudEdge: '#B48CFF', shine: 'rgba(200,180,255,.25)', shade: 'rgba(0,0,0,.2)', ink: '#F1EAFF',
+              body: '#EDE6FF', wing: '#E8761E', wing2: '#7A5AD0', glass: '#7FD3F7', trail: 'rgba(255,190,90,.8)', trailKind: 'jet', glow: true, stars: true },
+  autumn:   { plane: 'balloon', cloud: '#FFF8EC', cloud2: '#F2D6AE', cloudEdge: '#D9A86C', shine: 'rgba(255,255,255,.85)', shade: 'rgba(120,60,10,.12)', ink: '#3D2412',
+              body: '#C2621B', body2: '#E8761E', wing: '#D9A42B', wing2: '#8A5226', glass: '#FFF3C4', trail: 'rgba(232,118,30,.5)' },
 };
 let SKY = null;
 
@@ -294,6 +300,45 @@ function skyScene() {
       ctx.strokeStyle = 'rgba(43,76,126,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-40, 0); ctx.lineTo(26, -14); ctx.stroke();
       ctx.strokeStyle = '#C0392B'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-6, -8); ctx.lineTo(8, -12); ctx.stroke();
     },
+  };
+  /* طائرة بحرية بعوّامتين، صاروخ، ومنطاد هواء ساخن */
+  PLANES.seaplane = th => {
+    ctx.strokeStyle = '#5A4632'; ctx.lineWidth = 2;
+    [-10, 14].forEach(x => { ctx.beginPath(); ctx.moveTo(x, 8); ctx.lineTo(x - 2, 21); ctx.stroke(); });
+    ctx.fillStyle = '#F4F4F4'; ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(2, 24, 30, 4.5, 0, 0, 7); ctx.fill(); ctx.stroke();
+    PLANES.prop(th);
+  };
+  PLANES.rocket = th => {
+    const fl = 12 + Math.sin(S.t * 45) * 4;
+    const g = ctx.createLinearGradient(30, 0, 30 + fl + 12, 0);
+    g.addColorStop(0, '#FFF2B0'); g.addColorStop(.5, '#F7A93B'); g.addColorStop(1, 'rgba(232,80,30,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(30, -7); ctx.quadraticCurveTo(30 + fl + 14, 0, 30, 7); ctx.fill();
+    poly([[18, -8], [34, -24], [37, -6]], th.wing2);
+    poly([[18, 8], [34, 24], [37, 6]], th.wing2);
+    ctx.fillStyle = bodyGrad('#FFFFFF', th.body, 11);
+    ctx.beginPath(); ctx.moveTo(-44, 0); ctx.quadraticCurveTo(-30, -12, -6, -11); ctx.lineTo(32, -9); ctx.lineTo(32, 9); ctx.lineTo(-6, 11); ctx.quadraticCurveTo(-30, 12, -44, 0); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.fillStyle = th.wing; ctx.beginPath(); ctx.moveTo(-44, 0); ctx.quadraticCurveTo(-36, -8, -25, -10); ctx.lineTo(-25, 10); ctx.quadraticCurveTo(-36, 8, -44, 0); ctx.fill();
+    ctx.fillStyle = th.glass; ctx.strokeStyle = th.wing2; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(-4, 0, 5.5, 0, 7); ctx.fill(); ctx.stroke();
+    poly([[8, -2], [26, -2], [26, 2], [8, 2]], th.wing2);
+  };
+  PLANES.balloon = th => {
+    ctx.rotate(Math.sin(S.t * 2) * .05);
+    const g = ctx.createLinearGradient(-24, 0, 24, 0);
+    g.addColorStop(0, th.body); g.addColorStop(.5, th.body2); g.addColorStop(1, th.body);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(-11, 8); ctx.bezierCurveTo(-31, -8, -25, -40, 0, -40); ctx.bezierCurveTo(25, -40, 31, -8, 11, 8); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.strokeStyle = th.wing; ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(0, 8); ctx.moveTo(-11, -38); ctx.quadraticCurveTo(-20, -15, -7, 8); ctx.moveTo(11, -38); ctx.quadraticCurveTo(20, -15, 7, 8); ctx.stroke();
+    ctx.strokeStyle = '#6B4320'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(-10, 8); ctx.lineTo(-7, 20); ctx.moveTo(10, 8); ctx.lineTo(7, 20); ctx.stroke();
+    ctx.fillStyle = '#F7A93B'; ctx.beginPath(); ctx.ellipse(0, 14, 2.5, 4 + Math.sin(S.t * 30) * 1.5, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = th.wing2; ctx.beginPath(); ctx.roundRect(-8, 20, 16, 11, 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-8, 24); ctx.lineTo(8, 24); ctx.moveTo(-8, 28); ctx.lineTo(8, 28); ctx.stroke();
   };
   function drawPlane(th) {
     const x = S.px, y = S.y, tilt = Math.max(-.35, Math.min(.35, (S.ty - S.y) / 120));

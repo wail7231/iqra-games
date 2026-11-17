@@ -11,8 +11,11 @@ const WHEEL_COLORS = {
   garden:   ['#3F7D3A', '#F4A6C1', '#F7C948', '#6DAA5C'],
   ice:      ['#2D7FB8', '#FFFFFF', '#9CD5F2', '#4A9CCB'],
   notebook: ['#FFFFFF', '#E8F0FA', '#FFFFFF', '#FBEAEA'],
+  ocean:    ['#0E7C86', '#E3F6F8', '#3FB0B8', '#F7C948'],
+  space:    ['#22164A', '#B48CFF', '#3A2A7A', '#F6E7A8'],
+  autumn:   ['#C2621B', '#FFF3DC', '#8A5226', '#D9A42B'],
 };
-const RIM = { classic: '#7E2A17', night: '#59C3F0', garden: '#8A5A30', ice: '#FFFFFF', notebook: '#2B4C7E' };
+const RIM = { classic: '#7E2A17', night: '#59C3F0', garden: '#8A5A30', ice: '#FFFFFF', notebook: '#2B4C7E', ocean: '#085A62', space: '#B48CFF', autumn: '#6B4320' };
 let wheelTurn = 0;   // زاوية العجلة الحالية — تبقى بين الجولات حتى تدور من حيث توقفت
 
 /* لون النص المناسب فوق لون القطاع */

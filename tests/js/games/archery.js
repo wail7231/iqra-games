@@ -11,6 +11,9 @@ const ARCH_THEMES = {
   garden:   { ground: '#6DAA5C', ground2: '#4C9A4A', hills: '#9CCB7E', rings: ['#E5554F', '#FFFFFF', '#E5554F', '#FFFFFF', '#F7C948'], plate: '#FFFDF4', ink: '#22361F', edge: '#3F7D3A', bow: '#8A5A30', string: '#F4EED9', shaft: '#8A5A30', fletch: '#E5559A', dots: '#3F7D3A' },
   ice:      { ground: '#F7FBFF', ground2: '#DDEFF8', hills: '#CDE7F4', rings: ['#2D7FB8', '#FFFFFF', '#2D7FB8', '#FFFFFF', '#9CD5F2'], plate: '#FFFFFF', ink: '#12354A', edge: '#4A9CCB', bow: '#4A9CCB', string: '#FFFFFF', shaft: '#5A6B88', fletch: '#9CD5F2', dots: '#2D7FB8' },
   notebook: { ground: '#FDFBF3', ground2: '#DCE3EC', hills: 'rgba(43,76,126,.08)', rings: ['#2B4C7E', '#FDFBF3', '#E8A3A3', '#FDFBF3', '#2B4C7E'], plate: '#FFFFFF', ink: '#1F2F4D', edge: '#2B4C7E', bow: '#2B4C7E', string: '#5A6B88', shaft: '#2B4C7E', fletch: '#E8A3A3', dots: '#2B4C7E', sketch: true },
+  ocean:    { ground: '#E7D3A2', ground2: '#CDB27A', hills: '#9ED8DE', rings: ['#0E7C86', '#FFFFFF', '#3FB0B8', '#FFFFFF', '#F7C948'], plate: '#FFFFFF', ink: '#0B3B47', edge: '#7CC7CF', bow: '#085A62', string: '#FFFFFF', shaft: '#8A5A30', fletch: '#0E7C86', dots: '#0E7C86' },
+  space:    { ground: '#2A1D5E', ground2: '#1E1446', hills: '#3A2A7A', rings: ['#8E6CF0', '#22164A', '#B48CFF', '#22164A', '#F6E7A8'], plate: '#22164A', ink: '#F1EAFF', edge: '#B48CFF', bow: '#B48CFF', string: '#F6E7A8', shaft: '#C9B4FF', fletch: '#E8761E', dots: '#F6E7A8', glow: true },
+  autumn:   { ground: '#B5793E', ground2: '#8A5226', hills: '#EBC9A0', rings: ['#8A5226', '#FFF3DC', '#C2621B', '#FFF3DC', '#D9A42B'], plate: '#FFFAF2', ink: '#3D2412', edge: '#D9A86C', bow: '#6B4320', string: '#FFF3DC', shaft: '#8A5A30', fletch: '#C2621B', dots: '#C2621B' },
 };
 
 Play.register({
