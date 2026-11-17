@@ -141,11 +141,11 @@ function runnerScene() {
         /* أعشاب بحرية تتمايل وفقاعات */
         ctx.strokeStyle = th.far2; ctx.lineWidth = 6; ctx.lineCap = 'round';
         for (let j = -1; j <= 1; j++) {
-          const bx = x + j * 18, sw = Math.sin(S.t * 1.5 + k + j) * 8;
+          const bx = x + j * 18, sw = Math.sin(performance.now() / 650 + k + j) * 8;
           ctx.beginPath(); ctx.moveTo(bx, S.gy); ctx.quadraticCurveTo(bx + sw, S.gy - 30, bx - sw * .5, S.gy - 55 - j * 8); ctx.stroke();
         }
         ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.5;
-        const by = S.gy - 90 - ((S.t * 30 + k * 50) % 120);
+        const by = S.gy - 90 - ((performance.now() / 33 + k * 50) % 120);
         ctx.beginPath(); ctx.arc(x + 30, by, 5, 0, 7); ctx.stroke();
         ctx.beginPath(); ctx.arc(x + 38, by - 22, 3, 0, 7); ctx.stroke();
       } else if (th.deco === 'planets') {
