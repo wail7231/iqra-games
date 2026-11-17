@@ -197,7 +197,7 @@ function pondScene() {
       y = S.jump.from.y + (to.y - S.jump.from.y) * k;
       lift = Math.sin(k * Math.PI);
     }
-    const r = 15 * (1 + lift * .7);
+    const r = 18 * (1 + lift * .6);
     /* ظل على الماء يبتعد كلما ارتفعت القطعة */
     ctx.fillStyle = 'rgba(0,0,0,.25)';
     ctx.beginPath(); ctx.ellipse(x + lift * 12, y + lift * 16, 14, 9, 0, 0, 7); ctx.fill();
