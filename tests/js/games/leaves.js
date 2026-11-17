@@ -48,7 +48,9 @@ function pondScene() {
     S.missed = false;
     if (!S.home) S.home = { x: S.W / 2, y: S.homeY, r: 56, t: '', start: true, squash: 0, phase: 0, rot: 1.2, sink: 0 };
     if (!S.token) S.token = { x: S.home.x, y: S.home.y };
-    const answers = mixAnswers(q, 5);
+    S.got = 0;
+    S.need = needAll(q) ? answersOf(q).length : 1;
+    const answers = fitAnswers(mixAnswers(q, 6), 6);
     const n = answers.length, slot = S.W / n;
     const maxR = Math.min(slot * .47, 104, S.H * .2);
     ctx.font = font(fontPx(maxR));
@@ -67,7 +69,7 @@ function pondScene() {
     e.preventDefault();
     if (Play.roundDone || S.jump || S.scroll) return;
     const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
-    const leaf = S.row.find(l => !l.sink && !(l.delay > 0) &&Math.hypot(px - l.x, py - l.y) < l.r + 6);
+    const leaf = S.row.find(l => !l.sink && !l.good && !(l.delay > 0) && Math.hypot(px - l.x, py - l.y) < l.r + 6);
     if (!leaf) return;
     Play.touch();
     FX.play('pop');
@@ -77,7 +79,19 @@ function pondScene() {
   function landed(leaf) {
     const r = cv.getBoundingClientRect();
     const pt = { x: r.left + leaf.x, y: r.top + leaf.y };
+    if (leaf.ok && ++S.got < S.need) {
+      /* «يجب جمعها كلها»: الورقة تخضرّ وتبقى، والقطعة تعود لتقفز إلى صحيحة أخرى */
+      leaf.good = true;
+      leaf.squash = 1;
+      if (S.paint) S.paint(S.got);
+      FX.burst(pt, { count: 12 });
+      FX.floatText(pt, '✓');
+      FX.play('good');
+      S.jump = { from: { x: leaf.x, y: leaf.y }, leaf: S.home, t: 0, back: true };
+      return;
+    }
     if (leaf.ok) {
+      if (S.paint) S.paint(S.got);
       FX.burst(pt, { count: 26 });
       FX.floatText(pt, S.missed ? '✓' : '+١');
       FX.play('ok');
@@ -286,7 +300,8 @@ Play.register({
       Play.board.appendChild(POND.wrap);
       POND.size();
     }
-    Play.board.insertBefore(Play.head(q.q), POND.wrap);
+    POND.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
+    Play.board.insertBefore(POND.paint.el, POND.wrap);
     POND.setQuestion(q);
   },
 });
