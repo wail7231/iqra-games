@@ -203,15 +203,8 @@ function pondScene() {
     ctx.beginPath(); ctx.ellipse(x + lift * 12, y + lift * 16, 14, 9, 0, 0, 7); ctx.fill();
     ctx.save();
     ctx.translate(x, y);
-    if (th.glow) { ctx.shadowColor = th.token; ctx.shadowBlur = 20; }
-    const g = ctx.createRadialGradient(-r * .35, -r * .35, r * .1, 0, 0, r);
-    g.addColorStop(0, '#FFFFFF');
-    g.addColorStop(.35, th.token);
-    g.addColorStop(1, th.tokenEdge);
-    ctx.fillStyle = th.sketch ? th.token : g;
-    ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = th.tokenEdge; ctx.lineWidth = 2; ctx.stroke();
+    /* شكل القطعة يتبع قالب الشكل */
+    drawEmblem(ctx, th.kind || ({ ocean: 'pearl', autumn: 'acorn' })[Play.cfg.theme] || THEME_EMBLEM[Play.cfg.theme] || 'star', r, lift * 3);
     ctx.restore();
   }
 

@@ -210,6 +210,8 @@ Play.register({
       ctx.lineWidth = 5;
       ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(0, 26); ctx.lineTo(-18, H - bow.y - 30); ctx.moveTo(0, 26); ctx.lineTo(18, H - bow.y - 30); ctx.stroke();
+      /* شارة القوس تتبع قالب الشكل */
+      ctx.save(); ctx.translate(0, 30); drawEmblem(ctx, THEME_EMBLEM[Play.cfg.theme] || 'star', 11, clock * .8); ctx.restore();
       ctx.rotate(a);
       /* القوس: قوسان من الخشب ووتر يُشد للخلف */
       if (th.glow) { ctx.shadowColor = th.edge; ctx.shadowBlur = 12; }

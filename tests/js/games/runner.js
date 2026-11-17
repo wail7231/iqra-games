@@ -173,19 +173,8 @@ function runnerScene() {
     /* ظل على الأرض */
     ctx.fillStyle = 'rgba(0,0,0,.18)';
     ctx.beginPath(); ctx.ellipse(0, S.gy - by + 2, r * Math.max(.4, 1 - (S.gy - by - r) / 200), 4, 0, 0, 7); ctx.fill();
-    if (th.glow) { ctx.shadowColor = th.ball; ctx.shadowBlur = 22; }
-    ctx.fillStyle = th.ball;
-    ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = th.ballLine;
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-    /* نقش يدور مع التدحرج: نجمة ثمانية */
-    ctx.rotate(-S.dist / r);
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4; ctx.moveTo(Math.cos(a) * r * .75, Math.sin(a) * r * .75); ctx.lineTo(-Math.cos(a) * r * .75, -Math.sin(a) * r * .75); }
-    ctx.stroke();
+    /* شكل الكرة يتبع قالب الشكل، ونقشها يدور مع التدحرج */
+    drawEmblem(ctx, th.kind || THEME_EMBLEM[Play.cfg.theme] || 'star', r, -S.dist / r);
     ctx.restore();
   }
 
