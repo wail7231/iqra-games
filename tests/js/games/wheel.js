@@ -102,7 +102,9 @@ Play.register({
         const opts = mixAnswers(chosen);
         const need = needAll(chosen) ? answersOf(chosen).length : 1;
         let got = 0, missed = false;
-        if (need > 1) { const sub = el('div', 'round-sub'); q.after(sub); var paintSub = () => { sub.textContent = `✓ ${toAr(got)} من ${toAr(need)}`; }; }
+        const sub = el('div', 'round-sub');
+        const paintSub = () => { sub.textContent = need > 1 ? `✓ ${toAr(got)} من ${toAr(need)}` : ''; };
+        paintSub();
         const bs = opts.map((o, x) => {
           const b = el('button', 'quiz-opt', `<span class="qo-num">${toAr(x + 1)}</span><span class="qo-txt"></span><span class="qo-mark"></span>`);
           b.style.setProperty('--c', CHIP_COLORS[x % CHIP_COLORS.length]);
@@ -123,8 +125,7 @@ Play.register({
           grid.appendChild(b);
           return b;
         });
-        result.insertBefore(q, result.children[1] || null);
-        result.appendChild(grid);
+        result.append(q, sub, grid);
       } else {
         /* بلا سؤال: المعلم يسأل ويسجّل */
         const judge = el('div', 'wr-judge');
