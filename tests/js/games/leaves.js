@@ -13,6 +13,8 @@ const POND_THEMES = {
   ocean:    { water: '#1B8A9A', water2: '#0E6E80', ripple: 'rgba(255,255,255,.28)', leaf: '#F2DDB0', leafEdge: '#C9A96A', ink: '#3A2A12', shape: 'floe', kind: 'pearl' },
   space:    { water: '#120A2E', water2: '#24145A', ripple: 'rgba(180,140,255,.25)', leaf: '#6E6A86', leafEdge: '#B48CFF', ink: '#FFFFFF', shape: 'floe', glow: true, moon: true, kind: 'planet' },
   autumn:   { water: '#5E8C7A', water2: '#4C7A68', ripple: 'rgba(255,255,255,.22)', leaf: '#E8761E', leafEdge: '#8A5226', ink: '#FFFFFF', shape: 'pad', rim: '#B5793E', kind: 'acorn' },
+  summer:   { water: '#2BB3C0', water2: '#1E9AAE', ripple: 'rgba(255,255,255,.35)', leaf: '#FFFFFF', leafEdge: '#E8590C', ink: '#4A2A0A', shape: 'ring', kind: 'sun' },
+  winter:   { water: '#2C4A7A', water2: '#3B5BA9', ripple: 'rgba(255,255,255,.18)', leaf: '#FFFFFF', leafEdge: '#9FB3D1', ink: '#1E2A44', shape: 'floe', kind: 'snowball', snowy: true },
 };
 let POND = null;
 
@@ -156,7 +158,18 @@ function pondScene() {
     ctx.strokeStyle = th.leafEdge;
     ctx.lineWidth = th.sketch ? 2.5 : 3;
     ctx.beginPath();
-    if (th.shape === 'floe') {
+    if (th.shape === 'ring') {
+      /* عوّامة صيفية: حلقة بخطوط ملوّنة وفتحة يظهر منها الماء */
+      ctx.arc(0, 0, l.r, 0, 7);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      if (!l.good && !l.sink) {
+        ctx.fillStyle = '#E8590C';
+        for (let k = 0; k < 4; k++) { const a = l.rot + k * Math.PI / 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, l.r, a, a + .7); ctx.closePath(); ctx.fill(); }
+      }
+      ctx.fillStyle = th.water; ctx.beginPath(); ctx.arc(0, 0, l.r * .42, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, l.r, 0, 7);
+    } else if (th.shape === 'floe') {
       for (let k = 0; k < 9; k++) { const a = k / 9 * 6.283 + l.rot, rr = l.r * (.86 + ((k * 37) % 10) / 70); ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr * .88); }
       ctx.closePath();
     } else {
@@ -176,6 +189,7 @@ function pondScene() {
     }
     /* لمعة خفيفة */
     if (!th.sketch) { ctx.fillStyle = 'rgba(255,255,255,.13)'; ctx.beginPath(); ctx.ellipse(-l.r * .3, -l.r * .38, l.r * .38, l.r * .16, -.5, 0, 7); ctx.fill(); }
+    if (th.snowy && !l.sink) { ctx.fillStyle = 'rgba(159,179,209,.45)'; [[.5, .3, .1], [-.55, .2, .08], [.2, -.6, .07]].forEach(([x, y, s]) => { ctx.beginPath(); ctx.arc(x * l.r, y * l.r, s * l.r, 0, 7); ctx.fill(); }); }
     if (th.flowers && !l.t) { ctx.fillStyle = '#F4A6C1'; for (let k = 0; k < 5; k++) { const a = k * 1.256; ctx.beginPath(); ctx.arc(Math.cos(a) * 8, Math.sin(a) * 8, 6, 0, 7); ctx.fill(); } }
     if (l.t) {
       const ink = l.good ? '#FFFFFF' : th.ink;

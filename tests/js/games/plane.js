@@ -21,6 +21,10 @@ const PLANE_THEMES = {
               body: '#EDE6FF', wing: '#E8761E', wing2: '#7A5AD0', glass: '#7FD3F7', trail: 'rgba(255,190,90,.8)', trailKind: 'jet', glow: true, stars: true },
   autumn:   { plane: 'balloon', cloud: '#FFF8EC', cloud2: '#F2D6AE', cloudEdge: '#D9A86C', shine: 'rgba(255,255,255,.85)', shade: 'rgba(120,60,10,.12)', ink: '#3D2412',
               body: '#C2621B', body2: '#E8761E', wing: '#D9A42B', wing2: '#8A5226', glass: '#FFF3C4', trail: 'rgba(232,118,30,.5)' },
+  summer:   { plane: 'kite', cloud: '#FFFFFF', cloud2: '#FFE7B8', cloudEdge: '#F6B26B', shine: 'rgba(255,255,255,.95)', shade: 'rgba(232,89,12,.1)', ink: '#4A2A0A',
+              body: '#E8590C', body2: '#F7B32B', wing: '#2BB3C0', wing2: '#1E9AAE', glass: '#FFF6E0', trail: 'rgba(255,255,255,.95)' },
+  winter:   { plane: 'heli', cloud: '#F4F7FB', cloud2: '#C9D6E8', cloudEdge: '#9FB3D1', shine: 'rgba(255,255,255,1)', shade: 'rgba(59,91,169,.12)', ink: '#1E2A44',
+              body: '#C0392B', body2: '#E05A4A', wing: '#3B5BA9', wing2: '#22386E', glass: '#DDEBFA', trail: '#FFFFFF', trailKind: 'sparkle', sparkle: true },
 };
 let SKY = null;
 
@@ -339,6 +343,42 @@ function skyScene() {
     ctx.fillStyle = th.wing2; ctx.beginPath(); ctx.roundRect(-8, 20, 16, 11, 2); ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-8, 24); ctx.lineTo(8, 24); ctx.moveTo(-8, 28); ctx.lineTo(8, 28); ctx.stroke();
+  };
+  PLANES.kite = th => {
+    /* طائرة ورقية بأربعة ألوان وذيل من الأشرطة */
+    ctx.rotate(-.5 + Math.sin(S.t * 2.4) * .08);
+    ctx.strokeStyle = 'rgba(74,42,10,.5)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, 32);
+    for (let k = 1; k <= 6; k++) ctx.lineTo(Math.sin(S.t * 5 + k) * 7, 32 + k * 9);
+    ctx.stroke();
+    [[2, 48], [4, 66]].forEach(([k, yy], i) => { const xx = Math.sin(S.t * 5 + k) * 7; ctx.fillStyle = i ? th.wing : th.body; ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx - 7, yy - 5); ctx.lineTo(xx - 7, yy + 5); ctx.closePath(); ctx.moveTo(xx, yy); ctx.lineTo(xx + 7, yy - 5); ctx.lineTo(xx + 7, yy + 5); ctx.closePath(); ctx.fill(); });
+    poly([[0, -34], [-24, -4], [0, 0]], th.body);
+    poly([[0, -34], [24, -4], [0, 0]], th.body2);
+    poly([[-24, -4], [0, 32], [0, 0]], th.wing);
+    poly([[24, -4], [0, 32], [0, 0]], th.glass);
+    poly([[0, -34], [24, -4], [0, 32], [-24, -4]], null, '#4A2A0A', 2);
+    ctx.strokeStyle = 'rgba(74,42,10,.45)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, -34); ctx.lineTo(0, 32); ctx.moveTo(-24, -4); ctx.lineTo(24, -4); ctx.stroke();
+  };
+  PLANES.heli = th => {
+    /* مروحية حمراء بشفرات تدور وزلّاجتين */
+    const sp = S.t * 40;
+    ctx.strokeStyle = '#5A6B88'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(-18, 13); ctx.lineTo(-20, 22); ctx.moveTo(10, 13); ctx.lineTo(12, 22); ctx.stroke();
+    ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-30, 22); ctx.lineTo(22, 22); ctx.quadraticCurveTo(28, 22, 28, 17); ctx.stroke();
+    poly([[14, -4], [48, -3], [48, 3], [14, 6]], th.body, 'rgba(0,0,0,.25)');
+    ctx.save(); ctx.translate(49, 0); ctx.scale(1, Math.abs(Math.cos(sp * .7))); ctx.fillStyle = 'rgba(90,107,136,.7)'; ctx.fillRect(-2, -12, 4, 24); ctx.restore();
+    ctx.fillStyle = th.wing; ctx.beginPath(); ctx.arc(49, 0, 3, 0, 7); ctx.fill();
+    ctx.fillStyle = bodyGrad(th.body2, th.body, 15);
+    ctx.beginPath(); ctx.ellipse(-6, 0, 26, 15, 0, 0, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = th.glass; ctx.beginPath(); ctx.ellipse(-18, -3, 11, 9, -.2, Math.PI * .9, Math.PI * 2.05); ctx.fill();
+    ctx.strokeStyle = th.wing; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-2, 2, 18, 3);
+    ctx.fillStyle = '#5A6B88'; ctx.fillRect(-8, -19, 6, 5);
+    const bl = 40 * Math.abs(Math.cos(sp));
+    ctx.fillStyle = 'rgba(59,91,169,.75)'; ctx.beginPath(); ctx.ellipse(-5, -20, bl + 6, 2.2, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(59,91,169,.2)'; ctx.beginPath(); ctx.ellipse(-5, -20, 46, 3, 0, 0, 7); ctx.fill();
   };
   function drawPlane(th) {
     const x = S.px, y = S.y, tilt = Math.max(-.35, Math.min(.35, (S.ty - S.y) / 120));

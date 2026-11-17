@@ -37,6 +37,8 @@ const THEMES = {
   ocean:   { name: 'بحر', floor: '#E3F6F8', wall: '#0E7C86', inner: '#9ED8DE', wallW: .16, player: 'bubble', playerColor: '#3FB0B8' },
   space:   { name: 'فضاء', floor: '#140C33', wall: '#B48CFF', glow: true, player: 'planet', playerColor: '#8E6CF0', dark: true },
   autumn:  { name: 'خريف', floor: '#FBF1E1', wall: '#8A5226', inner: '#E8B07A', wallW: .18, player: 'leaf', playerColor: '#E8761E' },
+  summer:  { name: 'صيف', floor: '#FFF6E0', wall: '#E8590C', inner: '#F9C784', wallW: .16, player: 'emblem', kind: 'sun', playerColor: '#F7B32B' },
+  winter:  { name: 'شتاء', floor: '#F4F7FB', wall: '#3B5BA9', inner: '#C9D6E8', wallW: .16, player: 'emblem', kind: 'snowball', playerColor: '#FFFFFF' },
 };
 
 let GAME, isDraft = false, CFG;
@@ -541,6 +543,9 @@ function drawPlayer(c, t, cx, cy, r, clock, dir) {
   const col = t.playerColor;
   c.lineJoin = 'round';
   switch (t.player) {
+    case 'emblem':
+      drawEmblem(c, t.kind, r * .92, clock * 2);
+      break;
     case 'plane':
       c.rotate([-Math.PI / 2, 0, Math.PI / 2, Math.PI][dir ?? 0] + Math.sin(clock * 5) * .06);
       c.strokeStyle = t.wall; c.lineWidth = Math.max(1.5, r * .11);
@@ -958,15 +963,16 @@ function paintThemePreviews() {
   $$('.theme-btn').forEach(btn => {
     const c = btn.querySelector('canvas');
     const t = themeColors(btn.dataset.v);
-    const r = window.devicePixelRatio || 1, W = 96, H = 72;
+    const r = window.devicePixelRatio || 1, W = 196, H = 140;
     c.width = W * r; c.height = H * r;
     const g = c.getContext('2d');
     g.scale(r, r);
     g.fillStyle = t.floor;
     g.fillRect(0, 0, W, H);
-    drawRuled(g, t, W, H, 9);
-    drawWalls(g, PREVIEW_OPEN, 3, 3, 30, 3, { ...t, wallW: (t.wallW || .1) * 1.1 });
-    drawPlayer(g, t, 3 + 1.5 * 30, 3 + 1.5 * 30, 10, 0, 1);
+    drawRuled(g, t, W, H, 12);
+    drawWalls(g, PREVIEW_OPEN, 3, 3, 44, 5, { ...t, wallW: (t.wallW || .1) * 1.1 });
+    drawWalls(g, PREVIEW_OPEN, 3, 3, 44, 136, { ...t, wallW: (t.wallW || .1) * 1.1 });
+    drawPlayer(g, t, 5 + 1.5 * 44, 5 + 1.5 * 44, 16, 0, 1);
   });
 }
 
@@ -1010,7 +1016,8 @@ function bindSettings() {
     const b = document.createElement('button');
     b.className = 'theme-btn';
     b.dataset.v = id;
-    b.innerHTML = `<canvas></canvas><span>${t.name}</span>`;
+    b.innerHTML = `<span class="tp-frame maze-tp-frame"><span class="maze-tp"><canvas></canvas></span></span><span>${t.name}</span>`;
+    FX.themeLayer(b.querySelector('.maze-tp'), id, { overlay: true });
     b.addEventListener('click', () => {
       CFG.theme = id;
       markDirty();

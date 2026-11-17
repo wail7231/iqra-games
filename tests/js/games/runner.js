@@ -14,6 +14,8 @@ const RUN_THEMES = {
   ocean:    { far: '#8FD3D9', far2: '#2E8C6A', ground: '#E7D3A2', groundTop: '#CDB27A', plat: '#0E7C86', platEdge: '#085A62', ink: '#FFFFFF', deco: 'seaweed' },
   space:    { far: '#2A1D5E', far2: '#3A2A7A', ground: '#1E1446', groundTop: '#B48CFF', plat: '#22164A', platEdge: '#B48CFF', ink: '#F1EAFF', deco: 'planets', glow: true },
   autumn:   { far: '#EBC9A0', far2: '#D9A86C', ground: '#B5793E', groundTop: '#8A5226', plat: '#C98A3E', platEdge: '#7A4A1C', ink: '#FFFFFF', deco: 'autumn' },
+  summer:   { far: '#BFE9F7', far2: '#2E8B57', ground: '#F2D49B', groundTop: '#2BB3C0', plat: '#E8590C', platEdge: '#B8430A', ink: '#FFFFFF', deco: 'palms' },
+  winter:   { far: '#DCE7F3', far2: '#2F5D50', ground: '#FFFFFF', groundTop: '#C9D6E8', plat: '#3B5BA9', platEdge: '#22386E', ink: '#FFFFFF', deco: 'pines' },
 };
 let RUN = null;
 
@@ -158,6 +160,29 @@ function runnerScene() {
         }
         ctx.fillStyle = 'rgba(0,0,0,.25)';
         ctx.beginPath(); ctx.ellipse(x + 40, S.gy - 22, 18, 5, 0, 0, 7); ctx.fill();
+      } else if (th.deco === 'palms') {
+        /* نخلة تميل مع النسيم ومظلّة شاطئ */
+        const sw = Math.sin(performance.now() / 900 + k) * 4;
+        ctx.strokeStyle = '#A0703A'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x, S.gy); ctx.quadraticCurveTo(x + 14, S.gy - 50, x + 6 + sw, S.gy - 96); ctx.stroke();
+        ctx.fillStyle = th.far2;
+        for (let j = 0; j < 6; j++) { const a = -Math.PI / 2 + (j - 2.5) * .55; ctx.beginPath(); ctx.ellipse(x + 6 + sw + Math.cos(a) * 22, S.gy - 96 + Math.sin(a) * 12 + 8, 26, 7, a, 0, 7); ctx.fill(); }
+        ctx.fillStyle = '#8A5A30'; ctx.beginPath(); ctx.arc(x + 4 + sw, S.gy - 90, 5, 0, 7); ctx.arc(x + 12 + sw, S.gy - 92, 5, 0, 7); ctx.fill();
+        if (k % 2) {
+          ctx.strokeStyle = '#6B4A2E'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + 90, S.gy); ctx.lineTo(x + 84, S.gy - 52); ctx.stroke();
+          ['#E8590C', '#FFFFFF', '#2BB3C0', '#FFFFFF'].forEach((col, j) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x + 84, S.gy - 66); ctx.arc(x + 84, S.gy - 52, 32, Math.PI + j * Math.PI / 4, Math.PI + (j + 1) * Math.PI / 4); ctx.closePath(); ctx.fill(); });
+        }
+      } else if (th.deco === 'pines') {
+        /* صنوبر بثلج على أطرافه */
+        [[0, 1], [34, .75]].forEach(([dx, s]) => {
+          const px = x + dx, h = 90 * s;
+          ctx.fillStyle = '#6B4A2E'; ctx.fillRect(px - 4 * s, S.gy - 14 * s, 8 * s, 14 * s);
+          for (let j = 0; j < 3; j++) {
+            const ty = S.gy - 14 * s - j * h * .26, w = (34 - j * 8) * s;
+            ctx.fillStyle = th.far2; ctx.beginPath(); ctx.moveTo(px - w, ty); ctx.lineTo(px, ty - h * .42); ctx.lineTo(px + w, ty); ctx.fill();
+            ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(px - w * .45, ty - h * .24); ctx.lineTo(px, ty - h * .42); ctx.lineTo(px + w * .45, ty - h * .24); ctx.quadraticCurveTo(px, ty - h * .3, px - w * .45, ty - h * .24); ctx.fill();
+          }
+        });
       } else if (th.deco === 'autumn') {
         ctx.fillStyle = '#6B4320'; ctx.fillRect(x - 4, S.gy - 40, 8, 40);
         ctx.fillStyle = k % 2 ? '#E8761E' : '#C2621B';
@@ -188,6 +213,7 @@ function runnerScene() {
     ctx.shadowBlur = 0;
     if (th.deco === 'autumn' && !good && p.state !== 'bad') { ctx.fillStyle = '#E8761E'; ctx.beginPath(); ctx.roundRect(p.x - 2, p.top - 4, p.w + 4, 9, 5); ctx.fill(); }
     if (th.deco === 'trees' && !good && p.state !== 'bad') { ctx.fillStyle = '#5FA052'; ctx.beginPath(); ctx.roundRect(p.x - 2, p.top - 4, p.w + 4, 10, 5); ctx.fill(); }
+    if (th.deco === 'pines' && !good && p.state !== 'bad') { ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.roundRect(p.x - 2, p.top - 5, p.w + 4, 10, 5); ctx.fill(); }
     if (th.deco === 'mountains' && !good) { ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.roundRect(p.x + 4, p.top - 3, p.w - 8, 7, 4); ctx.fill(); }
     if (th.sketch) { ctx.strokeStyle = 'rgba(43,76,126,.35)'; ctx.lineWidth = 1; for (let k = 10; k < p.w; k += 10) { ctx.beginPath(); ctx.moveTo(p.x + k, p.top + h); ctx.lineTo(p.x + k - 8, p.top + 2); ctx.stroke(); } }
     ctx.fillStyle = good || p.state === 'bad' ? '#FFFFFF' : th.ink;

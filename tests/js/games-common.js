@@ -77,7 +77,7 @@ function needHead(text, need) {
 /* ================= شكل اللاعب حسب قالب الشكل (مشترك بين الكرة القافزة وقطعة الضفدع والقوس) =================
    أشكال بلا أرواح: نجمة، قمر، زهرة، ندفة ثلج، رسم بالقلم، فقاعة، كوكب، يقطينة، لؤلؤة، بلّوطة.
    rot يدير النقش (للتدحرج)، والأجزاء الثابتة (حلقة الكوكب، العنق) لا تدور. */
-const THEME_EMBLEM = { classic: 'star', night: 'moon', garden: 'flower', ice: 'snow', notebook: 'sketch', ocean: 'bubble', space: 'planet', autumn: 'pumpkin' };
+const THEME_EMBLEM = { classic: 'star', night: 'moon', garden: 'flower', ice: 'snow', notebook: 'sketch', ocean: 'bubble', space: 'planet', autumn: 'pumpkin', summer: 'sun', winter: 'snowball' };
 function drawEmblem(c, kind, r, rot = 0, t = 0) {
   c.save();
   c.lineJoin = 'round';
@@ -188,6 +188,39 @@ function drawEmblem(c, kind, r, rot = 0, t = 0) {
       c.beginPath(); c.ellipse(0, -r * .35, r * .88, r * .42, 0, Math.PI, 0); c.lineTo(r * .88, -r * .3); c.quadraticCurveTo(0, -r * .1, -r * .88, -r * .3); c.fill();
       c.fillRect(-r * .07, -r * 1.05, r * .14, r * .3);
       shine(.3);
+      break;
+    }
+    case 'sun': {
+      /* شمس صيفية: أشعة مثلثة تدور حول قرص دافئ */
+      c.save();
+      c.rotate(rot * .5);
+      c.fillStyle = '#F7A21B';
+      for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; c.beginPath(); c.moveTo(Math.cos(a - .16) * r * .78, Math.sin(a - .16) * r * .78); c.lineTo(Math.cos(a) * r * 1.22, Math.sin(a) * r * 1.22); c.lineTo(Math.cos(a + .16) * r * .78, Math.sin(a + .16) * r * .78); c.fill(); }
+      c.restore();
+      c.shadowColor = 'rgba(247,179,43,.8)'; c.shadowBlur = r * .6;
+      const g = c.createRadialGradient(-r * .25, -r * .3, r * .1, 0, 0, r * .85);
+      g.addColorStop(0, '#FFF6C9'); g.addColorStop(.55, '#FFD24A'); g.addColorStop(1, '#F7A21B');
+      c.beginPath(); c.arc(0, 0, r * .82, 0, 7); c.fillStyle = g; c.fill();
+      c.shadowBlur = 0;
+      c.strokeStyle = '#E8590C'; c.lineWidth = r * .08; c.stroke();
+      shine(.45);
+      break;
+    }
+    case 'snowball': {
+      /* كرة ثلج: حافة متموجة وظل أزرق ولمعات */
+      const g = c.createRadialGradient(-r * .3, -r * .35, r * .1, 0, 0, r);
+      g.addColorStop(0, '#FFFFFF'); g.addColorStop(.7, '#EEF3FA'); g.addColorStop(1, '#B9CBE4');
+      c.beginPath();
+      for (let i = 0; i <= 28; i++) { const a = i / 28 * 6.283, rr = r * (1 + Math.sin(i * 5 + 1) * .035); c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+      c.fillStyle = g; c.fill();
+      c.strokeStyle = '#9FB3D1'; c.lineWidth = r * .07; c.stroke();
+      c.rotate(rot);
+      c.fillStyle = 'rgba(159,179,209,.55)';
+      [[.35, .2, .12], [-.3, .4, .09], [.1, -.45, .08], [-.45, -.1, .07], [.5, -.3, .06]].forEach(([x, y, s]) => { c.beginPath(); c.arc(x * r, y * r, s * r, 0, 7); c.fill(); });
+      c.rotate(-rot);
+      c.fillStyle = '#FFFFFF';
+      const sp = (x, y, s) => { c.beginPath(); c.moveTo(x, y - s); c.quadraticCurveTo(x, y, x + s, y); c.quadraticCurveTo(x, y, x, y + s); c.quadraticCurveTo(x, y, x - s, y); c.quadraticCurveTo(x, y, x, y - s); c.fill(); };
+      sp(-r * .38, -r * .42, r * .22); sp(r * .3, -r * .62, r * .12);
       break;
     }
     default: { // star — نجمة ذهبية بنقش ثماني يدور

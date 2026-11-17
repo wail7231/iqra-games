@@ -111,6 +111,13 @@ const FX = (() => {
   const CLOUD = c => `<svg viewBox="0 0 120 50"><path d="M20 44a16 16 0 0 1 4-31 22 22 0 0 1 40-6 18 18 0 0 1 34 10 14 14 0 0 1 2 27z" fill="${c}"/></svg>`;
   const SUN = '<svg viewBox="0 0 100 100"><g stroke="#F7C948" stroke-width="5" stroke-linecap="round">' + [...Array(12)].map((_, i) => `<path d="M50 8v12" transform="rotate(${i * 30} 50 50)"/>`).join('') + '</g><circle cx="50" cy="50" r="22" fill="#F7C948"/><circle cx="50" cy="50" r="22" fill="none" stroke="#F2A516" stroke-width="3"/></svg>';
   const ICICLES = '<svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 0h400v6l-8 0-4 24-4-24h-14l-3 14-3-14h-20l-5 30-5-30h-16l-3 12-3-12h-22l-4 22-4-22h-18l-3 16-3-16h-24l-5 28-5-28h-14l-3 12-3-12h-22l-4 20-4-20h-18l-3 14-3-14h-20l-5 26-5-26h-16l-3 10-3-10h-22l-4 22-4-22H40l-3 14-3-14H14l-4 18-4-18H0z" fill="#E8F7FF"/></svg>';
+  const PALM = '<svg viewBox="0 0 80 120"><path d="M40 120c2-30 10-60 4-88" fill="none" stroke="#A0703A" stroke-width="7" stroke-linecap="round"/><path d="M40 120c2-30 10-60 4-88" fill="none" stroke="#C89458" stroke-width="2" stroke-dasharray="4 7"/><g fill="#2E8B57"><path d="M44 32C30 18 12 20 2 30c14-4 28-2 42 2z"/><path d="M44 32C58 16 74 20 80 30 68 26 56 28 44 32z"/><path d="M44 32C40 14 30 4 16 2c12 8 22 18 28 30z"/><path d="M44 32C50 14 62 6 74 6 62 14 52 22 44 32z"/><path d="M44 32C34 36 24 48 22 60c6-12 14-22 22-28z"/><path d="M44 32c10 6 18 16 20 28-6-10-12-20-20-28z"/></g><circle cx="40" cy="34" r="4" fill="#8A5A30"/><circle cx="47" cy="35" r="4" fill="#8A5A30"/></svg>';
+  const UMBRELLA = '<svg viewBox="0 0 80 80"><path d="M40 20l6 60" stroke="#6B4A2E" stroke-width="3"/><path d="M6 32a36 22 0 0 1 70-12z" fill="#E8590C"/><path d="M22 28a20 22 0 0 1 36-9z" fill="#FFFFFF"/><path d="M36 26a6 20 0 0 1 10-7z" fill="#2BB3C0"/></svg>';
+  const BALL = '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#FFFFFF" stroke="#B8430A" stroke-width="1.5"/><path d="M20 2a18 18 0 0 1 15 8L20 20z" fill="#E8590C"/><path d="M38 24a18 18 0 0 1-10 13L20 20z" fill="#2BB3C0"/><path d="M12 36A18 18 0 0 1 2 22l18-2z" fill="#F7B32B"/></svg>';
+  const SEA = '<svg viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0 14 Q25 4 50 14 T100 14 T150 14 T200 14 T250 14 T300 14 T350 14 T400 14 V60 H0Z" fill="#5FC9D6"/><path d="M0 24 Q25 16 50 24 T100 24 T150 24 T200 24 T250 24 T300 24 T350 24 T400 24 V60 H0Z" fill="#2BB3C0"/><path d="M0 44 Q50 36 100 44 T200 44 T300 44 T400 44 V60 H0Z" fill="#F2D49B"/></svg>';
+  const PINE = '<svg viewBox="0 0 60 100" preserveAspectRatio="none"><rect x="26" y="84" width="8" height="16" fill="#6B4A2E"/><path d="M30 2 6 40h10L2 64h12L0 88h60L46 64h12L44 40h10z" fill="#2F5D50"/><path d="M30 2 20 18q10-4 20 0zM16 40h28l-5-8q-9 4-18 0zM14 64h32l-5-8q-11 4-22 0zM2 88h56l-6-8q-22 5-44 0z" fill="#FFFFFF"/></svg>';
+  const HILLS = '<svg viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0 30 Q60 6 130 26 T260 22 T400 28 V60 H0Z" fill="#E3EAF3"/><path d="M0 44 Q80 24 170 40 T320 36 T400 42 V60 H0Z" fill="#FFFFFF"/></svg>';
+  const CABIN = '<svg viewBox="0 0 90 80"><rect x="60" y="8" width="10" height="22" fill="#7A4A2A"/><path d="M58 8h14" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><path d="M4 40 45 10l41 30z" fill="#FFFFFF" stroke="#C9D6E8" stroke-width="2" stroke-linejoin="round"/><path d="M12 40h66v38H12z" fill="#A0603A"/><path d="M12 48h66M12 57h66M12 66h66" stroke="#7A4A2A" stroke-width="1.5"/><rect x="20" y="48" width="18" height="14" fill="#FFD24A" stroke="#7A4A2A" stroke-width="2.5"/><path d="M29 48v14M20 55h18" stroke="#7A4A2A" stroke-width="1.5"/><rect x="50" y="54" width="14" height="24" fill="#6B3F22"/><circle cx="60" cy="66" r="1.5" fill="#FFD24A"/><path d="M8 78h74" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/></svg>';
   const CLIP = '<svg viewBox="0 0 30 70"><path d="M10 60V14a7 7 0 0 1 14 0v40a4 4 0 0 1-8 0V18" fill="none" stroke="#8A97AB" stroke-width="3" stroke-linecap="round"/></svg>';
 
   function themeLayer(host, theme, { overlay = false } = {}) {
@@ -173,6 +180,28 @@ const FX = (() => {
         add('fx-nebula', { top: '-10%', right: '-10%' });
         add('fx-planet', { top: '18px', left: '20px', '--sz': '90px' }, PLANET('#8E6CF0', '#C9B4FF', '#F6E7A8'));
         add('fx-planet', { bottom: '22px', right: '30px', '--sz': '54px', 'animation-delay': '-3s' }, PLANET('#E8761E', '#F7C948', '#FFE6C4'));
+      }
+    } else if (theme === 'summer') {
+      for (let i = 0; i < (overlay ? 8 : 14); i++) add('fx-glint', { left: rnd(0, 100) + '%', top: (overlay ? rnd(0, 100) : rnd(82, 96)) + '%', 'animation-delay': -rnd(0, 3) + 's', 'animation-duration': rnd(1.4, 2.8) + 's' });
+      if (!overlay) {
+        add('fx-sun big', {}, SUN);
+        add('fx-cloud c1', { 'animation-delay': -rnd(0, 40) + 's' }, CLOUD('rgba(255,255,255,.95)'));
+        add('fx-cloud c2', { 'animation-delay': -rnd(0, 40) + 's' }, CLOUD('rgba(255,255,255,.8)'));
+        add('fx-sea', {}, SEA);
+        add('fx-palm p1', {}, PALM);
+        add('fx-palm p2', {}, PALM);
+        add('fx-umbrella', {}, UMBRELLA);
+        add('fx-ball', {}, BALL);
+      }
+    } else if (theme === 'winter') {
+      for (let i = 0; i < (overlay ? 22 : 42); i++) add('fx-snow', { left: rnd(0, 100) + '%', '--sz': rnd(3, 8) + 'px', 'animation-delay': -rnd(0, 12) + 's', 'animation-duration': rnd(6, 13) + 's', '--sway': rnd(-40, 40) + 'px' });
+      if (!overlay) {
+        add('fx-cloud c1 gray', { 'animation-delay': -rnd(0, 40) + 's' }, CLOUD('rgba(201,214,232,.9)'));
+        add('fx-cloud c2 gray', { 'animation-delay': -rnd(0, 40) + 's' }, CLOUD('rgba(201,214,232,.7)'));
+        add('fx-hills', {}, HILLS);
+        [[2, 70], [9, 52], [80, 64], [90, 82], [70, 44]].forEach(([l, h]) => add('fx-pine', { left: l + '%', '--h': h + 'px' }, PINE));
+        add('fx-cabin', {}, CABIN);
+        for (let i = 0; i < 3; i++) add('fx-smoke', { 'animation-delay': i * 1.4 + 's' });
       }
     } else if (theme === 'autumn') {
       const cols = ['#E8761E', '#C2621B', '#D9A42B', '#A8432A', '#E0A458'];

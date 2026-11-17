@@ -12,7 +12,7 @@
 
 const PARAMS = new URLSearchParams(location.search);
 const STUDENT = PARAMS.has('student') || (location.protocol.startsWith('http') && !['localhost', '127.0.0.1'].includes(location.hostname));
-const THEME_LIST = [['classic', 'كلاسيكي'], ['night', 'ليل'], ['garden', 'حديقة'], ['ice', 'جليد'], ['notebook', 'دفتر'], ['ocean', 'بحر'], ['space', 'فضاء'], ['autumn', 'خريف']];
+const THEME_LIST = [['classic', 'كلاسيكي'], ['night', 'ليل'], ['garden', 'حديقة'], ['ice', 'جليد'], ['notebook', 'دفتر'], ['ocean', 'بحر'], ['space', 'فضاء'], ['autumn', 'خريف'], ['summer', 'صيف'], ['winter', 'شتاء']];
 const COMMON_SETTINGS = {
   timer: { key: 'timer', label: 'المؤقت', note: 'لكامل اللعبة', options: [[0, 'بلا'], [1, '١ د'], [2, '٢ د'], [3, '٣ د'], [5, '٥ د']], def: 0 },
   lives: { key: 'lives', label: 'القلوب', options: [[1, '١'], [3, '٣'], [5, '٥'], [0, '∞']], def: 3 },
@@ -286,12 +286,33 @@ function changed(restart) {
   if (restart) Play.restart();
 }
 
+/* معاينة القالب: لوحة حقيقية مصغّرة بزينتها المتحركة، وبطاقات إجابة، وشكل اللاعب */
+function themePreview(frame, id) {
+  const bd = document.createElement('div');
+  bd.className = 'board tp-board';
+  bd.dataset.theme = id;
+  bd.innerHTML = '<i class="tp-num"></i><i class="tp-q"></i><div class="tp-cards"><span></span><span class="on"></span><span></span><span></span></div>';
+  frame.appendChild(bd);
+  FX.themeLayer(bd, id);
+  const cv = document.createElement('canvas');
+  cv.className = 'tp-emblem';
+  cv.width = cv.height = 192;
+  const g = cv.getContext('2d');
+  g.translate(96, 96);
+  drawEmblem(g, THEME_EMBLEM[id] || 'star', 64, .4);
+  bd.appendChild(cv);
+  const fit = () => { if (frame.clientWidth) bd.style.setProperty('--k', frame.clientWidth / 588); };
+  fit();
+  new ResizeObserver(fit).observe(frame);
+}
+
 function bindSettings() {
   const grid = $('#themeGrid');
   for (const [id, name] of THEME_LIST) {
     const b = document.createElement('button');
     b.className = 'theme-btn' + (id === Play.cfg.theme ? ' on' : '');
-    b.innerHTML = `<span class="theme-prev" data-theme="${id}"><i></i><i></i><i></i></span><span>${name}</span>`;
+    b.innerHTML = `<span class="tp-frame"></span><span>${name}</span>`;
+    themePreview(b.firstChild, id);
     b.addEventListener('click', () => {
       Play.cfg.theme = id;
       applyTheme();

@@ -986,6 +986,14 @@ a { color: inherit; text-decoration: none; }
   --b-bg: #FBF1E1; --b-ink: #3D2412; --b-muted: #7A5638; --b-card: #FFFAF2; --b-line: #EBCFA8; --b-accent: #C2621B; --b-dead: #E5D3BB; --b-dead-ink: #7A6650;
   background: linear-gradient(180deg, #FCE6C8 0%, #FBF1E1 50%, #F2DBBA 100%);
 }
+.board[data-theme="summer"] {
+  --b-bg: #FFF6E0; --b-ink: #4A2A0A; --b-muted: #8A6534; --b-card: #FFFFFF; --b-line: #F6D58E; --b-accent: #E8590C; --b-dead: #F0DFC0; --b-dead-ink: #7A6650;
+  background: linear-gradient(180deg, #9EDCF5 0%, #D6F1FB 30%, #FFF6E0 62%, #FCE6B4 100%);
+}
+.board[data-theme="winter"] {
+  --b-bg: #EEF3F8; --b-ink: #1E2A44; --b-muted: #55657F; --b-card: #FFFFFF; --b-line: #C9D6E8; --b-accent: #3B5BA9; --b-dead: #D8E0EA; --b-dead-ink: #5B6B84;
+  background: linear-gradient(180deg, #B9C9DF 0%, #DCE5F0 40%, #F4F7FB 100%);
+}
 .board[data-theme="notebook"] {
   --b-bg: #FDFBF3; --b-ink: #1F2F4D; --b-muted: #5A6B88; --b-card: #FFFFFF; --b-line: #BFD3EA; --b-accent: #2B4C7E; --b-dead: #DCE3EC; --b-dead-ink: #5A6B88;
   background: repeating-linear-gradient(#FDFBF3 0 27px, #D6E3F2 27px 28px);
@@ -1020,6 +1028,8 @@ a { color: inherit; text-decoration: none; }
 .theme-prev[data-theme="ocean"] { --b-bg: #D4F1F4; --b-card: #FFFFFF; --b-accent: #0E7C86; background: linear-gradient(180deg, #D4F1F4, #A9DCE3); }
 .theme-prev[data-theme="space"] { --b-bg: #1A0F40; --b-card: #22164A; --b-accent: #B48CFF; background: radial-gradient(circle at 25% 20%, #3A2380, #0E0826 70%); }
 .theme-prev[data-theme="autumn"] { --b-bg: #FCE6C8; --b-card: #FFFAF2; --b-accent: #C2621B; }
+.theme-prev[data-theme="summer"] { --b-bg: #FFF6E0; --b-card: #FFFFFF; --b-accent: #E8590C; }
+.theme-prev[data-theme="winter"] { --b-bg: #EEF3F8; --b-card: #FFFFFF; --b-accent: #3B5BA9; }
 .theme-prev[data-theme="notebook"] { --b-bg: #FDFBF3; --b-card: #FFFFFF; --b-accent: #2B4C7E; background: repeating-linear-gradient(#FDFBF3 0 8px, #D6E3F2 8px 9px); }
 
 /* ---------- اختيار من متعدد ---------- */
@@ -1820,3 +1830,41 @@ a { color: inherit; text-decoration: none; }
 .board[data-theme="space"] .pl-flower ellipse { fill: #F6E7A8; filter: drop-shadow(0 0 5px #F6E7A8); }
 .board[data-theme="space"] .pl-leaf { fill: #3FA34D; } .board[data-theme="space"] .pl-fruit { fill: #B48CFF; filter: drop-shadow(0 0 5px #B48CFF); }
 .board[data-theme="space"] .wheel-holder { filter: drop-shadow(0 0 18px rgba(180, 140, 255, .45)); }
+
+/* صيف: شمس كبيرة، بحر ورمل، نخيل ومظلّة ولمعات على الماء */
+.fx-sun.big { top: -14px; left: -10px; width: 120px; height: 120px; filter: drop-shadow(0 0 22px rgba(247, 179, 43, .7)); }
+.fx-sea { left: 0; right: 0; bottom: -2px; height: 70px; animation: waveMove 5s ease-in-out infinite alternate; }
+.fx-palm { bottom: 10px; width: 80px; height: 130px; transform-origin: bottom center; animation: sway 4s ease-in-out infinite alternate; }
+.fx-palm.p1 { left: -6px; } .fx-palm.p2 { right: -4px; height: 104px; width: 64px; animation-delay: -2s; transform: scaleX(-1); }
+.fx-umbrella { bottom: 8px; right: 62px; width: 62px; height: 62px; }
+.fx-ball { bottom: 6px; left: 84px; width: 26px; height: 26px; animation: ballHop 1.6s ease-in-out infinite; }
+@keyframes ballHop { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-16px) rotate(180deg); } }
+.fx-glint { width: 10px; height: 10px; background: #FFFFFF; clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); animation: twinkle ease-in-out infinite alternate; }
+/* شتاء: ثلج ناعم، تلال بيضاء، صنوبر مثلج، وكوخ بنافذة مضيئة ودخان */
+.fx-snow { top: -12px; width: var(--sz); height: var(--sz); border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 4px rgba(59, 91, 169, .35); animation: fall linear infinite; }
+.fx-hills { left: 0; right: 0; bottom: -2px; height: 60px; }
+.fx-pine { bottom: 14px; width: calc(var(--h) * .6); height: var(--h); }
+.fx-cabin { bottom: 10px; right: 22%; width: 86px; height: 76px; }
+.fx-cabin svg rect[fill="#FFD24A"] { filter: drop-shadow(0 0 6px rgba(255, 210, 74, .9)); }
+.fx-smoke { bottom: 82px; right: calc(22% + 14px); width: 14px; height: 14px; border-radius: 50%; background: rgba(255, 255, 255, .8); opacity: 0; animation: smoke 4.2s ease-out infinite; }
+@keyframes smoke { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 15% { opacity: .9; } 100% { transform: translate(-30px, -70px) scale(2.2); opacity: 0; } }
+
+/* قوالب الشكل: بطاقات كبيرة فيها لوحة مصغّرة حيّة من القالب نفسه، وما زاد يُسحب يمينًا ويسارًا */
+.theme-grid > .theme-btn { flex: 0 0 210px; }
+.theme-btn { font-size: 14px; gap: 7px; padding: 6px 6px 8px; }
+.theme-btn canvas { aspect-ratio: 7 / 5; }
+.tp-frame { position: relative; width: 100%; aspect-ratio: 7 / 5; border-radius: 9px; overflow: hidden; display: block; pointer-events: none; }
+.tp-frame .board.tp-board {
+  position: absolute; top: 0; left: 0; width: 588px; height: 420px; min-height: 0; padding: 26px 30px; border-radius: 0; box-shadow: none; border: 0;
+  transform-origin: top left; transform: scale(var(--k, .335)); gap: 16px; justify-content: center;
+}
+.tp-board .tp-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 74%; margin: 0 auto; }
+.tp-board .tp-cards span { height: 50px; border-radius: 14px; background: var(--b-card); border: 2.5px solid var(--b-line); box-shadow: 0 3px 8px rgba(0, 0, 0, .08); }
+.tp-board .tp-cards span.on { background: var(--b-accent); border-color: var(--b-accent); }
+.tp-board .tp-q { align-self: center; width: 52%; height: 22px; border-radius: 99px; background: color-mix(in srgb, var(--b-ink) 75%, transparent); }
+.tp-board .tp-num { align-self: center; width: 70px; height: 20px; border-radius: 99px; background: color-mix(in srgb, var(--b-ink) 12%, transparent); }
+.tp-board canvas.tp-emblem { position: absolute; z-index: 2; bottom: 34px; left: 50%; width: 96px; height: 96px; margin-left: -48px; aspect-ratio: auto; border-radius: 0; animation: tpHop 1.8s ease-in-out infinite; }
+@keyframes tpHop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+.theme-btn:not(.on):not(:hover) .tp-frame * { animation-play-state: paused !important; }
+.maze-tp { position: absolute; inset: 0; }
+.maze-tp canvas { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; }
