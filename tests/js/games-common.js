@@ -74,6 +74,136 @@ function needHead(text, need) {
   return paint;
 }
 
+/* ================= شكل اللاعب حسب قالب الشكل (مشترك بين الكرة القافزة وقطعة الضفدع والقوس) =================
+   أشكال بلا أرواح: نجمة، قمر، زهرة، ندفة ثلج، رسم بالقلم، فقاعة، كوكب، يقطينة، لؤلؤة، بلّوطة.
+   rot يدير النقش (للتدحرج)، والأجزاء الثابتة (حلقة الكوكب، العنق) لا تدور. */
+const THEME_EMBLEM = { classic: 'star', night: 'moon', garden: 'flower', ice: 'snow', notebook: 'sketch', ocean: 'bubble', space: 'planet', autumn: 'pumpkin' };
+function drawEmblem(c, kind, r, rot = 0, t = 0) {
+  c.save();
+  c.lineJoin = 'round';
+  c.lineCap = 'round';
+  const disc = (fill, line, lw = r * .12) => { c.beginPath(); c.arc(0, 0, r, 0, 7); c.fillStyle = fill; c.fill(); if (line) { c.strokeStyle = line; c.lineWidth = lw; c.stroke(); } };
+  const shine = (a = .55) => { c.fillStyle = `rgba(255,255,255,${a})`; c.beginPath(); c.ellipse(-r * .35, -r * .4, r * .3, r * .16, -.6, 0, 7); c.fill(); };
+  switch (kind) {
+    case 'moon': {
+      c.shadowColor = '#F6E7A8'; c.shadowBlur = r * .9;
+      const g = c.createRadialGradient(-r * .3, -r * .3, r * .1, 0, 0, r);
+      g.addColorStop(0, '#FFFBE6'); g.addColorStop(1, '#F2D27A');
+      disc(g);
+      c.shadowBlur = 0;
+      c.rotate(rot);
+      c.fillStyle = 'rgba(190,150,60,.35)';
+      [[.3, -.2, .2], [-.35, .25, .14], [.05, .45, .1]].forEach(([x, y, s]) => { c.beginPath(); c.arc(x * r, y * r, s * r, 0, 7); c.fill(); });
+      break;
+    }
+    case 'flower': {
+      disc('#F7C948', '#E07A1F');
+      c.rotate(rot);
+      c.fillStyle = '#E5559A';
+      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; c.beginPath(); c.ellipse(Math.cos(a) * r * .5, Math.sin(a) * r * .5, r * .3, r * .17, a, 0, 7); c.fill(); }
+      c.fillStyle = '#FFFFFF'; c.beginPath(); c.arc(0, 0, r * .2, 0, 7); c.fill();
+      break;
+    }
+    case 'snow': {
+      const g = c.createRadialGradient(-r * .3, -r * .3, r * .1, 0, 0, r);
+      g.addColorStop(0, '#FFFFFF'); g.addColorStop(1, '#D6EEFA');
+      disc(g, '#9CCFEA', r * .08);
+      c.rotate(rot);
+      c.strokeStyle = '#4A9CCB'; c.lineWidth = Math.max(1.5, r * .09);
+      c.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = i * Math.PI / 3, ca = Math.cos(a), sa = Math.sin(a);
+        c.moveTo(0, 0); c.lineTo(ca * r * .72, sa * r * .72);
+        const bx = ca * r * .42, by = sa * r * .42;
+        c.moveTo(bx, by); c.lineTo(bx + Math.cos(a + .8) * r * .22, by + Math.sin(a + .8) * r * .22);
+        c.moveTo(bx, by); c.lineTo(bx + Math.cos(a - .8) * r * .22, by + Math.sin(a - .8) * r * .22);
+      }
+      c.stroke();
+      break;
+    }
+    case 'sketch': {
+      c.strokeStyle = '#2B4C7E';
+      c.fillStyle = '#FFFFFF';
+      c.beginPath(); c.arc(0, 0, r, 0, 7); c.fill();
+      c.lineWidth = Math.max(1.5, r * .1);
+      c.rotate(rot);
+      for (let k = 0; k < 2; k++) { c.beginPath(); for (let i = 0; i <= 24; i++) { const a = i / 24 * 6.283, rr = r * (1 + Math.sin(i * 3 + k * 2) * .04 - k * .06); c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.stroke(); }
+      c.save(); c.beginPath(); c.arc(0, 0, r * .92, 0, 7); c.clip();
+      c.lineWidth = 1.2; c.globalAlpha = .5;
+      for (let x = -r; x < r; x += r * .28) { c.beginPath(); c.moveTo(x, r); c.lineTo(x + r * .6, r * .2); c.stroke(); }
+      c.restore();
+      break;
+    }
+    case 'bubble': {
+      const g = c.createRadialGradient(-r * .25, -r * .3, r * .1, 0, 0, r);
+      g.addColorStop(0, 'rgba(255,255,255,.55)'); g.addColorStop(.7, 'rgba(120,210,230,.25)'); g.addColorStop(1, 'rgba(14,124,134,.45)');
+      disc(g, 'rgba(255,255,255,.85)', r * .08);
+      c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = r * .1;
+      c.beginPath(); c.arc(0, 0, r * .7, Math.PI * 1.1, Math.PI * 1.45); c.stroke();
+      c.fillStyle = '#FFFFFF'; c.beginPath(); c.arc(r * .38, r * .35, r * .09, 0, 7); c.fill();
+      break;
+    }
+    case 'planet': {
+      c.save();
+      c.beginPath(); c.arc(0, 0, r, 0, 7); c.clip();
+      c.fillStyle = '#8E6CF0'; c.fillRect(-r, -r, r * 2, r * 2);
+      c.rotate(.35);
+      const off = ((rot * r) % (r * .8) + r * .8) % (r * .8);
+      c.fillStyle = '#C9B4FF';
+      for (let y = -r * 1.6 + off; y < r * 1.6; y += r * .8) c.fillRect(-r * 1.5, y, r * 3, r * .26);
+      c.restore();
+      shine(.35);
+      c.strokeStyle = '#F6E7A8'; c.lineWidth = r * .14;
+      c.beginPath(); c.ellipse(0, 0, r * 1.55, r * .42, -.35, Math.PI * .05, Math.PI * .95); c.stroke();
+      c.beginPath(); c.ellipse(0, 0, r * 1.55, r * .42, -.35, Math.PI * 1.05, Math.PI * 1.95); c.globalAlpha = .55; c.stroke();
+      break;
+    }
+    case 'pumpkin': {
+      c.save();
+      c.rotate(Math.sin(rot) * .15);
+      c.fillStyle = '#E8761E';
+      c.strokeStyle = '#B4520E'; c.lineWidth = r * .08;
+      [-.55, .55, 0].forEach(x => { c.beginPath(); c.ellipse(x * r, 0, r * .55, r * .9, 0, 0, 7); c.fill(); c.stroke(); });
+      c.fillStyle = '#5C7F2A';
+      c.beginPath(); c.roundRect(-r * .1, -r * 1.15, r * .2, r * .35, r * .06); c.fill();
+      c.beginPath(); c.ellipse(r * .3, -r * 1.02, r * .25, r * .1, -.5, 0, 7); c.fill();
+      c.restore();
+      shine(.3);
+      break;
+    }
+    case 'pearl': {
+      const g = c.createRadialGradient(-r * .3, -r * .35, r * .05, 0, 0, r);
+      g.addColorStop(0, '#FFFFFF'); g.addColorStop(.6, '#F3E6F0'); g.addColorStop(1, '#C9B6C8');
+      c.shadowColor = 'rgba(255,255,255,.8)'; c.shadowBlur = r * .5;
+      disc(g);
+      c.shadowBlur = 0;
+      shine(.8);
+      break;
+    }
+    case 'acorn': {
+      c.rotate(Math.sin(rot) * .12);
+      c.fillStyle = '#C98A3E'; c.strokeStyle = '#7A4A1C'; c.lineWidth = r * .08;
+      c.beginPath(); c.ellipse(0, r * .15, r * .72, r * .85, 0, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = '#7A4A1C';
+      c.beginPath(); c.ellipse(0, -r * .35, r * .88, r * .42, 0, Math.PI, 0); c.lineTo(r * .88, -r * .3); c.quadraticCurveTo(0, -r * .1, -r * .88, -r * .3); c.fill();
+      c.fillRect(-r * .07, -r * 1.05, r * .14, r * .3);
+      shine(.3);
+      break;
+    }
+    default: { // star — نجمة ذهبية بنقش ثماني يدور
+      const g = c.createRadialGradient(-r * .3, -r * .3, r * .1, 0, 0, r);
+      g.addColorStop(0, '#FFF3C4'); g.addColorStop(1, '#E3B341');
+      disc(g, '#7E2A17');
+      c.rotate(rot);
+      c.fillStyle = '#AB3920';
+      c.beginPath();
+      for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8, rr = i % 2 ? r * .3 : r * .66; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+      c.closePath(); c.fill();
+    }
+  }
+  c.restore();
+}
+
 /* ================= شكل قطع البازل (مشترك بين اللعبة وغلافها) =================
    كل حدّ داخلي بين قطعتين له اتجاه ثابت: لسان بارز في واحدة وتجويف في جارتها.
    puzzleEdges → { top, right, bottom, left } قيمها ١ (لسان للخارج) أو −١ (تجويف) أو ٠ (حافة الصورة). */
