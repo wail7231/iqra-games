@@ -102,7 +102,7 @@ Play.register({
         const q = el('div', 'wr-q');
         q.textContent = chosen.q;
         const grid = el('div', 'quiz-grid wheel-answers');
-        const opts = mixAnswers(chosen);
+        const opts = mixAnswers(chosen, 6);
         const need = needAll(chosen) ? answersOf(chosen).length : 1;
         let got = 0, missed = false;
         const sub = el('div', 'round-sub');
