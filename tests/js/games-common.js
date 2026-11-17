@@ -40,12 +40,15 @@ const newGameId =() => 'g' + Date.now().toString(36) + Math.random().toString(36
 /* خلط الإجابات لكل الألعاب: ترتيب عشوائي جديد في كل مرة، والإجابة الصحيحة لا تبقى في موضعها
    نفسه من المرة السابقة لهذا السؤال (حتى لا يحفظ الطالب «الأولى يمين»).
    limit: أقصى عدد يُعرض — تُختصر الخاطئة فقط، والصحيحة لا تُستبعد أبدًا. كل عنصر فيه t و text و ok. */
-function mixAnswers(q, limit = Infinity) {
-  const corrects = Array.isArray(q.correct) ? q.correct : [q.correct];
-  const ok = corrects.slice(0, Math.max(1, Math.min(corrects.length, limit - 1)));
-  const bad = shuffle(q.wrong || []).slice(0, Math.max(0, limit - ok.length));
+/* «يجب جمعها كلها»: سؤال فيه أكثر من إجابة صحيحة وطلب المعلم اختيارها جميعًا */
+const needAll = q => Array.isArray(q.correct) && q.correct.filter(Boolean).length > 1 && q.need === 'all';
+function mixAnswers(q, limit = Infinity, skip = []) {
+  const corrects = (Array.isArray(q.correct) ? q.correct : [q.correct]).filter(c => !skip.includes(c));
+  /* كل الصحيحة تظهر في «يجب جمعها كلها»، وإلا تُختار منها عيّنة عشوائية تتسع لها اللعبة */
+  const ok = needAll(q) ? corrects : shuffle(corrects).slice(0, Math.max(1, Math.min(corrects.length, limit - 1)));
+  const bad = shuffle(q.wrong || []).slice(0, Math.max(needAll(q) ? 1 : 0, limit - ok.length));
   const list = [...ok.map(t => ({ t, text: t, ok: true })), ...bad.map(t => ({ t, text: t, ok: false }))];
-  const key = 'iqra_pos_' + [...String(q.q || q.label || '') + corrects[0]].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7);
+  const key = 'iqra_pos_' + [...String(q.q || q.label || '') + (corrects[0] || '')].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7);
   /* عشوائي تمامًا، مع منع ظهور الصحيحة في الموضع نفسه ثلاث مرات متتالية
      (ومع ثلاث إجابات فأكثر لا تتكرر في موضعها السابق) — بلا نمط ثابت يُحفظ */
   const hist = String(store.get(key) || '').split(',').filter(Boolean);
