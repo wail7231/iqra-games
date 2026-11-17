@@ -70,6 +70,7 @@ function needHead(text, need) {
   const sub = h.querySelector('.round-sub');
   const paint = got => { if (sub) sub.textContent = `✓ ${toAr(got)} من ${toAr(need)}`; };
   paint(0);
+  paint.el = h;
   return paint;
 }
 

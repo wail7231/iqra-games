@@ -46,7 +46,7 @@ function skyScene() {
   /* الغيوم تأتي واحدةً بعد أخرى متباعدة: بين كل غيمة والتي تليها مسافة واسعة،
      وكل غيمة في ارتفاع بعيد عن سابقتها (أعلى / وسط / أسفل)، فيقرأ الطالب كل إجابة ويفكّر قبل الاختيار */
   S.spawn = () => {
-    const answers = mixAnswers(S.q, 5);
+    const answers = fitAnswers(mixAnswers(S.q, 5, S.collected), 5);
     const h = Math.max(64, Math.min(92, S.H * .19));
     const levels = [.24, .53, .8].map(f => Math.round(S.H * f));
     const gap = Math.max(300, S.W * .42);
@@ -69,6 +69,8 @@ function skyScene() {
     S.q = q;
     S.missed = false;
     S.answered = false;
+    S.collected = [];
+    S.need = needAll(q) ? answersOf(q).length : 1;
     S.clouds = S.clouds.filter(c => c.state);
     S.spawn();
   };
@@ -84,6 +86,10 @@ function skyScene() {
     const pt = { x: r.left + c.x + c.w / 2, y: r.top + c.y };
     if (c.ok) {
       c.state = 'good';
+      /* «يجب جمعها كلها»: تكمل الطائرة حتى تمر بكل الغيوم الصحيحة */
+      S.collected.push(c.t);
+      if (S.paint) S.paint(S.collected.length);
+      if (S.collected.length < S.need) { FX.burst(pt, { count: 12 }); FX.floatText(pt, '✓'); FX.play('good'); return; }
       S.answered = true;
       FX.burst(pt, { count: 28 });
       FX.floatText(pt, S.missed ? '✓' : '+١');

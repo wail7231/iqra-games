@@ -47,7 +47,7 @@ function runnerScene() {
   /* منصات السؤال: واحدة لكل إجابة، تبدأ خارج اللوحة يسارًا وتتباعد */
   S.spawn = () => {
     const q = S.q;
-    const answers = mixAnswers(q);
+    const answers = fitAnswers(mixAnswers(q, 6, S.collected), 6);
     ctx.font = font(16);
     let x = -40;
     answers.forEach(a => {
@@ -61,6 +61,8 @@ function runnerScene() {
     S.q = q;
     S.missed = false;
     S.answered = false;
+    S.collected = [];
+    S.need = needAll(q) ? answersOf(q).length : 1;
     S.plats = S.plats.filter(p => p.state);   // منصات محسومة تكمل طريقها
     S.spawn();
   };
@@ -81,6 +83,10 @@ function runnerScene() {
     const pt = { x: r.left + S.bx, y: r.top + p.top - 10 };
     if (p.ok) {
       p.state = 'good';
+      /* «يجب جمعها كلها»: تكمل الكرة حتى تهبط على كل الصحيحة */
+      S.collected.push(p.t);
+      if (S.paint) S.paint(S.collected.length);
+      if (S.collected.length < S.need) { FX.burst(pt, { count: 12 }); FX.floatText(pt, '✓'); FX.play('good'); return; }
       S.answered = true;
       FX.burst(pt, { count: 28 });
       FX.floatText(pt, S.missed ? '✓' : '+١');
@@ -244,8 +250,8 @@ Play.register({
       Play.board.appendChild(RUN.wrap);
       RUN.size();
     }
-    const head = Play.head(q.q);
-    Play.board.insertBefore(head, RUN.wrap);
+    RUN.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
+    Play.board.insertBefore(RUN.paint.el, RUN.wrap);
     RUN.setQuestion(q);
   },
 });
