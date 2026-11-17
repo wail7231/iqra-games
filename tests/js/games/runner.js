@@ -11,6 +11,9 @@ const RUN_THEMES = {
   garden:   { far: '#9CCB7E', far2: '#7DB867', ground: '#8A5A30', groundTop: '#5FA052', plat: '#8A5A30', platEdge: '#5FA052', ink: '#FFFDF4', ball: '#F7C948', ballLine: '#E07A1F', deco: 'trees' },
   ice:      { far: '#CDE7F4', far2: '#FFFFFF', ground: '#F7FBFF', groundTop: '#BFE3F3', plat: '#BFE3F3', platEdge: '#4A9CCB', ink: '#12354A', ball: '#FFFFFF', ballLine: '#9CCFEA', deco: 'mountains' },
   notebook: { far: 'rgba(43,76,126,.1)', far2: 'rgba(43,76,126,.18)', ground: 'rgba(0,0,0,0)', groundTop: '#2B4C7E', plat: '#FFFFFF', platEdge: '#2B4C7E', ink: '#1F2F4D', ball: '#FFFFFF', ballLine: '#2B4C7E', deco: 'hills', sketch: true },
+  ocean:    { far: '#8FD3D9', far2: '#2E8C6A', ground: '#E7D3A2', groundTop: '#CDB27A', plat: '#0E7C86', platEdge: '#085A62', ink: '#FFFFFF', deco: 'seaweed' },
+  space:    { far: '#2A1D5E', far2: '#3A2A7A', ground: '#1E1446', groundTop: '#B48CFF', plat: '#22164A', platEdge: '#B48CFF', ink: '#F1EAFF', deco: 'planets', glow: true },
+  autumn:   { far: '#EBC9A0', far2: '#D9A86C', ground: '#B5793E', groundTop: '#8A5226', plat: '#C98A3E', platEdge: '#7A4A1C', ink: '#FFFFFF', deco: 'autumn' },
 };
 let RUN = null;
 
@@ -134,6 +137,33 @@ function runnerScene() {
       } else if (th.deco === 'mountains') {
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath(); ctx.moveTo(x - 26, S.gy - 120); ctx.lineTo(x, S.gy - 150); ctx.lineTo(x + 26, S.gy - 120); ctx.fill();
+      } else if (th.deco === 'seaweed') {
+        /* أعشاب بحرية تتمايل وفقاعات */
+        ctx.strokeStyle = th.far2; ctx.lineWidth = 6; ctx.lineCap = 'round';
+        for (let j = -1; j <= 1; j++) {
+          const bx = x + j * 18, sw = Math.sin(S.t * 1.5 + k + j) * 8;
+          ctx.beginPath(); ctx.moveTo(bx, S.gy); ctx.quadraticCurveTo(bx + sw, S.gy - 30, bx - sw * .5, S.gy - 55 - j * 8); ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.5;
+        const by = S.gy - 90 - ((S.t * 30 + k * 50) % 120);
+        ctx.beginPath(); ctx.arc(x + 30, by, 5, 0, 7); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x + 38, by - 22, 3, 0, 7); ctx.stroke();
+      } else if (th.deco === 'planets') {
+        /* كواكب بعيدة وفوهات على الأرض */
+        if (k % 2 === 0) {
+          ctx.fillStyle = k % 4 === 0 ? '#8E6CF0' : '#E8761E';
+          ctx.beginPath(); ctx.arc(x, S.gy - 150, 14, 0, 7); ctx.fill();
+          ctx.strokeStyle = '#F6E7A8'; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.ellipse(x, S.gy - 150, 26, 7, -.3, 0, 7); ctx.stroke();
+        }
+        ctx.fillStyle = 'rgba(0,0,0,.25)';
+        ctx.beginPath(); ctx.ellipse(x + 40, S.gy - 22, 18, 5, 0, 0, 7); ctx.fill();
+      } else if (th.deco === 'autumn') {
+        ctx.fillStyle = '#6B4320'; ctx.fillRect(x - 4, S.gy - 40, 8, 40);
+        ctx.fillStyle = k % 2 ? '#E8761E' : '#C2621B';
+        ctx.beginPath(); ctx.arc(x, S.gy - 52, 24, 0, 7); ctx.arc(x - 16, S.gy - 40, 15, 0, 7); ctx.arc(x + 16, S.gy - 40, 15, 0, 7); ctx.fill();
+        ctx.fillStyle = '#D9A42B';
+        ctx.beginPath(); ctx.arc(x + 8, S.gy - 60, 9, 0, 7); ctx.fill();
       }
     }
     /* الأرض */
@@ -156,6 +186,7 @@ function runnerScene() {
     ctx.lineWidth = th.sketch ? 2.5 : 3;
     ctx.beginPath(); ctx.roundRect(p.x, p.top, p.w, h, 8); ctx.fill(); ctx.stroke();
     ctx.shadowBlur = 0;
+    if (th.deco === 'autumn' && !good && p.state !== 'bad') { ctx.fillStyle = '#E8761E'; ctx.beginPath(); ctx.roundRect(p.x - 2, p.top - 4, p.w + 4, 9, 5); ctx.fill(); }
     if (th.deco === 'trees' && !good && p.state !== 'bad') { ctx.fillStyle = '#5FA052'; ctx.beginPath(); ctx.roundRect(p.x - 2, p.top - 4, p.w + 4, 10, 5); ctx.fill(); }
     if (th.deco === 'mountains' && !good) { ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.roundRect(p.x + 4, p.top - 3, p.w - 8, 7, 4); ctx.fill(); }
     if (th.sketch) { ctx.strokeStyle = 'rgba(43,76,126,.35)'; ctx.lineWidth = 1; for (let k = 10; k < p.w; k += 10) { ctx.beginPath(); ctx.moveTo(p.x + k, p.top + h); ctx.lineTo(p.x + k - 8, p.top + 2); ctx.stroke(); } }
