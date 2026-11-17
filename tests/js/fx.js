@@ -219,5 +219,28 @@ const FX = (() => {
     sync();
   }
 
-  return { play, burst, floatText, bump, sequence, themeLayer, bindToggle, bindFullscreen };
+  /* شريط قوالب الشكل: يُسحب يمينًا ويسارًا بالإصبع أو الفأرة، والقالب المختار يظهر في المنتصف */
+  function swipe(el) {
+    if (!el || el._swipe) return;
+    el._swipe = true;
+    let down = null, moved = false;
+    el.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse') return;       // اللمس يسحب بطبيعته
+      down = { x: e.clientX, left: el.scrollLeft };
+      moved = false;
+    });
+    window.addEventListener('pointermove', e => {
+      if (!down) return;
+      const dx = e.clientX - down.x;
+      if (Math.abs(dx) > 5) { moved = true; el.classList.add('dragging'); }
+      if (moved) el.scrollLeft = down.left - dx;
+    });
+    window.addEventListener('pointerup', () => { if (!down) return; down = null; el.classList.remove('dragging'); });
+    el.addEventListener('click', e => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    el.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { el.scrollLeft -= e.deltaY; e.preventDefault(); } }, { passive: false });
+    const on = el.querySelector('.on');
+    if (on) requestAnimationFrame(() => on.scrollIntoView({ block: 'nearest', inline: 'center' }));
+  }
+
+  return { play, burst, floatText, bump, sequence, themeLayer, bindToggle, bindFullscreen, swipe };
 })();

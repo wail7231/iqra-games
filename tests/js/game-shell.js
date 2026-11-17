@@ -301,6 +301,7 @@ function bindSettings() {
     });
     grid.appendChild(b);
   }
+  FX.swipe(grid);
   const rows = $('#cfgRows');
   for (const s of settingDefs()) {
     const row = document.createElement('div');

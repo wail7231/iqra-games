@@ -1020,7 +1020,8 @@ function bindSettings() {
     });
     b.classList.toggle('on', id === CFG.theme);
     grid.appendChild(b);
-  }
+  }  FX.swipe(grid);
+
   paintThemePreviews();
 }
 
