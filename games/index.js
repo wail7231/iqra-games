@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwl87gfw56x",
+  "type": "runner",
+  "name": "holy books",
+  "desc": "",
+  "count": 2,
+  "updated": 1794952314705
+ },
+ {
   "id": "gmwiasn3b4rm",
   "type": "lines",
   "name": "سورة الليل",
