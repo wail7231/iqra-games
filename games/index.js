@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmw0lxrc0pfu",
+  "type": "hangman",
+  "name": "Reading 1",
+  "desc": "",
+  "count": 2,
+  "updated": 1794952477368
+ },
+ {
   "id": "gmwl87gfw56x",
   "type": "runner",
   "name": "holy books",
