@@ -12,7 +12,7 @@
 
 const PARAMS = new URLSearchParams(location.search);
 const STUDENT = PARAMS.has('student') || (location.protocol.startsWith('http') && !['localhost', '127.0.0.1'].includes(location.hostname));
-const THEME_LIST = [['classic', 'كلاسيكي'], ['night', 'ليل'], ['garden', 'حديقة'], ['ice', 'جليد'], ['notebook', 'دفتر']];
+const THEME_LIST = [['classic', 'كلاسيكي'], ['night', 'ليل'], ['garden', 'حديقة'], ['ice', 'جليد'], ['notebook', 'دفتر'], ['ocean', 'بحر'], ['space', 'فضاء'], ['autumn', 'خريف']];
 const COMMON_SETTINGS = {
   timer: { key: 'timer', label: 'المؤقت', note: 'لكامل اللعبة', options: [[0, 'بلا'], [1, '١ د'], [2, '٢ د'], [3, '٣ د'], [5, '٥ د']], def: 0 },
   lives: { key: 'lives', label: 'القلوب', options: [[1, '١'], [3, '٣'], [5, '٥'], [0, '∞']], def: 3 },

@@ -103,6 +103,11 @@ const FX = (() => {
 
   /* تفاصيل إضافية لكل قالب (في اللوحة فقط، لا فوق المتاهة) */
   const LANTERN = '<svg viewBox="0 0 30 70"><path d="M15 0v14" stroke="#B8925A" stroke-width="1.5"/><path d="M10 14h10v4H10z" fill="#7E2A17"/><path d="M7 18h16l3 26H4z" fill="#E3B341"/><path d="M10 21h10l2 20H8z" fill="#FFF3C4"/><path d="M4 44h22v5H4z" fill="#7E2A17"/><path d="M12 49h6l-1 4h-4z" fill="#7E2A17"/></svg>';
+  const WAVES = '<svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 18 Q25 6 50 18 T100 18 T150 18 T200 18 T250 18 T300 18 T350 18 T400 18 V40 H0Z"/></svg>';
+  const WEED = '<svg viewBox="0 0 30 80" preserveAspectRatio="none"><path d="M15 80 C4 62 26 50 15 32 C7 20 19 10 15 0" fill="none" stroke-width="5" stroke-linecap="round"/></svg>';
+  const PLANET = (body, band, ring) => `<svg viewBox="0 0 100 60"><path d="M4 30a46 11 0 0 1 92 0" fill="none" stroke="${ring}" stroke-width="3" opacity=".6"/><circle cx="50" cy="30" r="20" fill="${body}"/><path d="M33 24h34M31 33h38" stroke="${band}" stroke-width="4"/><path d="M4 30a46 11 0 0 0 92 0" fill="none" stroke="${ring}" stroke-width="3"/></svg>`;
+  const LEAF = '<svg viewBox="0 0 24 24"><path d="M12 1c5 4 8 8 8 12a8 8 0 0 1-16 0c0-4 3-8 8-12z"/><path d="M12 5v18" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="1.2"/></svg>';
+  const PILE = '<svg viewBox="0 0 400 30" preserveAspectRatio="none"><path d="M0 30 Q20 10 40 22 Q60 6 80 20 Q100 8 120 22 Q140 4 160 20 Q180 10 200 22 Q220 6 240 20 Q260 8 280 22 Q300 4 320 20 Q340 10 360 22 Q380 8 400 18 V30Z"/></svg>';
   const CLOUD = c => `<svg viewBox="0 0 120 50"><path d="M20 44a16 16 0 0 1 4-31 22 22 0 0 1 40-6 18 18 0 0 1 34 10 14 14 0 0 1 2 27z" fill="${c}"/></svg>`;
   const SUN = '<svg viewBox="0 0 100 100"><g stroke="#F7C948" stroke-width="5" stroke-linecap="round">' + [...Array(12)].map((_, i) => `<path d="M50 8v12" transform="rotate(${i * 30} 50 50)"/>`).join('') + '</g><circle cx="50" cy="50" r="22" fill="#F7C948"/><circle cx="50" cy="50" r="22" fill="none" stroke="#F2A516" stroke-width="3"/></svg>';
   const ICICLES = '<svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 0h400v6l-8 0-4 24-4-24h-14l-3 14-3-14h-20l-5 30-5-30h-16l-3 12-3-12h-22l-4 22-4-22h-18l-3 16-3-16h-24l-5 28-5-28h-14l-3 12-3-12h-22l-4 20-4-20h-18l-3 14-3-14h-20l-5 26-5-26h-16l-3 10-3-10h-22l-4 22-4-22H40l-3 14-3-14H14l-4 18-4-18H0z" fill="#E8F7FF"/></svg>';
@@ -153,6 +158,26 @@ const FX = (() => {
         add('fx-tape');
         DOODLES.forEach((d, i) => add('fx-doodle d' + i, { 'animation-delay': i * .4 + 's' }, d));
       }
+    } else if (theme === 'ocean') {
+      for (let i = 0; i < (overlay ? 12 : 20); i++) add('fx-bubble', { left: rnd(0, 100) + '%', '--sz': rnd(6, 22) + 'px', '--sway': rnd(-30, 30) + 'px', 'animation-delay': -rnd(0, 14) + 's', 'animation-duration': rnd(8, 16) + 's' });
+      if (!overlay) {
+        add('fx-rays');
+        const cols = ['#2E8C6A', '#3FA37A', '#1F7A6B'];
+        for (let i = 0; i < 5; i++) add('fx-weed', { left: rnd(2, 95) + '%', '--h': rnd(50, 90) + 'px', '--c': cols[i % 3], 'animation-delay': -rnd(0, 3) + 's' }, WEED);
+        add('fx-waves', {}, WAVES);
+      }
+    } else if (theme === 'space') {
+      for (let i = 0; i < (overlay ? 24 : 50); i++) add('fx-star', { left: rnd(0, 100) + '%', top: rnd(0, 100) + '%', '--s': rnd(1.2, 3.2) + 'px', 'animation-delay': rnd(0, 4) + 's', 'animation-duration': rnd(2, 5) + 's' });
+      for (let i = 0; i < 2; i++) add('fx-shoot', { top: rnd(4, 50) + '%', right: rnd(0, 50) + '%', 'animation-delay': rnd(1, 9) + 's' });
+      if (!overlay) {
+        add('fx-nebula', { top: '-10%', right: '-10%' });
+        add('fx-planet', { top: '18px', left: '20px', '--sz': '90px' }, PLANET('#8E6CF0', '#C9B4FF', '#F6E7A8'));
+        add('fx-planet', { bottom: '22px', right: '30px', '--sz': '54px', 'animation-delay': '-3s' }, PLANET('#E8761E', '#F7C948', '#FFE6C4'));
+      }
+    } else if (theme === 'autumn') {
+      const cols = ['#E8761E', '#C2621B', '#D9A42B', '#A8432A', '#E0A458'];
+      for (let i = 0; i < (overlay ? 10 : 16); i++) add('fx-leaf', { left: rnd(0, 100) + '%', '--sz': rnd(12, 22) + 'px', '--c': cols[i % cols.length], 'animation-delay': -rnd(0, 12) + 's', 'animation-duration': rnd(9, 16) + 's', '--sway': rnd(20, 70) + 'px' }, LEAF);
+      if (!overlay) { add('fx-haze'); add('fx-pile', {}, PILE); }
     } else {
       for (let i = 0; i < (overlay ? 10 : 16); i++) add('fx-spark', { left: rnd(0, 100) + '%', top: rnd(10, 100) + '%', 'animation-delay': -rnd(0, 6) + 's', 'animation-duration': rnd(4, 8) + 's' });
       if (!overlay) {
