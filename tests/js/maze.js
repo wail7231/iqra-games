@@ -181,7 +181,9 @@ function newRound() {
   const rows = portrait ? 11 : 9;
   const start = { x: cols >> 1, y: rows >> 1 };
   const corrects = answerList(q);
-  const answers = mixAnswers(q, 6);
+  let answers = mixAnswers(q, 6);
+  /* المتاهة تتسع لستة أبواب: في «يجب جمعها كلها» مع إجابات صحيحة كثيرة نأخذ خمسًا منها وبابًا خاطئًا */
+  if (answers.length > 6) answers = shuffle([...answers.filter(a => a.ok).slice(0, 5), ...answers.filter(a => !a.ok).slice(0, 1)]);
   const { open, cells } = buildMaze(cols, rows, start, answers.length);
   const gates = answers.map((a, i) => ({ ...a, x: cells[i].x, y: cells[i].y, color: GATE_COLORS[i], num: toAr(i + 1), gone: false }));
 
@@ -189,7 +191,7 @@ function newRound() {
     q, cols, rows, open, start, gates,
     gateAt: (x, y) => gates.find(g => !g.gone && g.x === x && g.y === y),
     p: { x: start.x, y: start.y, nx: start.x, ny: start.y, t: 0, moving: false, dir: null },
-    need: corrects.length > 1 && q.need === 'all' ? corrects.length : 1, got: 0,
+    need: corrects.length > 1 && q.need === 'all' ? answers.filter(a => a.ok).length : 1, got: 0,
     enemies: [], chaseMap: null, started: false, done: false, missed: false, invuln: 0, hl: -1, hlUntil: 0, clock: 0,
   };
   R.chaseMap = bfs(open, cols, rows, start.x, start.y);
