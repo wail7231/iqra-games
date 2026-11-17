@@ -970,9 +970,9 @@ function paintThemePreviews() {
     g.fillStyle = t.floor;
     g.fillRect(0, 0, W, H);
     drawRuled(g, t, W, H, 12);
-    drawWalls(g, PREVIEW_OPEN, 3, 3, 44, 5, { ...t, wallW: (t.wallW || .1) * 1.1 });
-    drawWalls(g, PREVIEW_OPEN, 3, 3, 44, 136, { ...t, wallW: (t.wallW || .1) * 1.1 });
-    drawPlayer(g, t, 5 + 1.5 * 44, 5 + 1.5 * 44, 16, 0, 1);
+    g.translate(27, 0);
+    drawWalls(g, PREVIEW_OPEN, 3, 3, 44, 4, { ...t, wallW: (t.wallW || .1) * 1.1 });
+    drawPlayer(g, t, 4 + 1.5 * 44, 4 + 1.5 * 44, 16, 0, 1);
   });
 }
 
