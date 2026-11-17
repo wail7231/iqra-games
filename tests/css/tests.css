@@ -965,6 +965,18 @@ a { color: inherit; text-decoration: none; }
 }
 .board[data-theme="garden"] { --b-bg: #F4EED9; --b-ink: #22361F; --b-muted: #5D7354; --b-card: #FFFDF4; --b-line: #C9DDB8; --b-accent: #3F7D3A; --b-dead: #D8D3BE; --b-dead-ink: #6C6A58; }
 .board[data-theme="ice"] { --b-bg: #EEF8FC; --b-ink: #12354A; --b-muted: #4E7387; --b-card: #FFFFFF; --b-line: #BFE3F3; --b-accent: #2D7FB8; --b-dead: #D3E3EB; --b-dead-ink: #5B7584; }
+.board[data-theme="ocean"] {
+  --b-bg: #E3F6F8; --b-ink: #0B3B47; --b-muted: #3F6E78; --b-card: #FFFFFF; --b-line: #A9DCE3; --b-accent: #0E7C86; --b-dead: #CBE3E6; --b-dead-ink: #4E7178;
+  background: linear-gradient(180deg, #CDEFF3 0%, #E6F8FA 45%, #B9E4EB 100%);
+}
+.board[data-theme="space"] {
+  --b-bg: #140C33; --b-ink: #F1EAFF; --b-muted: #B7A8E0; --b-card: #22164A; --b-line: #4A3A8A; --b-accent: #B48CFF; --b-dead: #2E2260; --b-dead-ink: #A99AD6;
+  background: radial-gradient(110% 90% at 20% 0%, #3A2380 0%, #1A0F40 45%, #0E0826 100%);
+}
+.board[data-theme="autumn"] {
+  --b-bg: #FBF1E1; --b-ink: #3D2412; --b-muted: #7A5638; --b-card: #FFFAF2; --b-line: #EBCFA8; --b-accent: #C2621B; --b-dead: #E5D3BB; --b-dead-ink: #7A6650;
+  background: linear-gradient(180deg, #FCE6C8 0%, #FBF1E1 50%, #F2DBBA 100%);
+}
 .board[data-theme="notebook"] {
   --b-bg: #FDFBF3; --b-ink: #1F2F4D; --b-muted: #5A6B88; --b-card: #FFFFFF; --b-line: #BFD3EA; --b-accent: #2B4C7E; --b-dead: #DCE3EC; --b-dead-ink: #5A6B88;
   background: repeating-linear-gradient(#FDFBF3 0 27px, #D6E3F2 27px 28px);
@@ -996,6 +1008,9 @@ a { color: inherit; text-decoration: none; }
 .theme-prev[data-theme="night"] { --b-bg: #111933; --b-card: #1B2752; --b-accent: #59C3F0; }
 .theme-prev[data-theme="garden"] { --b-bg: #F4EED9; --b-card: #FFFDF4; --b-accent: #3F7D3A; }
 .theme-prev[data-theme="ice"] { --b-bg: #EEF8FC; --b-card: #FFFFFF; --b-accent: #2D7FB8; }
+.theme-prev[data-theme="ocean"] { --b-bg: #D4F1F4; --b-card: #FFFFFF; --b-accent: #0E7C86; background: linear-gradient(180deg, #D4F1F4, #A9DCE3); }
+.theme-prev[data-theme="space"] { --b-bg: #1A0F40; --b-card: #22164A; --b-accent: #B48CFF; background: radial-gradient(circle at 25% 20%, #3A2380, #0E0826 70%); }
+.theme-prev[data-theme="autumn"] { --b-bg: #FCE6C8; --b-card: #FFFAF2; --b-accent: #C2621B; }
 .theme-prev[data-theme="notebook"] { --b-bg: #FDFBF3; --b-card: #FFFFFF; --b-accent: #2B4C7E; background: repeating-linear-gradient(#FDFBF3 0 8px, #D6E3F2 8px 9px); }
 
 /* ---------- اختيار من متعدد ---------- */
@@ -1761,3 +1776,38 @@ a { color: inherit; text-decoration: none; }
 .pz-drop.invalid { border-color: #C0392B; }
 .pz-stage.pz-finished { transition: height .6s ease; }
 .pz-stage.pz-finished .pz-frame { transition: left .6s ease, box-shadow .4s; }
+
+/* ================= القوالب الجديدة: بحر، فضاء، خريف ================= */
+/* بحر: فقاعات تصعد، أشعة ضوء، أعشاب بحرية تتمايل، وموج في الأسفل */
+.fx-bubble { bottom: -30px; width: var(--sz); height: var(--sz); border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, .9); background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .8), rgba(255, 255, 255, .1) 45%, rgba(14, 124, 134, .12)); animation: bubbleUp linear infinite; }
+@keyframes bubbleUp { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: .9; } 50% { transform: translate(var(--sway), -55vh); } 100% { transform: translate(0, -110vh); opacity: .2; } }
+.fx-rays { top: -20%; left: 10%; width: 80%; height: 90%; background: repeating-linear-gradient(105deg, rgba(255, 255, 255, .22) 0 18px, transparent 18px 70px); filter: blur(6px); transform-origin: top center; animation: rays 7s ease-in-out infinite alternate; }
+@keyframes rays { from { transform: skewX(-6deg); opacity: .5; } to { transform: skewX(6deg); opacity: .9; } }
+.fx-waves { left: 0; right: 0; bottom: -2px; height: 34px; animation: waveMove 6s ease-in-out infinite alternate; }
+.fx-waves svg path { fill: rgba(14, 124, 134, .28); }
+@keyframes waveMove { from { transform: translateX(-12px); } to { transform: translateX(12px); } }
+.fx-weed { bottom: 0; width: 26px; height: var(--h); transform-origin: bottom center; animation: sway 3.4s ease-in-out infinite alternate; }
+.fx-weed svg path { stroke: var(--c); }
+/* فضاء: نجوم وكواكب ومذنّبات */
+.fx-planet { width: var(--sz); height: calc(var(--sz) * .6); animation: floatY 6s ease-in-out infinite alternate; opacity: .9; }
+@keyframes floatY { from { transform: translateY(-6px) rotate(-4deg); } to { transform: translateY(6px) rotate(4deg); } }
+.fx-nebula { width: 60%; height: 60%; border-radius: 50%; background: radial-gradient(circle, rgba(180, 140, 255, .25), transparent 70%); filter: blur(10px); }
+/* خريف: أوراق ملوّنة تتساقط وشمس دافئة */
+.fx-leaf { top: -24px; width: var(--sz); height: var(--sz); animation: fall linear infinite; }
+.fx-leaf svg path:first-child { fill: var(--c); }
+.fx-haze { top: -60px; right: -40px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 196, 92, .55), rgba(255, 196, 92, .12) 55%, transparent 70%); }
+.fx-pile { left: 0; right: 0; bottom: -2px; height: 26px; }
+.fx-pile svg path { fill: rgba(194, 98, 27, .35); }
+/* فضاء: ألوان المشانق والحفر والنبتة والعجلة مثل الليل بلون بنفسجي */
+.board[data-theme="space"] .hole::after { background: radial-gradient(ellipse at 50% 35%, #0A0620 0 48%, #4A3A8A 56%, rgba(183, 168, 224, .35) 64%, transparent 71%); }
+.board[data-theme="space"] .hole-back { background: radial-gradient(ellipse at 50% 60%, #05030E 0 45%, #1E1446 75%, #4A3A8A 100%); box-shadow: inset 0 8px 14px rgba(0, 0, 0, .8), 0 0 14px rgba(180, 140, 255, .35); }
+.board[data-theme="space"] .hole-lip { border-color: #B48CFF; filter: drop-shadow(0 0 4px #B48CFF); }
+.board[data-theme="space"] .hang-all { filter: url(#hmGlow); }
+.board[data-theme="space"] .hp-wood path { stroke: #B48CFF; stroke-width: 5; }
+.board[data-theme="space"] .hp-wood path.grain { stroke: #EDE4FF; stroke-width: 1.5; }
+.board[data-theme="space"] .hp-rope path { stroke: #F6E7A8; }
+.board[data-theme="space"] .hp-fig path, .board[data-theme="space"] .hp-fig circle { stroke: #F6E7A8; stroke-width: 5; }
+.board[data-theme="space"] .pl-pot { fill: #2E2260; } .board[data-theme="space"] .pl-rim { fill: #B48CFF; filter: drop-shadow(0 0 6px #B48CFF); }
+.board[data-theme="space"] .pl-flower ellipse { fill: #F6E7A8; filter: drop-shadow(0 0 5px #F6E7A8); }
+.board[data-theme="space"] .pl-leaf { fill: #3FA34D; } .board[data-theme="space"] .pl-fruit { fill: #B48CFF; filter: drop-shadow(0 0 5px #B48CFF); }
+.board[data-theme="space"] .wheel-holder { filter: drop-shadow(0 0 18px rgba(180, 140, 255, .45)); }
