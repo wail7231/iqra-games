@@ -59,6 +59,20 @@ function mixAnswers(q, limit = Infinity, skip = []) {
   return out;
 }
 
+/* لعبة تتسع لعدد محدود من الإجابات: إن زادت (في «يجب جمعها كلها») نأخذ منها max−1 صحيحة وواحدة خاطئة */
+function fitAnswers(list, max) {
+  if (list.length <= max) return list;
+  return shuffle([...list.filter(a => a.ok).slice(0, max - 1), ...list.filter(a => !a.ok).slice(0, 1)]);
+}
+/* رأس السؤال مع عدّاد «✓ ١ من ٣» حين يجب جمع كل الإجابات الصحيحة؛ يعيد دالة تحديث العدّاد */
+function needHead(text, need) {
+  const h = Play.head(text, need > 1 ? ' ' : '');
+  const sub = h.querySelector('.round-sub');
+  const paint = got => { if (sub) sub.textContent = `✓ ${toAr(got)} من ${toAr(need)}`; };
+  paint(0);
+  return paint;
+}
+
 /* ================= شكل قطع البازل (مشترك بين اللعبة وغلافها) =================
    كل حدّ داخلي بين قطعتين له اتجاه ثابت: لسان بارز في واحدة وتجويف في جارتها.
    puzzleEdges → { top, right, bottom, left } قيمها ١ (لسان للخارج) أو −١ (تجويف) أو ٠ (حافة الصورة). */

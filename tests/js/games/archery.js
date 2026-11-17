@@ -22,11 +22,9 @@ Play.register({
   label: q => q.q,
   answer: q => answersOf(q).join('، '),
   round(q) {
-    Play.head(q.q);
     const wrap = el('div', 'arch-wrap');
     const cv = el('canvas', 'arch-canvas');
     wrap.appendChild(cv);
-    Play.board.appendChild(wrap);
     const ctx = cv.getContext('2d');
     const token = {};
     Play._arch = token;
@@ -34,7 +32,12 @@ Play.register({
 
     /* لكل هدف عمود وممر خاص به في الجهة اليسرى: صف واحد حتى ٣ أهداف وصفّان لأكثر،
        ويتحرك الهدف داخل ممره فقط، وعرض شريطه لا يتجاوز عموده — فلا تتداخل الأهداف أبدًا */
-    const answers = mixAnswers(q, 6);
+    const answers = fitAnswers(mixAnswers(q, 6), 6);
+    /* «يجب جمعها كلها»: تُصاب كل الأهداف الصحيحة قبل انتهاء السؤال */
+    const need = needAll(q) ? answers.filter(a => a.ok).length : 1;
+    let got = 0;
+    const paintNeed = needHead(q.q, need);
+    Play.board.appendChild(wrap);
     const rows = answers.length <= 3 ? 1 : 2, cols = Math.ceil(answers.length / rows);
     const targets = answers.map((a, i) => ({
       ...a, col: i % cols, row: Math.floor(i / cols), phase: Math.random() * 6.28,
@@ -118,6 +121,9 @@ Play.register({
       arrow = null;
       if (t.ok) {
         t.hit = 1;
+        got++;
+        paintNeed(got);
+        if (got < need) { FX.burst(screen, { count: 14 }); FX.floatText(screen, '✓'); FX.play('good'); return; }
         done = true;
         FX.burst(screen, { count: 30 });
         FX.floatText(screen, missed ? '✓' : '+١');
@@ -248,7 +254,7 @@ Play.register({
         arrow.y += arrow.vy * dt;
         const a = Math.atan2(arrow.vy, arrow.vx);
         const tip = { x: arrow.x + Math.cos(a) * 6, y: arrow.y + Math.sin(a) * 6 };
-        const t = targets.find(t => t.alive && !t.broken && Math.hypot(tip.x - t.x, tip.y - t.y) < R);
+        const t = targets.find(t => t.alive && !t.broken && !t.hit && Math.hypot(tip.x - t.x, tip.y - t.y) < R);
         if (t) hitTarget(t);
         else if (arrow.x < -60 || arrow.x > W + 60 || arrow.y > H + 60) arrow = null;
       }
