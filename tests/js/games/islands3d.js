@@ -4,7 +4,8 @@
    مع كل سؤال تغوص الجزر القديمة وتصعد جزر جديدة. الشكل يتبع قالب الشكل. */
 'use strict';
 
-const ISL = { cols: 5, rows: 4, dx: 2.5, dz: 2.7 };
+const ISL = { cols: 7, rows: 6, dx: 2.5, dz: 2.7 };
+const ISL_START = Math.floor(ISL.cols / 2);
 let ISLE = null;
 
 function islandsScene() {
@@ -13,7 +14,7 @@ function islandsScene() {
   const board = new THREE.Group();
   scene.add(board);
   let cells = [], hero, shadow, old = null;
-  const P = S.P = { c: 2, r: 0, prev: null, hop: null, x: 0, z: 0, y: 0 };
+  const P = S.P = { c: ISL_START, r: 0, prev: null, hop: null, x: 0, z: 0, y: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   const pos = (c, r) => new THREE.Vector3((c - (ISL.cols - 1) / 2) * ISL.dx, 0, -r * ISL.dz);
 
@@ -21,11 +22,11 @@ function islandsScene() {
 
   S.onTheme = th => {
     K3.horizon(S, th, { radius: 70, y: -14, hills: false });
-    K3.weather(S, th, { w: 20, h: 16, d: 40, cz: -6, cy: -6 });
+    K3.weather(S, th, { w: 26, h: 16, d: 50, cz: -8, cy: -6 });
     /* غيوم تحت الجزر */
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 24; i++) {
       const c = K3.cloud(K3.rnd(.8, 1.6), th.dark ? '#3A4A80' : '#FFFFFF', th.dark ? .55 : .92);
-      c.position.set(K3.rnd(-16, 16), K3.rnd(-7, -3.5), K3.rnd(-22, 6));
+      c.position.set(K3.rnd(-20, 20), K3.rnd(-7, -3.5), K3.rnd(-26, 6));
       c.userData.drift = K3.rnd(.2, .6);
       S.env.add(c);
     }
@@ -78,7 +79,7 @@ function islandsScene() {
     for (let tries = 0; tries < 60; tries++) {
       const grid = [...Array(rows)].map(() => Array(cols).fill('plain'));
       const spots = [];
-      for (let r = 1; r < rows; r++) for (let c = 0; c < cols; c++) spots.push([c, r]);
+      for (let r = 2; r < rows; r++) for (let c = 0; c < cols; c++) spots.push([c, r]);
       const chosen = [];
       for (const s of shuffle(spots)) {
         if (chosen.length === answers.length) break;
@@ -89,7 +90,7 @@ function islandsScene() {
       chosen.forEach(([c, r], k) => { grid[r][c] = k; });
       for (let r = 1; r < rows; r++) for (let c = 0; c < cols; c++) if (grid[r][c] === 'plain' && Math.random() < (tries < 40 ? .28 : 0)) grid[r][c] = null;
       /* كل جزيرة إجابة يجب أن يُوصَل إليها من البداية عبر الجزر العادية */
-      const seen = new Set(['2,0']), queue = [[2, 0]], reach = new Set();
+      const seen = new Set([ISL_START + ',0']), queue = [[ISL_START, 0]], reach = new Set();
       while (queue.length) {
         const [c, r] = queue.shift();
         for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -105,7 +106,7 @@ function islandsScene() {
       if (reach.size === answers.length) return grid;
     }
     const grid = [...Array(ISL.rows)].map(() => Array(ISL.cols).fill('plain'));
-    answers.forEach((a, k) => { grid[1 + Math.floor(k / 2)][k % 2 ? 4 : 0] = k; });
+    answers.forEach((a, k) => { grid[1 + Math.floor(k / 2)][k % 2 ? ISL.cols - 1 : 0] = k; });
     return grid;
   }
   function build(keep) {
@@ -127,7 +128,7 @@ function islandsScene() {
       board.add(g);
       cells.push({ c, r, a, g, rise: -(r * .12 + c * .05), state: '', ph: Math.random() * 6 });
     }
-    P.c = 2; P.r = 0; P.prev = null; P.hop = null;
+    P.c = ISL_START; P.r = 0; P.prev = null; P.hop = null;
   }
   S.cells = () => cells;
   const cellAt = (c, r) => cells.find(x => x.c === c && x.r === r && x.state !== 'gone');
