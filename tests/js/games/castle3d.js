@@ -137,7 +137,7 @@ function castleScene() {
   };
 
   const angDiff = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
-  const jump = () => { if (P.vy === 0 && !P.rise) { P.vy = 8.2; FX.play('tick'); } };
+  const jump = () => { if (P.vy === 0 && !P.rise) { P.vy = 9.6; FX.play('tick'); } };
   K3.controls(S, {
     hold: joy.hold,
     dir(d) { if (d === 'up') jump(); },
@@ -177,7 +177,7 @@ function castleScene() {
     const inp = live ? joy.read() : { x: 0, z: 0 };
     if (inp.z < -.6 && joy.active) jump();
     /* الدوران حول البرج */
-    if (!P.rise) P.a += inp.x * dt * 1.9;
+    if (!P.rise) P.a -= inp.x * dt * 1.9;
     const floorY = level * CT.H;
     /* القفز والجاذبية والهبوط على درجة */
     if (P.rise) {
