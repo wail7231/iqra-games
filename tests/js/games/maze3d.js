@@ -13,7 +13,7 @@ function maze3dScene() {
   const world = new THREE.Group();
   scene.add(world);
   let M = null, hero, shadow;
-  const P = { c: 0, r: 0, x: 0, z: 0, from: null, t: 1, dir: null, run: null, bounce: null };
+  const P = S.P = { c: 0, r: 0, x: 0, z: 0, from: null, t: 1, dir: null, run: null, bounce: null };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
 
   camera.position.set(0, 10, 8);
@@ -119,7 +119,7 @@ function maze3dScene() {
     }
     /* زينة حول المتاهة */
     for (let i = 0; i < 22; i++) {
-      const a = Math.random() * Math.PI * 2, rr = Math.max(W, H) * .5 + K3.rnd(2, 8);
+      const a = Math.PI * K3.rnd(.92, 2.08), rr = Math.max(W, H) * .5 + K3.rnd(2.5, 9);
       const p = K3.prop(th, K3.rnd(1, 1.6));
       p.position.set(Math.cos(a) * rr, 0, Math.sin(a) * rr);
       world.add(p);
@@ -155,6 +155,7 @@ function maze3dScene() {
       K3.recolorSign(d.s, d.a.t, { bg: '#C0392B', fg: '#FFFFFF', edge: '#7A1F15', px: 64 });
     }
   }
+  S.maze = () => M;
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
@@ -164,7 +165,7 @@ function maze3dScene() {
     P.c = M.sc; P.r = M.sr; P.from = null; P.t = 1; P.run = null;
     const p = at(P.c, P.r); P.x = p.x; P.z = p.z;
     draw();
-    camera.position.set(p.x, 10, p.z + 7.5);
+    camera.position.set(p.x, 11, p.z + 6.4);
   };
 
   /* ---------- الحركة ---------- */
@@ -239,9 +240,9 @@ function maze3dScene() {
     }
     M.doors.forEach(d => { if (d.pad && !d.state) d.pad.material.opacity = .35 + Math.sin(S.t * 4) * .25; });
     camera.position.x += (P.x - camera.position.x) * Math.min(1, dt * 3);
-    camera.position.z += (P.z + 7.2 - camera.position.z) * Math.min(1, dt * 3);
-    camera.position.y += (10.5 - camera.position.y) * Math.min(1, dt * 3);
-    camera.lookAt(camera.position.x, 0, camera.position.z - 7.6);
+    camera.position.z += (P.z + 6.4 - camera.position.z) * Math.min(1, dt * 3);
+    camera.position.y += (11 - camera.position.y) * Math.min(1, dt * 3);
+    camera.lookAt(camera.position.x, 0, camera.position.z - 8.6);
   };
   S.size();
   return S;
