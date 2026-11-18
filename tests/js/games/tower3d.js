@@ -208,10 +208,10 @@ function towerScene() {
       if (f.bounced && f.m.position.y < -6) { f.done = true; scene.remove(f.m); }
     });
     /* الكاميرا ترتفع مع البرج وتدور حوله قليلًا */
-    const cy = topY + 2.2, a = Math.sin(S.t * .25) * .22;
+    const cy = topY + 1.3, a = Math.sin(S.t * .25) * .22;
     camera.position.x += (Math.sin(a) * 10 - camera.position.x) * Math.min(1, dt * 2);
     camera.position.z += (Math.cos(a) * 10 - camera.position.z) * Math.min(1, dt * 2);
-    camera.position.y += (cy + 1.6 - camera.position.y) * Math.min(1, dt * 2);
+    camera.position.y += (cy + 1.5 - camera.position.y) * Math.min(1, dt * 2);
     camera.lookAt(0, cy, 0);
   };
   camera.position.set(0, 4, 10);
