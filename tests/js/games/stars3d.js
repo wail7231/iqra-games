@@ -5,7 +5,7 @@
 'use strict';
 
 let STAR3 = null;
-const ARENA_R = 8.2;
+const ARENA_R = 7.4;
 
 function starsScene() {
   const S = K3.create({ fov: 48, fogNear: 30, fogFar: 85, ratio: .62 });
@@ -13,11 +13,11 @@ function starsScene() {
   const field = new THREE.Group();
   scene.add(field);
   let orbs = [], hero, shadow, rider, arena;
-  const P = { x: 0, z: 3.5, vx: 0, vz: 0, target: null, push: 0 };
+  const P = S.P = { x: 0, z: 3.5, vx: 0, vz: 0, target: null, push: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   const speed = () => 3.2 + Play.cfg.speed * .45;
 
-  camera.position.set(0, 12.5, 11);
+  camera.position.set(0, 10, 9.6);
   camera.lookAt(0, 0, 0);
 
   S.onTheme = th => {
@@ -67,14 +67,14 @@ function starsScene() {
   /* ---------- النجوم ---------- */
   function orb(a, th) {
     const g = new THREE.Group();
-    const s = K3.starMesh(.55, th.gold, .25);
+    const s = K3.starMesh(.62, th.gold, .28);
     g.add(s);
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: th.gold, transparent: true, opacity: .45, depthWrite: false }));
     halo.scale.set(2, 2, 1); g.add(halo);
-    const sign = K3.sign(a.t, { h: .62, px: 64 });
-    const maxW = 3;
+    const sign = K3.sign(a.t, { h: .9, px: 64 });
+    const maxW = 3.6;
     if (sign.scale.x > maxW) sign.scale.set(maxW, maxW / sign.userData.ratio, 1);
-    sign.position.y = 1.15;
+    sign.position.y = 1.3;
     g.add(sign);
     const sh = K3.blob(.5, .22);
     sh.position.y = -.88;
@@ -110,6 +110,7 @@ function starsScene() {
     K3.tint(o.g, '#4CAF50', .7);
     K3.recolorSign(o.g.userData.sign, '✓ ' + o.a.t, { bg: '#4CAF50', fg: '#FFFFFF', edge: '#2E7D32', px: 64 });
   }
+  S.orbs = () => orbs;
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
@@ -203,8 +204,8 @@ function starsScene() {
       spawn(fresh);
     }
     camera.position.x += (P.x * .35 - camera.position.x) * Math.min(1, dt * 2.5);
-    camera.position.z += (P.z * .35 + 11 - camera.position.z) * Math.min(1, dt * 2.5);
-    camera.lookAt(camera.position.x, 0, camera.position.z - 11);
+    camera.position.z += (P.z * .35 + 9.6 - camera.position.z) * Math.min(1, dt * 2.5);
+    camera.lookAt(camera.position.x, 0, camera.position.z - 10.2);
   };
   S.size();
   return S;
