@@ -1,8 +1,8 @@
-/* لعبة «الاخلاص» — صُنعت بأداة الألعاب التفاعلية، IQRA Network */
+/* لعبة «المعوذات» — صُنعت بأداة الألعاب التفاعلية، IQRA Network */
 window.__GAME__ = {
  "id": "gmwldc47ukg4",
  "type": "islands3d",
- "name": "الاخلاص",
+ "name": "المعوذات",
  "desc": "",
  "settings": {
   "font": "ui",
@@ -35,5 +35,5 @@ window.__GAME__ = {
   }
  ],
  "created": 1794960834906,
- "updated": 1795017701738
+ "updated": 1795017711576
 };

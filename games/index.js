@@ -3,10 +3,10 @@ window.__GAMES_INDEX__ = [
  {
   "id": "gmwldc47ukg4",
   "type": "islands3d",
-  "name": "الاخلاص",
+  "name": "المعوذات",
   "desc": "",
   "count": 3,
-  "updated": 1795017701738
+  "updated": 1795017711576
  },
  {
   "id": "gmw0lxrc0pfu",
