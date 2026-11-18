@@ -88,7 +88,7 @@ function islandsScene() {
       }
       if (chosen.length < answers.length) continue;
       chosen.forEach(([c, r], k) => { grid[r][c] = k; });
-      for (let r = 1; r < rows; r++) for (let c = 0; c < cols; c++) if (grid[r][c] === 'plain' && Math.random() < (tries < 40 ? .28 : 0)) grid[r][c] = null;
+      for (let r = 1; r < rows; r++) for (let c = 0; c < cols; c++) if (grid[r][c] === 'plain' && Math.random() < (tries < 40 ? .32 : 0)) grid[r][c] = null;
       /* كل جزيرة إجابة يجب أن يُوصَل إليها من البداية عبر الجزر العادية */
       const seen = new Set([ISL_START + ',0']), queue = [[ISL_START, 0]], reach = new Set();
       while (queue.length) {
