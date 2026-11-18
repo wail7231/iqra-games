@@ -201,7 +201,7 @@ function maze3dScene() {
         S.missed = true;
         K3.burstAt(S, pt, false);
         FX.play('bad');
-        if (!Play.mistake()) { const back = { up: 'down', down: 'up', left: 'right', right: 'left' }[P.dir]; P.bounce = back; }
+        if (!Play.mistake()) { const back = { up: 'down', down: 'up', left: 'right', right: 'left' }[P.dir]; setTimeout(() => step(back), 380); }
       }
       return;
     }
@@ -224,8 +224,7 @@ function maze3dScene() {
       const a = at(P.from.c, P.from.r), b = at(P.c, P.r), k = P.t;
       P.x = a.x + (b.x - a.x) * k; P.z = a.z + (b.z - a.z) * k;
       if (P.t >= 1) {
-        if (P.bounce) { const d = P.bounce; P.bounce = null; M.doors.forEach(x => { if (x.c === P.c && x.r === P.r) x.wasHere = true; }); step(d); }
-        else arrive();
+        arrive();
       }
     } else {
       /* مفتاح مضغوط باستمرار = يكمل السير */
