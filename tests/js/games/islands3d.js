@@ -140,7 +140,7 @@ function islandsScene() {
   function hopTo(c, r, back) {
     if (P.hop || S.answered || Play.roundDone) return;
     const to = cellAt(c, r);
-    if (!to) { if (!back) { FX.play('tick'); hero.userData.nudge = { t: 0, dc: c - P.c, dr: r - P.r }; } return; }
+    if (!to || to.state === 'bad') { if (!back) { FX.play('tick'); hero.userData.nudge = { t: 0, dc: c - P.c, dr: r - P.r }; } return; }
     P.hop = { from: { c: P.c, r: P.r }, to, t: 0, back };
     if (!back) P.prev = { c: P.c, r: P.r };
     P.c = c; P.r = r;
