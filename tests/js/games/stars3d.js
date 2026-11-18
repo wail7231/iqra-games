@@ -5,7 +5,7 @@
 'use strict';
 
 let STAR3 = null;
-const ARENA_R = 7.4;
+const ARENA_R = 13;
 
 function starsScene() {
   const S = K3.create({ fov: 48, fogNear: 30, fogFar: 85, ratio: .62 });
@@ -13,7 +13,7 @@ function starsScene() {
   const field = new THREE.Group();
   scene.add(field);
   let orbs = [], hero, shadow, rider, arena;
-  const P = S.P = { x: 0, z: 3.5, vx: 0, vz: 0, target: null, push: 0 };
+  const P = S.P = { x: 0, z: 0, vx: 0, vz: 0, target: null, push: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   const speed = () => 3.2 + Play.cfg.speed * .45;
 
@@ -27,25 +27,25 @@ function starsScene() {
     top.position.y = -.25; arena.add(top);
     const inner = new THREE.Mesh(new THREE.CircleGeometry(ARENA_R - .3, 48), K3.mat(th.path, { transparent: true, opacity: .55 }));
     inner.rotation.x = -Math.PI / 2; inner.position.y = .01; arena.add(inner);
-    for (let k = 1; k <= 3; k++) {
-      const ring = new THREE.Mesh(new THREE.RingGeometry(k * 2.4 - .04, k * 2.4 + .04, 64), new THREE.MeshBasicMaterial({ color: th.accent, transparent: true, opacity: .25, side: THREE.DoubleSide }));
+    for (let k = 1; k <= 5; k++) {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(k * 2.5 - .05, k * 2.5 + .05, 96), new THREE.MeshBasicMaterial({ color: th.accent, transparent: true, opacity: .25, side: THREE.DoubleSide }));
       ring.rotation.x = -Math.PI / 2; ring.position.y = .02; arena.add(ring);
     }
     const rim = new THREE.Mesh(new THREE.TorusGeometry(ARENA_R + .55, .16, 8, 64), K3.mat(th.wall2, { emissive: K3.col(th.wall2).multiplyScalar(th.dark ? .5 : .15) }));
     rim.rotation.x = Math.PI / 2; rim.position.y = .02; arena.add(rim);
-    const rock = new THREE.Mesh(new THREE.ConeGeometry(ARENA_R + .3, 6, 12), K3.mat(th.dark ? '#2A2550' : th.sketch ? '#FFFFFF' : '#9C7A55', { flatShading: true }));
-    rock.rotation.x = Math.PI; rock.position.y = -3.5; arena.add(rock);
-    for (let i = 0; i < 10; i++) {
-      const a = i / 10 * Math.PI * 2, p = K3.prop(th, .8);
+    const rock = new THREE.Mesh(new THREE.ConeGeometry(ARENA_R + .3, 9, 14), K3.mat(th.dark ? '#2A2550' : th.sketch ? '#FFFFFF' : '#9C7A55', { flatShading: true }));
+    rock.rotation.x = Math.PI; rock.position.y = -5; arena.add(rock);
+    for (let i = 0; i < 18; i++) {
+      const a = i / 18 * Math.PI * 2, p = K3.prop(th, 1);
       p.position.set(Math.cos(a) * (ARENA_R + 2.2), -.5, Math.sin(a) * (ARENA_R + 2.2));
       if (Math.sin(a) < .3) arena.add(p);
     }
     S.env.add(arena);
     K3.horizon(S, th, { radius: 75, y: -12, hills: false });
-    K3.weather(S, th, { w: 18, h: 14, d: 30, cz: -2, cy: -2 });
+    K3.weather(S, th, { w: 26, h: 14, d: 44, cz: -2, cy: -2 });
     for (let i = 0; i < 10; i++) {
       const c = K3.cloud(K3.rnd(1, 2), th.dark ? '#3A4A80' : '#FFFFFF', th.dark ? .5 : .9);
-      c.position.set(K3.rnd(-20, 20), K3.rnd(-9, -4), K3.rnd(-20, 10));
+      c.position.set(K3.rnd(-30, 30), K3.rnd(-11, -5), K3.rnd(-30, 14));
       c.userData.drift = K3.rnd(.2, .5); S.env.add(c);
     }
     S.fx.push(dt => S.env.children.forEach(c => { if (c.userData.drift) { c.position.x += c.userData.drift * dt; if (c.position.x > 22) c.position.x = -22; } }));
@@ -203,8 +203,8 @@ function starsScene() {
       const fresh = mixAnswers(S.q, 6, [...S.collected, ...keep]).map(a => ({ a }));
       spawn(fresh);
     }
-    camera.position.x += (P.x * .35 - camera.position.x) * Math.min(1, dt * 2.5);
-    camera.position.z += (P.z * .35 + 9.6 - camera.position.z) * Math.min(1, dt * 2.5);
+    camera.position.x += (P.x * .8 - camera.position.x) * Math.min(1, dt * 2.5);
+    camera.position.z += (P.z * .8 + 9.6 - camera.position.z) * Math.min(1, dt * 2.5);
     camera.lookAt(camera.position.x, 0, camera.position.z - 10.2);
   };
   S.size();

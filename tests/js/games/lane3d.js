@@ -185,7 +185,7 @@ function laneScene() {
       ball.position.set(P.x, .55 * sq + P.y, 0);
       ball.scale.set(1 / Math.sqrt(sq), sq, 1 / Math.sqrt(sq));
       /* الكرات تتدحرج، وبقية الأشكال تدور حول نفسها حتى تبقى ظاهرة */
-      const roll = ['moon', 'snowball', 'bubble', 'sketch'].includes(ball.userData.kind);
+      const roll = ['snowball', 'bubble', 'sketch'].includes(ball.userData.kind);
       if (roll) ball.userData.body.rotation.x -= v * dt / .55; else ball.userData.body.rotation.y += dt * (1.5 + v * .15);
       ball.rotation.z = (P.x - LANE_X[P.lane]) * .25;
       shadow.position.set(P.x, .02, 0);
