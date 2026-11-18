@@ -111,6 +111,8 @@ function towerScene() {
     });
     sel = Math.max(0, Math.min(sel, choices.length - 1));
   }
+  S.choices = () => choices;
+  S.pick = k => { sel = k; drop(); };
   S.setQuestion = it => {
     S.it = it; S.missed = false; S.done = false;
     words = towerWords(it);
