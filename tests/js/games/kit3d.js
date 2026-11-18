@@ -223,6 +223,40 @@ const K3 = (() => {
     S.cv.addEventListener('pointerup', up);
     S.cv.addEventListener('pointercancel', () => { down = null; if (hold) hold(null, 'up'); });
   }
+  /* عصا تحكم باللمس: تظهر تحت الإصبع حيث يلمس، وتعيد اتجاهًا بين -1 و1 (x يمين، z أسفل) */
+  function joystick(S) {
+    const joy = { x: 0, z: 0, o: null, active: false };
+    const ui = el('div', 'k3-joy', '<i></i>');
+    S.wrap.appendChild(ui);
+    joy.hold = (e, phase) => {
+      if (phase === 'down' && e) {
+        joy.o = { x: e.clientX, y: e.clientY }; joy.active = true;
+        const r = S.wrap.getBoundingClientRect();
+        ui.style.left = (e.clientX - r.left) + 'px'; ui.style.top = (e.clientY - r.top) + 'px';
+        ui.classList.add('on');
+      } else if (phase === 'move' && joy.o && e) {
+        const dx = e.clientX - joy.o.x, dy = e.clientY - joy.o.y, len = Math.hypot(dx, dy);
+        const k = len < 6 ? 0 : Math.min(1, len / 55) / len;
+        joy.x = dx * k; joy.z = dy * k;
+        ui.firstChild.style.transform = 'translate(' + Math.max(-28, Math.min(28, dx)) + 'px,' + Math.max(-28, Math.min(28, dy)) + 'px)';
+      } else if (phase === 'up') {
+        joy.o = null; joy.x = joy.z = 0; joy.active = false;
+        ui.classList.remove('on'); ui.firstChild.style.transform = '';
+      }
+    };
+    /* اتجاه موحّد من الأسهم والعصا */
+    joy.read = () => {
+      const k = S.keys;
+      let x = joy.x, z = joy.z;
+      if (k.ArrowLeft || k.KeyA) x -= 1;
+      if (k.ArrowRight || k.KeyD) x += 1;
+      if (k.ArrowUp || k.KeyW) z -= 1;
+      if (k.ArrowDown || k.KeyS) z += 1;
+      const l = Math.hypot(x, z);
+      return l > 1 ? { x: x / l, z: z / l } : { x, z };
+    };
+    return joy;
+  }
   /* نقطة على الأرض (مستوى y) تحت إصبع اللاعب */
   const ray = new THREE.Raycaster();
   function pick(S, e, objects) {
@@ -734,7 +768,7 @@ const K3 = (() => {
   const ease = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
 
   return {
-    THEMES, theme, mat, glow, col, rnd, ease, fonts, sign, plate, recolorSign, textCanvas, texture, create, clear, controls, pick, groundPoint,
+    THEMES, theme, mat, glow, col, rnd, ease, fonts, sign, plate, recolorSign, textCanvas, texture, create, clear, controls, joystick, pick, groundPoint,
     player, blob, starMesh, tree, pine, palm, prop, cloud, planet, horizon, weather, groundTexture, burstAt, tint, dotTex,
   };
 })();
