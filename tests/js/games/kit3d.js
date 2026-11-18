@@ -246,7 +246,7 @@ const K3 = (() => {
     return s;
   }
   function starMesh(r, color, depth = .22) {
-    const g = new THREE.ExtrudeGeometry(starShape(r, r * .45), { depth, bevelEnabled: true, bevelThickness: .06, bevelSize: .05, bevelSegments: 2 });
+    const g = new THREE.ExtrudeGeometry(starShape(r, r * .45), { depth, bevelEnabled: true, bevelThickness: Math.min(.06, r * .12), bevelSize: Math.min(.05, r * .1), bevelSegments: 2 });
     g.center();
     return new THREE.Mesh(g, mat(color, { emissive: col(color).multiplyScalar(.25) }));
   }
