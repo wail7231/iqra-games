@@ -11,9 +11,7 @@ const SKI_W = 7.5;          // نصف عرض المنحدر
 function skiScene() {
   const S = K3.create({ fov: 58, fogNear: 28, fogFar: 75, ratio: .62 });
   const { scene, camera } = S;
-  const slope = new THREE.Group();          // كل شيء على المنحدر داخل هذه المجموعة المائلة
-  slope.rotation.x = .2;
-  scene.add(slope);
+  let slope = null;                         // كل شيء على المنحدر داخل مجموعة مائلة (تُبنى مع القالب)
   const joy = K3.joystick(S);
   const items = [];                          // بوابات وصخور ومطبّات وزينة تتحرك نحو الكرة
   let ground, groundTex, ball, shadow, trail = [];
@@ -24,6 +22,11 @@ function skiScene() {
   camera.position.set(0, 4.6, 7.2);
 
   S.onTheme = th => {
+    slope = new THREE.Group();
+    slope.rotation.x = .2;
+    S.env.add(slope);
+    items.length = 0;
+    trail = [];
     groundTex = K3.groundTexture(th, 10);
     groundTex.repeat.set(4, 30);
     ground = new THREE.Mesh(new THREE.PlaneGeometry(SKI_W * 2 + 2, 180), K3.mat(th.ground, { map: groundTex }));
@@ -37,22 +40,17 @@ function skiScene() {
       const rope = new THREE.Mesh(new THREE.BoxGeometry(.12, .12, 180), K3.mat(th.accent));
       rope.position.set(sx * (SKI_W + .9), .6, -80); slope.add(rope);
     }
-    S.env.add(slope.children.length ? new THREE.Group() : new THREE.Group());
     K3.horizon(S, th, { radius: 85, y: 6 });
     K3.weather(S, th, { w: 20, h: 14, d: 50, cz: -20 });
-    items.splice(0).forEach(it => slope.remove(it.g));
     for (let z = -6; z > -90; z -= 6) addSide(z);
-    if (ball) scene.remove(ball, shadow);
     ball = K3.player();
     shadow = K3.blob(.55, .3);
     slope.add(ball, shadow);
-    trail.forEach(t => slope.remove(t.m));
-    trail = [];
     for (let i = 0; i < 24; i++) {
       const m = new THREE.Mesh(new THREE.SphereGeometry(.14, 6, 4), new THREE.MeshBasicMaterial({ color: th.dark ? '#9DB3D9' : '#FFFFFF', transparent: true, opacity: 0 }));
       slope.add(m); trail.push({ m, life: 0 });
     }
-    if (S.q && !S.answered) spawnRow(-45);
+    if (S.q && !S.answered) spawnRow(-42);
   };
   /* ---------- قطع المنحدر ---------- */
   function addSide(z) {
@@ -118,6 +116,7 @@ function skiScene() {
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
+    if (!slope) return;
     items.filter(it => it.kind === 'row' && !it.done).forEach(it => { slope.remove(it.g); it.dead = true; });
     spawnRow(-42);
   };
@@ -156,6 +155,7 @@ function skiScene() {
   }
 
   S.onFrame = dt => {
+    if (!slope) return;
     const live = S.started && !Play.finished;
     const v = live ? speed() : 0;
     P.tuck = Math.max(0, P.tuck - dt);
