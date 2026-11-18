@@ -262,7 +262,8 @@ const K3 = (() => {
     return pivot;
   }
   function twinkle(mesh, speed = 3, phase = 0, base = 1, amp = .35) {
-    mesh.onBeforeRender = () => mesh.scale.setScalar(base + Math.sin(clock() * speed + phase) * amp);
+    const s0 = mesh.scale.x;
+    mesh.onBeforeRender = () => mesh.scale.setScalar(s0 * (base + Math.sin(clock() * speed + phase) * amp));
     return mesh;
   }
   const sparkTex = (() => {
