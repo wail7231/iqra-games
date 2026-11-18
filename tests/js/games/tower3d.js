@@ -183,7 +183,10 @@ function towerScene() {
     choices.forEach((c, k) => {
       c.g.rotation.z = Math.sin(S.t * 1.8 + c.g.userData.ph) * .05;
       c.g.position.y = (k === sel ? -.15 : 0) + Math.sin(S.t * 2 + k) * .04;
-      c.g.scale.setScalar(k === sel ? 1.08 : 1);
+      c.g.scale.setScalar(k === sel ? 1.1 : 1);
+      /* المكعب المختار يتوهج بلون القالب */
+      const side = c.g.userData.m.material[0];
+      side.emissive.set(k === sel ? K3.theme().gold : '#000000').multiplyScalar(k === sel ? .45 + Math.sin(S.t * 6) * .15 : 0);
     });
     if (claw && choices[sel]) {
       claw.position.x += (choices[sel].g.position.x - claw.position.x) * Math.min(1, dt * 12);
