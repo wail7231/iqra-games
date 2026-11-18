@@ -237,94 +237,195 @@ const K3 = (() => {
     return ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -y), p) ? p : null;
   }
 
-  /* ---------- شكل اللاعب حسب القالب (أشكال بلا أرواح) ---------- */
-  function starShape(r1, r2, n = 5) {
+  /* أجزاء تتحرك وحدها (نجوم صغيرة تدور، لمعات تومض): تتحدّث قبل رسمها في كل إطار */
+  const clock = () => performance.now() / 1000;
+  function orbit(parent, mesh, r, speed, tilt = 0, phase = 0, y = 0) {
+    const pivot = new THREE.Group();
+    pivot.rotation.x = tilt;
+    mesh.position.set(r, y, 0);
+    pivot.add(mesh);
+    parent.add(pivot);
+    mesh.onBeforeRender = () => { pivot.rotation.y = phase + clock() * speed; };
+    return pivot;
+  }
+  function twinkle(mesh, speed = 3, phase = 0, base = 1, amp = .35) {
+    mesh.onBeforeRender = () => mesh.scale.setScalar(base + Math.sin(clock() * speed + phase) * amp);
+    return mesh;
+  }
+  const sparkTex = (() => {
+    let t = null;
+    return () => {
+      if (t) return t;
+      const c = document.createElement('canvas'); c.width = c.height = 64;
+      const g = c.getContext('2d');
+      g.fillStyle = '#FFFFFF';
+      g.beginPath(); g.moveTo(32, 0); g.quadraticCurveTo(36, 28, 64, 32); g.quadraticCurveTo(36, 36, 32, 64); g.quadraticCurveTo(28, 36, 0, 32); g.quadraticCurveTo(28, 28, 32, 0); g.fill();
+      return (t = texture(c));
+    };
+  })();
+  const spark = (c = '#FFFFFF', s = .25) => { const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: sparkTex(), color: c, transparent: true, depthWrite: false })); m.scale.set(s, s, 1); return m; };
+  const halo = (c, s, o = .5) => { const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: c, transparent: true, opacity: o, depthWrite: false })); m.scale.set(s, s, 1); return m; };
+  function crescentShape(r) {
     const s = new THREE.Shape();
-    for (let i = 0; i <= n * 2; i++) {
-      const a = Math.PI / 2 + i * Math.PI / n, r = i % 2 ? r2 : r1;
-      i ? s.lineTo(Math.cos(a) * r, Math.sin(a) * r) : s.moveTo(Math.cos(a) * r, Math.sin(a) * r);
-    }
+    s.absarc(0, 0, r, Math.PI * .5, Math.PI * 1.5, false);
+    s.absarc(r * .42, 0, r * .82, Math.PI * 1.36, Math.PI * .64, true);
     return s;
   }
-  function starMesh(r, color, depth = .22) {
-    const g = new THREE.ExtrudeGeometry(starShape(r, r * .45), { depth, bevelEnabled: true, bevelThickness: .06, bevelSize: .05, bevelSegments: 2 });
-    g.center();
-    return new THREE.Mesh(g, mat(color, { emissive: col(color).multiplyScalar(.25) }));
-  }
+
+  /* ---------- شكل اللاعب حسب القالب (أشكال بلا أرواح، بتفاصيل وأجزاء تتحرك) ---------- */
   function player(kind = THEME_EMBLEM[Play.cfg.theme] || 'star') {
     const g = new THREE.Group(), body = new THREE.Group();
     g.add(body);
     g.userData.body = body;
-    const sph = (r, c, o) => new THREE.Mesh(new THREE.SphereGeometry(r, 28, 20), mat(c, o));
+    const sph = (r, c, o, ws = 28, hs = 20) => new THREE.Mesh(new THREE.SphereGeometry(r, ws, hs), mat(c, o));
+    const shiny = (c, o = {}) => new THREE.MeshPhongMaterial({ color: c, shininess: 80, specular: col('#FFFFFF').multiplyScalar(.35), ...o });
     switch (kind) {
       case 'moon': {
-        body.add(sph(.5, '#FFF3C4', { emissive: col('#F2D27A').multiplyScalar(.55) }));
-        [[.25, .18, .4, .1], [-.2, -.1, .44, .08], [.05, -.3, .38, .07]].forEach(([x, y, z, r]) => { const m = sph(r, '#E2C47A'); m.position.set(x, y, z); m.scale.z = .4; body.add(m); });
-        const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: '#F6E7A8', transparent: true, opacity: .55, depthWrite: false }));
-        halo.scale.set(2, 2, 1); g.add(halo);
+        /* هلال ذهبي بحواف ناعمة، وفوهات صغيرة، ونجمتان تدوران حوله */
+        const geo = new THREE.ExtrudeGeometry(crescentShape(.55), { depth: .22, bevelEnabled: true, bevelThickness: .08, bevelSize: .07, bevelSegments: 4, curveSegments: 32 });
+        geo.center();
+        const m = new THREE.Mesh(geo, shiny('#FFF0B0', { emissive: col('#F2C94C').multiplyScalar(.45) }));
+        body.add(m);
+        [[-.32, .2, .17, .07], [-.38, -.18, .17, .05], [-.18, .4, .16, .04]].forEach(([x, y, z, r]) => { const c = sph(r, '#E2B85A'); c.position.set(x, y, z); c.scale.z = .35; body.add(c); });
+        g.add(halo('#F6E7A8', 2.1, .5));
+        for (let i = 0; i < 2; i++) { const s = starMesh(.12, '#FFF6D0', .05); orbit(g, s, .78, 1.2 + i * .5, .5 - i, i * 3); }
+        orbit(g, spark('#FFFFFF', .22), .62, -2, .9, 1);
         break;
       }
       case 'flower': {
-        body.add(sph(.26, '#F7C948'));
-        for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2, p = sph(.2, '#E5559A'); p.scale.set(1.5, .55, .9); p.position.set(Math.cos(a) * .36, 0, Math.sin(a) * .36); p.rotation.y = -a; body.add(p); }
-        const c = sph(.12, '#FFFFFF'); c.position.y = .2; body.add(c);
-        body.rotation.x = .5;
+        /* زهرة بطبقتين من البتلات، وقلب منقّط، وأوراق خضراء */
+        const heart = sph(.22, '#F7C948', { emissive: col('#E07A1F').multiplyScalar(.15) });
+        heart.scale.z = .55; body.add(heart);
+        for (let i = 0; i < 14; i++) { const a = i * 2.4, rr = .05 + Math.sqrt(i / 14) * .15, d = sph(.028, '#B8681E', {}, 8, 6); d.position.set(Math.cos(a) * rr, Math.sin(a) * rr, .12); body.add(d); }
+        const petal = new THREE.SphereGeometry(.2, 16, 12);
+        for (let i = 0; i < 8; i++) {
+          const a = i / 8 * Math.PI * 2, p = new THREE.Mesh(petal, shiny('#E5559A')); p.scale.set(1.45, .7, .35);
+          p.position.set(Math.cos(a) * .4, Math.sin(a) * .4, -.03); p.rotation.z = a; body.add(p);
+          const a2 = a + Math.PI / 8, q = new THREE.Mesh(petal, shiny('#F4A6C1')); q.scale.set(1.05, .55, .3);
+          q.position.set(Math.cos(a2) * .3, Math.sin(a2) * .3, .03); q.rotation.z = a2; body.add(q);
+        }
+        for (const s of [-1, 1]) { const l = sph(.18, '#5FA052', { flatShading: true }); l.scale.set(1.5, .5, .2); l.position.set(s * .5, -.42, -.1); l.rotation.z = s * .5; body.add(l); }
+        orbit(g, sph(.04, '#FFFFFF', { emissive: col('#FFFFFF').multiplyScalar(.5) }), .75, 1.6, .4);
         break;
       }
       case 'snow': {
-        const ice = new THREE.Mesh(new THREE.OctahedronGeometry(.32, 0), mat('#D6EEFA', { emissive: col('#4A9CCB').multiplyScalar(.2) }));
-        body.add(ice);
-        const arm = new THREE.BoxGeometry(1.05, .09, .09), twig = new THREE.BoxGeometry(.26, .06, .06), m = mat('#FFFFFF', { emissive: col('#9CD5F2').multiplyScalar(.3) });
-        for (let i = 0; i < 3; i++) {
-          const a = new THREE.Mesh(arm, m); a.rotation.z = i * Math.PI / 3; body.add(a);
-          for (const s of [-1, 1]) for (const d of [-1, 1]) { const t = new THREE.Mesh(twig, m); t.position.set(Math.cos(i * Math.PI / 3) * .34 * s, Math.sin(i * Math.PI / 3) * .34 * s, 0); t.rotation.z = i * Math.PI / 3 + d * .8; body.add(t); }
+        /* ندفة ثلج بستة أذرع مزخرفة، وبلورة في القلب، ولمعات */
+        const m = shiny('#FFFFFF', { emissive: col('#9CD5F2').multiplyScalar(.35) });
+        const core = new THREE.Mesh(new THREE.CylinderGeometry(.17, .17, .1, 6), shiny('#BFE3F3', { emissive: col('#4A9CCB').multiplyScalar(.2) }));
+        core.rotation.x = Math.PI / 2; body.add(core);
+        const arm = new THREE.BoxGeometry(.56, .08, .08), twig = new THREE.BoxGeometry(.2, .055, .055);
+        for (let i = 0; i < 6; i++) {
+          const a = i * Math.PI / 3, armG = new THREE.Group(); armG.rotation.z = a;
+          const b = new THREE.Mesh(arm, m); b.position.x = .32; armG.add(b);
+          for (const [x, l] of [[.3, 1], [.46, .7]]) for (const d of [-1, 1]) { const t = new THREE.Mesh(twig, m); t.scale.x = l; t.position.set(x + .04, d * .06, 0); t.rotation.z = d * .9; armG.add(t); }
+          const tip = new THREE.Mesh(new THREE.OctahedronGeometry(.07, 0), shiny('#9CD5F2', { emissive: col('#59C3F0').multiplyScalar(.4) })); tip.position.x = .62; armG.add(tip);
+          body.add(armG);
         }
+        g.add(halo('#CFEFFF', 1.7, .45));
+        for (let i = 0; i < 3; i++) orbit(g, twinkle(spark('#FFFFFF', .2), 4, i * 2, 1, .4), .7, 1 + i * .3, i * .7, i * 2);
         break;
       }
       case 'sketch': {
+        /* كرة مرسومة بالقلم: خطوط مزدوجة مهتزة، وتظليل، وقلم رصاص صغير يدور حولها */
         const geo = new THREE.IcosahedronGeometry(.48, 1);
         body.add(new THREE.Mesh(geo, mat('#FFFFFF')));
-        body.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: '#2B4C7E' })));
+        const ink = new THREE.LineBasicMaterial({ color: '#2B4C7E' });
+        body.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), ink));
+        const l2 = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: '#5A6B88', transparent: true, opacity: .5 }));
+        l2.scale.setScalar(1.035); l2.rotation.set(.05, .08, .03); body.add(l2);
+        const hatch = new THREE.Group();
+        for (let i = 0; i < 6; i++) { const p = new THREE.Mesh(new THREE.BoxGeometry(.02, .3, .005), new THREE.MeshBasicMaterial({ color: '#9AA6BB' })); p.position.set(-.1 + i * .07, -.22, .44); p.rotation.z = .6; hatch.add(p); }
+        body.add(hatch);
+        const pencil = new THREE.Group();
+        const wood = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, .34, 6), mat('#F7C948')); pencil.add(wood);
+        const tip = new THREE.Mesh(new THREE.ConeGeometry(.05, .1, 6), mat('#F6E0B5')); tip.position.y = -.22; tip.rotation.x = Math.PI; pencil.add(tip);
+        const lead = new THREE.Mesh(new THREE.ConeGeometry(.018, .04, 6), mat('#2B4C7E')); lead.position.y = -.28; lead.rotation.x = Math.PI; pencil.add(lead);
+        const rub = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, .07, 6), mat('#F4A6C1')); rub.position.y = .2; pencil.add(rub);
+        pencil.rotation.z = .5;
+        orbit(g, pencil, .78, 1.3, .3);
         break;
       }
       case 'bubble': {
-        body.add(new THREE.Mesh(new THREE.SphereGeometry(.5, 32, 24), new THREE.MeshPhongMaterial({ color: '#9ED8DE', transparent: true, opacity: .5, shininess: 120, specular: col('#FFFFFF') })));
-        const hl = sph(.1, '#FFFFFF', { emissive: col('#FFFFFF') }); hl.position.set(-.2, .22, .38); body.add(hl);
-        const hl2 = sph(.05, '#FFFFFF', { emissive: col('#FFFFFF') }); hl2.position.set(.22, -.2, .42); body.add(hl2);
+        /* فقاعة بألوان قوس قزح خفيفة، ولمعات، وفقاعات صغيرة تدور */
+        body.add(new THREE.Mesh(new THREE.SphereGeometry(.5, 40, 30), new THREE.MeshPhongMaterial({ color: '#9ED8DE', transparent: true, opacity: .42, shininess: 140, specular: col('#FFFFFF'), emissive: col('#F4A6C1').multiplyScalar(.12) })));
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(.49, .012, 6, 48), new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: .55 }));
+        body.add(rim);
+        const inner = new THREE.Mesh(new THREE.SphereGeometry(.42, 24, 18), new THREE.MeshBasicMaterial({ color: '#C9B4FF', transparent: true, opacity: .12, side: THREE.BackSide }));
+        body.add(inner);
+        const hl = sph(.11, '#FFFFFF', { emissive: col('#FFFFFF') }); hl.scale.set(1.4, .8, .5); hl.position.set(-.2, .24, .38); hl.rotation.z = .6; body.add(hl);
+        const hl2 = sph(.05, '#FFFFFF', { emissive: col('#FFFFFF') }); hl2.position.set(.24, -.2, .4); body.add(hl2);
+        const small = () => new THREE.Mesh(new THREE.SphereGeometry(.09, 16, 12), new THREE.MeshPhongMaterial({ color: '#BFEAF0', transparent: true, opacity: .55, shininess: 120 }));
+        orbit(g, small(), .72, 1.3, .3);
+        orbit(g, small(), .66, -1, -.5, 2);
         break;
       }
       case 'planet': {
-        body.add(sph(.4, '#8E6CF0', { emissive: col('#3A2380').multiplyScalar(.4) }));
-        const band = new THREE.Mesh(new THREE.TorusGeometry(.4, .045, 8, 40), mat('#C9B4FF')); band.rotation.x = Math.PI / 2; band.position.y = .1; body.add(band);
-        const ring = new THREE.Mesh(new THREE.TorusGeometry(.66, .05, 8, 48), mat('#F6E7A8', { emissive: col('#F6E7A8').multiplyScalar(.4) }));
-        ring.rotation.x = Math.PI / 2 - .4; g.add(ring);
+        /* كوكب بأحزمة ملوّنة، وحلقتين مائلتين، وقمر صغير يدور */
+        body.add(sph(.4, '#8E6CF0', { emissive: col('#3A2380').multiplyScalar(.4) }, 36, 28));
+        [[.18, '#C9B4FF', .405], [-.08, '#B48CFF', .41], [-.25, '#6E52C8', .36]].forEach(([y, c, r]) => {
+          const band = new THREE.Mesh(new THREE.TorusGeometry(Math.sqrt(Math.max(.01, r * r - y * y)) + .005, .035, 8, 48), mat(c)); band.rotation.x = Math.PI / 2; band.position.y = y; body.add(band);
+        });
+        const spot = sph(.08, '#E8761E'); spot.position.set(.2, .05, .32); spot.scale.z = .4; body.add(spot);
+        const ringG = new THREE.Group(); ringG.rotation.x = Math.PI / 2 - .45; ringG.rotation.y = .2;
+        ringG.add(new THREE.Mesh(new THREE.TorusGeometry(.66, .045, 8, 64), mat('#F6E7A8', { emissive: col('#F6E7A8').multiplyScalar(.45) })));
+        ringG.add(new THREE.Mesh(new THREE.TorusGeometry(.8, .025, 6, 64), mat('#FFE6C4', { emissive: col('#E8761E').multiplyScalar(.3), transparent: true, opacity: .8 })));
+        g.add(ringG);
+        orbit(g, sph(.08, '#D9D9E8', { emissive: col('#FFFFFF').multiplyScalar(.15) }), 1, 1.1, .6);
+        g.add(halo('#B48CFF', 1.8, .35));
         break;
       }
       case 'pumpkin': {
-        for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2, s = sph(.28, i % 2 ? '#E8761E' : '#F08A2E'); s.scale.set(.75, 1, 1.2); s.position.set(Math.cos(a) * .2, 0, Math.sin(a) * .2); s.rotation.y = -a; body.add(s); }
-        const st = new THREE.Mesh(new THREE.CylinderGeometry(.05, .07, .22, 8), mat('#5C7F2A')); st.position.y = .36; body.add(st);
+        /* يقطينة بفصوص لامعة، وساق ملتوية، وورقة، ومحلاق ملفوف */
+        for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, s = new THREE.Mesh(new THREE.SphereGeometry(.28, 22, 16), shiny(i % 2 ? '#E8761E' : '#F08A2E')); s.scale.set(.72, .95, 1.2); s.position.set(Math.cos(a) * .2, 0, Math.sin(a) * .2); s.rotation.y = -a; body.add(s); }
+        const st = new THREE.Mesh(new THREE.CylinderGeometry(.045, .075, .24, 8), mat('#5C7F2A'));
+        st.position.set(.02, .36, 0); st.rotation.z = -.25; body.add(st);
+        const leaf = sph(.13, '#6E9B35', { flatShading: true }); leaf.scale.set(1.6, .2, .9); leaf.position.set(-.16, .32, .05); leaf.rotation.z = .4; body.add(leaf);
+        const vine = new THREE.Mesh(new THREE.TorusGeometry(.08, .012, 6, 20, Math.PI * 1.6), mat('#5C7F2A')); vine.position.set(.16, .38, .05); body.add(vine);
+        orbit(g, new THREE.Mesh(new THREE.SphereGeometry(.07, 10, 6), mat('#C2621B')), .7, 1.2, .3);
         break;
       }
       case 'sun': {
-        body.add(sph(.36, '#FFD24A', { emissive: col('#F7A21B').multiplyScalar(.6) }));
-        const cone = new THREE.ConeGeometry(.08, .24, 8), m = mat('#F7A21B', { emissive: col('#E8590C').multiplyScalar(.4) });
-        for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, c = new THREE.Mesh(cone, m); c.position.set(Math.cos(a) * .48, Math.sin(a) * .48, 0); c.rotation.z = a - Math.PI / 2; body.add(c); }
-        for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, c = new THREE.Mesh(cone, m); c.position.set(Math.cos(a) * .42, 0, Math.sin(a) * .42); c.rotation.set(Math.PI / 2, 0, a - Math.PI / 2); c.lookAt(Math.cos(a) * 2, 0, Math.sin(a) * 2); c.rotateX(Math.PI / 2); body.add(c); }
-        const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: '#FFD24A', transparent: true, opacity: .5, depthWrite: false }));
-        halo.scale.set(1.9, 1.9, 1); g.add(halo);
+        /* شمس بطبقتين من الأشعة تدوران بعكس بعض، وتاج مضيء */
+        const core = sph(.34, '#FFD24A', { emissive: col('#F7A21B').multiplyScalar(.65) }, 32, 24);
+        body.add(core);
+        const inner = sph(.25, '#FFF3B0', { emissive: col('#FFE07A').multiplyScalar(.6), transparent: true, opacity: .6 });
+        inner.position.z = .12; body.add(inner);
+        const cone = new THREE.ConeGeometry(.075, .26, 8);
+        const rays1 = new THREE.Group(), rays2 = new THREE.Group();
+        for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, c = new THREE.Mesh(cone, mat('#F7A21B', { emissive: col('#E8590C').multiplyScalar(.45) })); c.position.set(Math.cos(a) * .47, Math.sin(a) * .47, 0); c.rotation.z = a - Math.PI / 2; rays1.add(c); }
+        for (let i = 0; i < 12; i++) { const a = (i + .5) / 12 * Math.PI * 2, c = new THREE.Mesh(cone, mat('#FFD24A', { emissive: col('#F7B32B').multiplyScalar(.5) })); c.scale.setScalar(.7); c.position.set(Math.cos(a) * .42, Math.sin(a) * .42, -.03); c.rotation.z = a - Math.PI / 2; rays2.add(c); }
+        rays1.children[0].onBeforeRender = () => { rays1.rotation.z = clock() * .6; };
+        rays2.children[0].onBeforeRender = () => { rays2.rotation.z = -clock() * .9; };
+        body.add(rays1, rays2);
+        const corona = new THREE.Mesh(new THREE.TorusGeometry(.38, .02, 6, 48), glow('#FFF3B0'));
+        body.add(corona);
+        g.add(twinkle(halo('#FFD24A', 2, .5), 2, 0, 1, .06));
         break;
       }
       case 'snowball': {
-        const geo = new THREE.IcosahedronGeometry(.48, 2), p = geo.attributes.position;
+        /* كرة ثلج متكتلة، عليها حبات ثلج بارزة ولمعات تومض */
+        const geo = new THREE.IcosahedronGeometry(.48, 3), p = geo.attributes.position;
         for (let i = 0; i < p.count; i++) { const v = new THREE.Vector3().fromBufferAttribute(p, i), k = 1 + (Math.sin(v.x * 23) * Math.cos(v.y * 19) * Math.sin(v.z * 17)) * .05; p.setXYZ(i, v.x * k, v.y * k, v.z * k); }
         geo.computeVertexNormals();
-        body.add(new THREE.Mesh(geo, mat('#FFFFFF', { emissive: col('#DCE5F0').multiplyScalar(.25) })));
+        body.add(new THREE.Mesh(geo, mat('#FFFFFF', { emissive: col('#DCE5F0').multiplyScalar(.3) })));
+        for (let i = 0; i < 14; i++) {
+          const a = Math.random() * Math.PI * 2, e = Math.acos(Math.random() * 2 - 1), c = new THREE.Mesh(new THREE.DodecahedronGeometry(.06 + Math.random() * .05, 0), mat(i % 3 ? '#FFFFFF' : '#DCE8F7', { flatShading: true }));
+          c.position.setFromSphericalCoords(.48, e, a); body.add(c);
+        }
+        for (let i = 0; i < 4; i++) { const s = twinkle(spark('#FFFFFF', .2), 3 + i, i * 1.7, 1, .5); s.position.setFromSphericalCoords(.55, 1 + i * .4, i * 1.6); body.add(s); }
+        orbit(g, new THREE.Mesh(new THREE.SphereGeometry(.05, 8, 6), mat('#FFFFFF')), .72, 1.4, .5);
+        orbit(g, new THREE.Mesh(new THREE.SphereGeometry(.04, 8, 6), mat('#FFFFFF')), .66, -1.1, -.3, 2);
         break;
       }
-      default: { // star — نجمة ذهبية
-        const s = starMesh(.52, '#E3B341');
+      default: { // star — نجمة ذهبية بنجمة حمراء بارزة وحبات على الأطراف ولمعات تدور
+        const s = starMesh(.55, '#E3B341', .24);
+        s.material = shiny('#E3B341', { emissive: col('#E3B341').multiplyScalar(.25) });
         body.add(s);
-        const c = sph(.13, '#AB3920'); c.position.z = .17; c.scale.z = .5; body.add(c);
+        const inner = starMesh(.27, '#AB3920', .1); inner.position.z = .2; body.add(inner);
+        const c = sph(.08, '#FFF3C4', { emissive: col('#FFF3C4').multiplyScalar(.5) }); c.position.z = .27; body.add(c);
+        for (let i = 0; i < 5; i++) { const a = Math.PI / 2 + i * Math.PI * 2 / 5, b = sph(.05, '#FFF3C4', { emissive: col('#FFF3C4').multiplyScalar(.4) }, 10, 8); b.position.set(Math.cos(a) * .5, Math.sin(a) * .5, .14); body.add(b); }
+        g.add(halo('#F7D774', 1.7, .4));
+        for (let i = 0; i < 3; i++) orbit(g, twinkle(spark('#FFF3C4', .22), 4, i * 2, 1, .4), .78, 1.2 + i * .3, i * .6 - .3, i * 2.1);
       }
     }
     g.userData.kind = kind;
