@@ -70,7 +70,7 @@ function boatScene() {
     wake.forEach(w => scene.remove(w.m));
     wake = [];
     for (let i = 0; i < 36; i++) {
-      const m = new THREE.Mesh(new THREE.SphereGeometry(.16, 8, 6), new THREE.MeshBasicMaterial({ color: th.dark ? '#9DB3D9' : '#FFFFFF', transparent: true, opacity: 0 }));
+      const m = new THREE.Mesh(new THREE.SphereGeometry(.12, 8, 6), new THREE.MeshBasicMaterial({ color: th.dark ? '#9DB3D9' : '#FFFFFF', transparent: true, opacity: 0 }));
       scene.add(m); wake.push({ m, life: 0 });
     }
     if (S.q) spawn(buoys.map(b => ({ a: b.a, x: b.g.position.x, z: b.g.position.z, state: b.state })));
@@ -97,21 +97,23 @@ function boatScene() {
       for (const sx of [-1, 1]) { const e = new THREE.Mesh(new THREE.CylinderGeometry(.16, .22, .6, 10), K3.glow('#F7A93B')); e.rotation.x = Math.PI / 2; e.position.set(sx * .45, .35, -1.2); g.add(e); }
     } else {
       /* صاري وشراع منتفخ بلون القالب، وعلم صغير */
-      const mast = new THREE.Mesh(new THREE.CylinderGeometry(.06, .07, 2.6, 8), K3.mat('#6B4A2E')); mast.position.set(0, 1.75, -.1); g.add(mast);
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(.06, .07, 2.6, 8), K3.mat('#6B4A2E')); mast.position.set(0, 1.75, .35); g.add(mast);
+      const yard = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, 1.9, 6), K3.mat('#6B4A2E')); yard.rotation.z = Math.PI / 2; yard.position.set(0, 2.85, .4); g.add(yard);
       const sailGeo = new THREE.PlaneGeometry(1.6, 1.9, 8, 8), sp = sailGeo.attributes.position;
       for (let i = 0; i < sp.count; i++) { const x = sp.getX(i), y = sp.getY(i); sp.setZ(i, Math.cos(x / .8 * Math.PI / 2) * .32 * (1 - Math.abs(y) / 1.6)); }
       sailGeo.computeVertexNormals();
       const sail = new THREE.Mesh(sailGeo, K3.mat(id === 'notebook' ? '#FFFFFF' : th.card, { side: THREE.DoubleSide }));
-      sail.rotation.y = Math.PI / 2; sail.position.set(.06, 1.85, -.4); sail.scale.x = .9; g.add(sail);
+      sail.position.set(0, 1.85, .45); sail.scale.set(1.05, .95, 1); g.add(sail);
+      g.userData.sail = sail;
       const band = new THREE.Mesh(new THREE.PlaneGeometry(1.45, .32), K3.mat(th.accent, { side: THREE.DoubleSide }));
-      band.rotation.y = Math.PI / 2; band.position.set(.32, 1.55, -.4); g.add(band);
+      band.position.set(0, 1.6, .62); g.add(band);
       const flag = new THREE.Mesh(new THREE.PlaneGeometry(.5, .28), K3.mat(th.gold, { side: THREE.DoubleSide }));
-      flag.position.set(0, 3.0, -.35); flag.rotation.y = Math.PI / 2; g.add(flag);
+      flag.position.set(.25, 3.2, .35); g.add(flag);
       g.userData.flag = flag;
     }
     const rider = K3.player();
     rider.scale.setScalar(.62);
-    rider.position.set(0, 1.0, .85);
+    rider.position.set(0, 1.0, -.55);
     g.add(rider);
     g.userData.rider = rider;
     return g;
@@ -227,7 +229,8 @@ function boatScene() {
       const h = wave(P.x, P.z, t);
       boat.position.set(P.x, h - .1, P.z);
       boat.rotation.set(Math.sin(t * 1.7) * .05 - P.v * .006, P.a, -inp.x * Math.min(1, Math.abs(P.v) / 5) * .18 + Math.cos(t * 1.3) * .04, 'YXZ');
-      if (boat.userData.flag) boat.userData.flag.rotation.x = Math.sin(t * 8) * .25;
+      if (boat.userData.flag) boat.userData.flag.rotation.y = Math.sin(t * 8) * .35;
+      if (boat.userData.sail) boat.userData.sail.scale.z = 1 + Math.min(1, Math.abs(P.v) / 6) * .6 + Math.sin(t * 3) * .05;
       boat.userData.rider.userData.body.rotation.y += dt * 1.5;
     }
     /* رذاذ الماء خلف القارب */
@@ -243,7 +246,7 @@ function boatScene() {
       if (w.life <= 0) { w.m.material.opacity = 0; return; }
       w.life -= dt * .9;
       w.m.position.x += w.vx * dt; w.m.position.z += w.vz * dt;
-      w.m.scale.setScalar(1 + (1 - w.life) * 2.2);
+      w.m.scale.set(1 + (1 - w.life) * 1.6, .35, 1 + (1 - w.life) * 1.6);
       w.m.material.opacity = Math.max(0, w.life) * .75;
     });
     /* العوّامات تتمايل مع الموج */
