@@ -19,7 +19,7 @@ function castleScene() {
   function stoneTexture(th) {
     const c = document.createElement('canvas'); c.width = 256; c.height = 128;
     const g = c.getContext('2d');
-    g.fillStyle = th.wall; g.fillRect(0, 0, 256, 128);
+    g.fillStyle = '#' + K3.col(th.wall).lerp(K3.col(th.dark ? '#1B2752' : '#FFFFFF'), th.sketch ? 0 : .35).getHexString(); g.fillRect(0, 0, 256, 128);
     g.strokeStyle = th.sketch ? '#2B4C7E' : 'rgba(0,0,0,.18)'; g.lineWidth = 3;
     for (let r = 0; r < 4; r++) {
       const y = r * 32;
@@ -51,7 +51,7 @@ function castleScene() {
     ground.rotation.x = -Math.PI / 2; ground.position.y = -.02;
     S.env.add(ground);
     for (let i = 0; i < 30; i++) {
-      const a = Math.random() * Math.PI * 2, r = K3.rnd(8, 22);
+      const a = Math.random() * Math.PI * 2, r = K3.rnd(15, 26);
       const p = K3.prop(th, K3.rnd(1.2, 2)); p.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
       S.env.add(p);
     }
@@ -67,6 +67,7 @@ function castleScene() {
     S.fx.push(dt => S.env.children.forEach(c => { const o = c.userData.orbit; if (o) { o.a += o.s * dt; c.position.x = Math.cos(o.a) * o.r; c.position.z = Math.sin(o.a) * o.r; } }));
     built = 0;
     growTo(level + 2, th);
+    for (let lv = 0; lv <= level; lv++) tower.add(floorRing(th, lv * CT.H));
   }
   /* يبني طوابق البرج حتى الطابق n */
   function growTo(n, th) {
@@ -84,7 +85,6 @@ function castleScene() {
         w.position.set(Math.cos(a) * (CT.R + .01), y + 1.3, Math.sin(a) * (CT.R + .01)); w.lookAt(Math.cos(a) * 9, y + 1.3, Math.sin(a) * 9);
         tower.add(w);
       }
-      tower.add(floorRing(th, y));
       built++;
     }
     /* قمّة البرج فوق آخر طابق */
@@ -183,7 +183,7 @@ function castleScene() {
     if (P.rise) {
       P.rise -= dt;
       P.y += ((level + 1) * CT.H - P.y) * Math.min(1, dt * 5);
-      if (P.rise <= 0) { P.rise = 0; level++; P.y = level * CT.H; P.vy = 0; P.on = null; growTo(level + 2); }
+      if (P.rise <= 0) { P.rise = 0; level++; P.y = level * CT.H; P.vy = 0; P.on = null; growTo(level + 2); tower.add(floorRing(K3.theme(), level * CT.H)); }
     } else if (P.on) {
       P.y = P.on.y + .14;
       if (P.drop) { P.drop -= dt; if (P.drop <= 0) { P.drop = 0; P.on = null; P.vy = 2; } }
