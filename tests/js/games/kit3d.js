@@ -237,6 +237,19 @@ const K3 = (() => {
     return ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -y), p) ? p : null;
   }
 
+  function starShape(r1, r2, n = 5) {
+    const s = new THREE.Shape();
+    for (let i = 0; i <= n * 2; i++) {
+      const a = Math.PI / 2 + i * Math.PI / n, r = i % 2 ? r2 : r1;
+      i ? s.lineTo(Math.cos(a) * r, Math.sin(a) * r) : s.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    return s;
+  }
+  function starMesh(r, color, depth = .22) {
+    const g = new THREE.ExtrudeGeometry(starShape(r, r * .45), { depth, bevelEnabled: true, bevelThickness: .06, bevelSize: .05, bevelSegments: 2 });
+    g.center();
+    return new THREE.Mesh(g, mat(color, { emissive: col(color).multiplyScalar(.25) }));
+  }
   /* أجزاء تتحرك وحدها (نجوم صغيرة تدور، لمعات تومض): تتحدّث قبل رسمها في كل إطار */
   const clock = () => performance.now() / 1000;
   function orbit(parent, mesh, r, speed, tilt = 0, phase = 0, y = 0) {
