@@ -6,7 +6,7 @@
 'use strict';
 
 let SKI = null;
-const SKI_W = 7.5;          // نصف عرض المنحدر
+const SKI_W = 8.5;          // نصف عرض المنحدر
 
 function skiScene() {
   const S = K3.create({ fov: 58, fogNear: 28, fogFar: 75, ratio: .62 });
@@ -76,12 +76,12 @@ function skiScene() {
     const g = new THREE.Group();
     g.position.x = x;
     const fl = [flag(th.accent), flag(th.accent)];
-    fl[0].position.x = -1.35; fl[1].position.x = 1.35; fl[1].scale.x = -1;
+    fl[0].position.x = -1.65; fl[1].position.x = 1.65; fl[1].scale.x = -1;
     g.add(...fl);
-    const banner = K3.plate(a.t, 2.5, .7, { px: 70 });
-    banner.position.y = 2.55;
+    const banner = K3.plate(a.t, 3.2, .9, { px: 72 });
+    banner.position.y = 2.85;
     g.add(banner);
-    const cord = new THREE.Mesh(new THREE.BoxGeometry(2.7, .05, .05), K3.mat(th.wall2)); cord.position.y = 2.15; g.add(cord);
+    const cord = new THREE.Mesh(new THREE.BoxGeometry(3.3, .05, .05), K3.mat(th.wall2)); cord.position.y = 2.15; g.add(cord);
     g.userData = { a, flags: fl };
     return g;
   }
@@ -89,21 +89,22 @@ function skiScene() {
     const th = K3.theme();
     const answers = mixAnswers(S.q, 3, S.collected).slice(0, 3);
     /* مواضع متباعدة عبر عرض المنحدر */
-    const slots = shuffle([-5, -1.7, 1.7, 5]).slice(0, answers.length).sort((a, b) => a - b);
+    const slots = shuffle([-6, -2, 2, 6]).slice(0, answers.length).sort((a, b) => a - b);
     const row = { kind: 'row', z, q: S.q, gates: [], done: false, g: new THREE.Group() };
     answers.forEach((a, k) => { const gt = gate(a, slots[k] + K3.rnd(-.4, .4), th); row.g.add(gt); row.gates.push(gt); });
     row.g.position.z = z;
     slope.add(row.g);
     items.push(row);
     /* بين الصفوف: مطبّ وصخرة */
-    const ramp = new THREE.Mesh(new THREE.BoxGeometry(2.6, .6, 2.2), K3.mat(th.path));
+    const ramp = new THREE.Mesh(new THREE.BoxGeometry(2.6, .6, 2.2), K3.mat(th.wall, { flatShading: true }));
     ramp.geometry.translate(0, .3, 0);
     const rp = ramp.geometry.attributes.position;
     for (let i = 0; i < rp.count; i++) if (rp.getZ(i) > 0) rp.setY(i, 0);
     ramp.geometry.computeVertexNormals();
     const rx = K3.rnd(-SKI_W + 2, SKI_W - 2);
     const rg = new THREE.Group(); rg.add(ramp);
-    const edge = new THREE.Mesh(new THREE.BoxGeometry(2.6, .08, .12), K3.mat(th.accent)); edge.position.set(0, .62, -1.1); rg.add(edge);
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(2.64, .1, .14), K3.mat(th.gold)); edge.position.set(0, .62, -1.1); rg.add(edge);
+    for (const sx of [-1, 1]) { const st = new THREE.Mesh(new THREE.BoxGeometry(.12, .66, 2.24), K3.mat(th.wall2)); st.position.set(sx * 1.3, .3, 0); st.geometry.translate(0, 0, 0); rg.add(st); }
     rg.position.set(rx, 0, z + 18);
     slope.add(rg);
     items.push({ kind: 'ramp', g: rg, z: z + 18, x: rx, done: false });
@@ -131,7 +132,7 @@ function skiScene() {
   function passRow(row) {
     row.done = true;
     if (row.q !== S.q || S.answered || Play.roundDone) return;
-    const gt = row.gates.find(g => Math.abs(g.position.x - P.x) < 1.35);
+    const gt = row.gates.find(g => Math.abs(g.position.x - P.x) < 1.65);
     if (!gt) { spawnRow(); return; }
     const a = gt.userData.a, wp = new THREE.Vector3(gt.position.x, 2.6, 0);
     row.g.localToWorld(wp);
