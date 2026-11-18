@@ -17,7 +17,7 @@ function starsScene() {
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   const speed = () => 3.2 + Play.cfg.speed * .45;
 
-  camera.position.set(0, 10, 9.6);
+  camera.position.set(0, 12, 11);
   camera.lookAt(0, 0, 0);
 
   S.onTheme = th => {
@@ -204,8 +204,8 @@ function starsScene() {
       spawn(fresh);
     }
     camera.position.x += (P.x * .8 - camera.position.x) * Math.min(1, dt * 2.5);
-    camera.position.z += (P.z * .8 + 9.6 - camera.position.z) * Math.min(1, dt * 2.5);
-    camera.lookAt(camera.position.x, 0, camera.position.z - 10.2);
+    camera.position.z += (P.z * .8 + 11 - camera.position.z) * Math.min(1, dt * 2.5);
+    camera.lookAt(camera.position.x, 0, camera.position.z - 11.6);
   };
   S.size();
   return S;
