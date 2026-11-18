@@ -491,7 +491,7 @@ const K3 = (() => {
     return g;
   }
   /* مشهد بعيد: جبال/تلال/كواكب في الأفق */
-  function horizon(S, th, { radius = 60, y = 0 } = {}) {
+  function horizon(S, th, { radius = 60, y = 0, hills = true } = {}) {
     const g = new THREE.Group();
     if (th.deco === 'space' || th.deco === 'night') {
       if (th.deco === 'space') {
@@ -505,7 +505,7 @@ const K3 = (() => {
       }
     } else if (th.deco !== 'paper') {
       const hillCol = { palms: '#2BB3C0', pines: '#DCE5F0', crystals: '#CFE8F6', coral: '#2E9CA8', autumn: '#D9A86C', trees: '#9CCB7E', domes: '#E9D3A8' }[th.deco] || th.ground2;
-      for (let i = 0; i < 14; i++) {
+      for (let i = 0; i < (hills ? 14 : 0); i++) {
         const a = Math.PI + (i / 13) * Math.PI, h = rnd(5, 12);
         const m = new THREE.Mesh(new THREE.ConeGeometry(rnd(7, 12), h, 6), mat(hillCol, { flatShading: true }));
         m.position.set(Math.cos(a) * radius, y + h / 2 - 1, Math.sin(a) * radius);

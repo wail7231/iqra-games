@@ -41,7 +41,7 @@ function starsScene() {
       if (Math.sin(a) < .3) arena.add(p);
     }
     S.env.add(arena);
-    K3.horizon(S, th, { radius: 75, y: -12 });
+    K3.horizon(S, th, { radius: 75, y: -12, hills: false });
     K3.weather(S, th, { w: 18, h: 14, d: 30, cz: -2, cy: -2 });
     for (let i = 0; i < 10; i++) {
       const c = K3.cloud(K3.rnd(1, 2), th.dark ? '#3A4A80' : '#FFFFFF', th.dark ? .5 : .9);

@@ -13,14 +13,14 @@ function islandsScene() {
   const board = new THREE.Group();
   scene.add(board);
   let cells = [], hero, shadow, old = null;
-  const P = { c: 2, r: 0, prev: null, hop: null, x: 0, z: 0, y: 0 };
+  const P = S.P = { c: 2, r: 0, prev: null, hop: null, x: 0, z: 0, y: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   const pos = (c, r) => new THREE.Vector3((c - (ISL.cols - 1) / 2) * ISL.dx, 0, -r * ISL.dz);
 
   camera.position.set(0, 7.5, 8);
 
   S.onTheme = th => {
-    K3.horizon(S, th, { radius: 70, y: -14 });
+    K3.horizon(S, th, { radius: 70, y: -14, hills: false });
     K3.weather(S, th, { w: 20, h: 16, d: 40, cz: -6, cy: -6 });
     /* غيوم تحت الجزر */
     for (let i = 0; i < 16; i++) {
@@ -57,8 +57,8 @@ function islandsScene() {
       /* لافتة الإجابة على عمود */
       const post = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.1, 6), K3.mat(th.wall2));
       post.position.set(0, .55, -.55); g.add(post);
-      const s = K3.sign(a.t, { h: .62, px: 64 });
-      const maxW = 2.3;
+      const s = K3.sign(a.t, { h: .74, px: 64 });
+      const maxW = 2.45;
       if (s.scale.x > maxW) s.scale.set(maxW, maxW / s.userData.ratio, 1);
       s.position.set(0, 1.35, -.55);
       g.add(s);
@@ -129,6 +129,7 @@ function islandsScene() {
     }
     P.c = 2; P.r = 0; P.prev = null; P.hop = null;
   }
+  S.cells = () => cells;
   const cellAt = (c, r) => cells.find(x => x.c === c && x.r === r && x.state !== 'gone');
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false; S.answers = null;
