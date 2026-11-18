@@ -12,7 +12,8 @@ function laneScene() {
   const { scene, camera } = S;
   const rows = [];                      // صفوف البوابات والحواجز القادمة
   const side = [];                      // زينة جانبي الطريق (تتحرك وتعود)
-  const P = { lane: 1, x: 0, y: 0, vy: 0, duck: 0, stumble: 0 };
+  const P = S.P = { lane: 1, x: 0, y: 0, vy: 0, duck: 0, stumble: 0 };
+  S.rows = () => rows;
   let road, stripes, ball, shadow;
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false; S.gap = 0;
   const speed = () => 7 + Play.cfg.speed * 1.5;
@@ -72,11 +73,12 @@ function laneScene() {
     }
     const beam = new THREE.Mesh(new THREE.BoxGeometry(2.1, .2, .26), beamM);
     beam.position.y = 2.25; g.add(beam);
-    const label = K3.plate(a.t, 2.05, .8, { px: 70 });
-    label.position.set(0, 2.95, .02);
+    const label = K3.plate(a.t, 2.25, .9, { px: 72 });
+    label.position.set(0, 3.0, .02);
+    label.rotation.x = -.12;
     g.add(label);
-    const back = new THREE.Mesh(new THREE.PlaneGeometry(2.1, label.geometry.parameters.height + .08), K3.mat(th.wall2));
-    back.position.set(0, 2.95, -.01); g.add(back);
+    const back = new THREE.Mesh(new THREE.PlaneGeometry(2.33, label.geometry.parameters.height + .08), K3.mat(th.wall2));
+    back.position.set(0, 3.0, -.03); back.rotation.x = -.12; g.add(back);
     /* ستارة شفافة خفيفة داخل البوابة */
     const veil = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 2.1), new THREE.MeshBasicMaterial({ color: th.gold, transparent: true, opacity: .12, side: THREE.DoubleSide, depthWrite: false }));
     veil.position.y = 1.08; g.add(veil);
@@ -182,7 +184,9 @@ function laneScene() {
       const sq = P.duck > 0 ? .55 : 1;
       ball.position.set(P.x, .55 * sq + P.y, 0);
       ball.scale.set(1 / Math.sqrt(sq), sq, 1 / Math.sqrt(sq));
-      ball.userData.body.rotation.x -= v * dt / .55;
+      /* الكرات تتدحرج، وبقية الأشكال تدور حول نفسها حتى تبقى ظاهرة */
+      const roll = ['moon', 'snowball', 'bubble', 'sketch'].includes(ball.userData.kind);
+      if (roll) ball.userData.body.rotation.x -= v * dt / .55; else ball.userData.body.rotation.y += dt * (1.5 + v * .15);
       ball.rotation.z = (P.x - LANE_X[P.lane]) * .25;
       shadow.position.set(P.x, .02, 0);
       shadow.scale.setScalar(1 - Math.min(.5, P.y / 5));
