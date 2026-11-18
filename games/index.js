@@ -6,7 +6,7 @@ window.__GAMES_INDEX__ = [
   "name": "المعوذات",
   "desc": "",
   "count": 3,
-  "updated": 1795017711576
+  "updated": 1795017756988
  },
  {
   "id": "gmw0lxrc0pfu",
