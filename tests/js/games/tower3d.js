@@ -109,9 +109,7 @@ function towerScene() {
       hang.add(g);
       choices.push({ g, word: w, ok: w === next });
     });
-    sel = Math.min(sel, choices.length - 1);
-    const mid = choices.findIndex(c => Math.abs(c.g.position.x) < .1);
-    if (mid >= 0 && sel < 0) sel = mid;
+    sel = Math.max(0, Math.min(sel, choices.length - 1));
   }
   S.setQuestion = it => {
     S.it = it; S.missed = false; S.done = false;
@@ -153,7 +151,6 @@ function towerScene() {
       } else { K3.burstAt(S, pt, true, '✓'); FX.play('good'); offer(); }
     } else {
       /* يرتطم ويتدحرج إلى جانب ويسقط */
-      K3.recolor && K3.recolor(f.m);
       f.m.material.forEach((x, i) => { if (i < 4) x.color.set('#C0392B'); });
       f.vx = (Math.random() < .5 ? -1 : 1) * 3.5; f.vy = 4; f.spin = f.vx * 1.6; f.bounced = true;
       S.missed = true;
@@ -191,8 +188,7 @@ function towerScene() {
     if (claw && choices[sel]) {
       claw.position.x += (choices[sel].g.position.x - claw.position.x) * Math.min(1, dt * 12);
       claw.position.y = CUBE_H / 2 + .8;
-      marker.position.y = -1.85 - CUBE_H + Math.sin(S.t * 5) * .08 + .2;
-      marker.position.y = .75;
+      marker.position.y = .75 + Math.sin(S.t * 5) * .06;
       marker.visible = !falling.some(f => !f.done);
     }
     falling.forEach(f => {

@@ -29,6 +29,11 @@ const GAME_TYPES = {
   archery: { name: 'الرماية', editor: 'editor.html', player: 'game.html', desc: 'اسحب القوس وأطلق السهم على هدف الإجابة الصحيحة.' },
   plant:   { name: 'اختيار من متعدد', editor: 'editor.html', player: 'game.html', desc: 'سؤال وإجابات، وكل إجابة صحيحة تسقي النبتة فتكبر حتى تُثمر.' },
   puzzle:  { name: 'البازل', editor: 'editor.html', player: 'game.html', desc: 'ارفع صورة فتُقسَّم قطعًا، ويركّبها الطالب في مكانها.' },
+  lane3d:    { name: 'الممر الجاري', three: true, editor: 'editor.html', player: 'game.html', desc: 'كرة تجري في ممر مجسّم، تنتقل يمينًا ويسارًا لتعبر بوابة الإجابة الصحيحة.' },
+  islands3d: { name: 'الجزر الطائرة', three: true, editor: 'editor.html', player: 'game.html', desc: 'قفز بين جزر تطفو في السماء حتى جزيرة الإجابة الصحيحة.' },
+  maze3d:    { name: 'المتاهة المجسّمة', three: true, editor: 'editor.html', player: 'game.html', desc: 'متاهة بجدران مرتفعة، ادخل باب الإجابة الصحيحة.' },
+  stars3d:   { name: 'جمع النجوم', three: true, editor: 'editor.html', player: 'game.html', desc: 'مركبة تجمع من الساحة النجوم التي تحمل الإجابات الصحيحة.' },
+  tower3d:   { name: 'برج المكعبات', three: true, editor: 'editor.html', player: 'game.html', desc: 'أسقط المكعب الصحيح لتُبنى الآية كلمة فوق كلمة.' },
   runner:  { name: 'الكرة القافزة', editor: 'editor.html', player: 'game.html', desc: 'اقفز بالكرة على المنصة التي تحمل الإجابة الصحيحة.' },
 };
 const ICON_MAZE = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v8h4M16 8v12M8 16h4v4M12 8h4"/></svg>';

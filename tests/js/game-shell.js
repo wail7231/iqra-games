@@ -443,6 +443,11 @@ async function init() {
       document.head.appendChild(s);
     });
     if (Play.game.type === 'whack') await load('js/games/whack-shapes.js');
+    if (GAME_TYPES[Play.game.type].three) {
+      try { await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'); }
+      catch (_) { showFatal('هذه اللعبة تحتاج اتصالًا بالإنترنت.', 'index.html#games'); return; }
+      await load('js/games/kit3d.js');
+    }
     await load(`js/games/${Play.game.type}.js`);
   } catch (_) {
     showFatal('لم نجد ملف هذه اللعبة في مجلد games.', 'index.html#games');
