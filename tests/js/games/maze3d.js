@@ -5,7 +5,7 @@
 'use strict';
 
 let MZ3 = null;
-const MZ = { cell: 2.2, wallH: 1.25, wallT: .32 };
+const MZ = { cell: 2.5, wallH: 1.3, wallT: .34, R: .5 };
 
 function maze3dScene() {
   const S = K3.create({ fov: 50, fogNear: 22, fogFar: 60, ratio: .62 });
@@ -13,7 +13,8 @@ function maze3dScene() {
   const world = new THREE.Group();
   scene.add(world);
   let M = null, hero, shadow;
-  const P = S.P = { c: 0, r: 0, x: 0, z: 0, from: null, t: 1, dir: null, run: null, bounce: null };
+  const P = S.P = { x: 0, z: 0, vx: 0, vz: 0, yaw: 0, knock: null };
+  const joy = { x: 0, z: 0, o: null };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
 
   camera.position.set(0, 10, 8);
@@ -56,7 +57,7 @@ function maze3dScene() {
   }
   const bits = o => [1, 2, 4, 8].filter(b => o & b).length;
   function makeMaze(n) {
-    const cols = n > 4 ? 9 : 7, rows = n > 4 ? 8 : 7;
+    const cols = n > 4 ? 15 : 13, rows = n > 4 ? 13 : 11;
     const sc = Math.floor(cols / 2), sr = rows - 1;
     for (let tries = 0; tries < 40; tries++) {
       const open = carve(cols, rows, sc, sr);
@@ -113,6 +114,10 @@ function maze3dScene() {
       m4.compose(new THREE.Vector3(x, MZ.wallH + .05, z), q, one); caps.setMatrixAt(i, m4);
     });
     world.add(walls, caps);
+    /* صناديق التصادم للحركة الحرة */
+    M.boxes = segs.map(([x, z, h]) => ({ x, z, hw: h ? (MZ.cell + MZ.wallT) / 2 : MZ.wallT / 2, hd: h ? MZ.wallT / 2 : (MZ.cell + MZ.wallT) / 2 }));
+    M.doors.forEach(d => { if (d.state === 'bad') block(d); });
+    paintMap();
     if (th.sketch) {
       const e = new THREE.LineBasicMaterial({ color: '#2B4C7E' });
       segs.forEach(([x, z, h]) => { const l = new THREE.LineSegments(new THREE.EdgesGeometry(geo), e); l.position.set(x, MZ.wallH / 2, z); l.rotation.y = h ? 0 : Math.PI / 2; world.add(l); });
@@ -156,93 +161,167 @@ function maze3dScene() {
     }
   }
   S.maze = () => M;
+  /* الباب الخاطئ يُغلق بحاجز عند مدخله */
+  function block(d) {
+    const o = M.open[d.r][d.c], p = at(d.c, d.r);
+    const [, [dc, dr]] = Object.entries(DIRS).find(([, v]) => o & v[2]);
+    const x = p.x + dc * MZ.cell * .5, z = p.z + dr * MZ.cell * .5;
+    M.boxes.push(dc ? { x, z, hw: MZ.wallT / 2, hd: MZ.cell / 2 } : { x, z, hw: MZ.cell / 2, hd: MZ.wallT / 2 });
+  }
+
+  /* ---------- خريطة صغيرة في الزاوية: الجدران والأبواب واللاعب ---------- */
+  const map = el('canvas', 'k3-map');
+  const joyEl = el('div', 'k3-joy', '<i></i>');
+  S.wrap.append(map, joyEl);
+  let mapBase = null;
+  const MK = 9;
+  function paintMap() {
+    const th = K3.theme(), W = M.cols * MK + 8, H = M.rows * MK + 8, dpr = window.devicePixelRatio || 1;
+    map.width = W * dpr; map.height = H * dpr;
+    map.style.width = W + 'px'; map.style.height = H + 'px';
+    const g = map.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+    g.fillStyle = th.dark ? 'rgba(10,10,30,.72)' : 'rgba(255,255,255,.85)';
+    g.beginPath(); g.roundRect(0, 0, W, H, 8); g.fill();
+    g.strokeStyle = th.wall2; g.lineWidth = 1.6; g.lineCap = 'round';
+    g.beginPath();
+    for (let r = 0; r < M.rows; r++) for (let c = 0; c < M.cols; c++) {
+      const o = M.open[r][c], X = 4 + c * MK, Y = 4 + r * MK;
+      if (!(o & 1)) { g.moveTo(X, Y); g.lineTo(X + MK, Y); }
+      if (!(o & 8)) { g.moveTo(X, Y); g.lineTo(X, Y + MK); }
+      if (r === M.rows - 1) { g.moveTo(X, Y + MK); g.lineTo(X + MK, Y + MK); }
+      if (c === M.cols - 1) { g.moveTo(X + MK, Y); g.lineTo(X + MK, Y + MK); }
+    }
+    g.stroke();
+    mapBase = g.getImageData(0, 0, map.width, map.height);
+  }
+  function drawMap() {
+    if (!mapBase) return;
+    const g = map.getContext('2d'), th = K3.theme();
+    g.putImageData(mapBase, 0, 0);
+    const toMap = (x, z) => [4 + (x / MZ.cell + (M.cols - 1) / 2 + .5) * MK, 4 + (z / MZ.cell + (M.rows - 1) / 2 + .5) * MK];
+    M.doors.forEach(d => {
+      const p = at(d.c, d.r), [x, y] = toMap(p.x, p.z);
+      g.fillStyle = d.state === 'good' ? '#4CAF50' : d.state === 'bad' ? '#C0392B' : th.gold;
+      g.beginPath(); g.arc(x, y, 3.2, 0, 7); g.fill();
+    });
+    const [px, py] = toMap(P.x, P.z);
+    g.fillStyle = th.accent; g.strokeStyle = '#FFFFFF'; g.lineWidth = 1.5;
+    g.beginPath(); g.arc(px, py, 3.8, 0, 7); g.fill(); g.stroke();
+  }
+
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
     const answers = mixAnswers(q, 6);
     M = makeMaze(answers.length);
     M.doors.forEach((d, k) => { d.a = answers[k]; d.state = ''; });
-    P.c = M.sc; P.r = M.sr; P.from = null; P.t = 1; P.run = null;
-    const p = at(P.c, P.r); P.x = p.x; P.z = p.z;
+    const p = at(M.sc, M.sr);
+    P.x = p.x; P.z = p.z; P.vx = P.vz = 0; P.knock = null; P.yaw = 0;
     draw();
-    camera.position.set(p.x, 11, p.z + 6.4);
+    camera.position.set(p.x, 12, p.z + 7);
   };
 
-  /* ---------- الحركة ---------- */
-  function step(d) {
-    if (!M || P.t < 1 || S.answered || Play.roundDone) return false;
-    const [dc, dr, b] = DIRS[d];
-    if (!(M.open[P.r][P.c] & b)) return false;
-    const door = M.doors.find(x => x.c === P.c + dc && x.r === P.r + dr);
-    if (door && door.state === 'bad') return false;
-    P.from = { c: P.c, r: P.r };
-    P.c += dc; P.r += dr; P.t = 0; P.dir = d;
-    return true;
-  }
-  /* تقاطع: خانة فيها أكثر من طريقين، أو باب */
-  const junction = () => bits(M.open[P.r][P.c]) !== 2 || M.doors.some(x => x.c === P.c && x.r === P.r);
-  function arrive() {
-    const door = M.doors.find(x => x.c === P.c && x.r === P.r);
-    if (door && !door.state) {
-      P.run = null;
-      const pt = new THREE.Vector3(door.s.position.x, 2.2, door.s.position.z);
-      if (door.a.ok) {
-        door.state = 'good';
-        paintDoor(door);
-        S.collected.push(door.a.t);
-        if (S.paint) S.paint(S.collected.length);
-        if (S.collected.length < S.need) { K3.burstAt(S, pt, true, '✓'); FX.play('good'); return; }
-        S.answered = true;
-        K3.burstAt(S, pt, true, S.missed ? '✓' : '+١');
-        FX.play('ok');
-        Play.finish(S.missed ? 0 : 1, { delay: 1100 });
-      } else {
-        door.state = 'bad';
-        paintDoor(door);
-        S.missed = true;
-        K3.burstAt(S, pt, false);
-        FX.play('bad');
-        if (!Play.mistake()) { const back = { up: 'down', down: 'up', left: 'right', right: 'left' }[P.dir]; setTimeout(() => step(back), 380); }
-      }
-      return;
+  /* ---------- الحركة الحرة مع التصادم بالجدران ---------- */
+  function collide(nx, nz) {
+    const R = MZ.R;
+    for (let it = 0; it < 2; it++) for (const b of M.boxes) {
+      const cx = Math.max(b.x - b.hw, Math.min(nx, b.x + b.hw)), cz = Math.max(b.z - b.hd, Math.min(nz, b.z + b.hd));
+      const dx = nx - cx, dz = nz - cz, d2 = dx * dx + dz * dz;
+      if (d2 >= R * R) continue;
+      if (d2 > 1e-8) { const d = Math.sqrt(d2); nx = cx + dx / d * R; nz = cz + dz / d * R; }
+      else if (b.hw < b.hd) nx = b.x + Math.sign(nx - b.x || 1) * (b.hw + R);
+      else nz = b.z + Math.sign(nz - b.z || 1) * (b.hd + R);
     }
-    if (P.run && !junction()) {
-      /* يكمل في الممر ويتبع انعطافه حتى أقرب تقاطع */
-      const back = { up: 'down', down: 'up', left: 'right', right: 'left' }[P.dir];
-      const next = Object.keys(DIRS).find(k => k !== back && M.open[P.r][P.c] & DIRS[k][2]);
-      if (next && step(next)) return;
-    }
-    P.run = null;
+    return [nx, nz];
   }
+  function reach(door) {
+    const pt = new THREE.Vector3(door.s.position.x, 2.2, door.s.position.z);
+    if (door.a.ok) {
+      door.state = 'good';
+      paintDoor(door);
+      S.collected.push(door.a.t);
+      if (S.paint) S.paint(S.collected.length);
+      if (S.collected.length < S.need) { K3.burstAt(S, pt, true, '✓'); FX.play('good'); return; }
+      S.answered = true;
+      K3.burstAt(S, pt, true, S.missed ? '✓' : '+١');
+      FX.play('ok');
+      Play.finish(S.missed ? 0 : 1, { delay: 1100 });
+    } else {
+      door.state = 'bad';
+      paintDoor(door);
+      S.missed = true;
+      K3.burstAt(S, pt, false);
+      FX.play('bad');
+      /* يرتدّ اللاعب إلى الخانة المجاورة ثم يُغلق الباب */
+      const o = M.open[door.r][door.c], [, [dc, dr]] = Object.entries(DIRS).find(([, v]) => o & v[2]);
+      const to = at(door.c + dc, door.r + dr);
+      P.knock = { fx: P.x, fz: P.z, tx: to.x, tz: to.z, t: 0, door };
+      P.vx = P.vz = 0;
+      Play.mistake();
+    }
+  }
+  /* عصا التحكم: اسحب بإصبعك من أي مكان في اللوحة */
   K3.controls(S, {
-    dir(d, repeat, swipe) { if (step(d)) { P.run = swipe ? d : null; FX.play('tick'); } else if (!repeat) FX.play('tick'); },
+    hold(e, phase) {
+      if (phase === 'down' && e) {
+        joy.o = { x: e.clientX, y: e.clientY };
+        const r = S.wrap.getBoundingClientRect();
+        joyEl.style.left = (e.clientX - r.left) + 'px'; joyEl.style.top = (e.clientY - r.top) + 'px';
+        joyEl.classList.add('on');
+      } else if (phase === 'move' && joy.o && e) {
+        const dx = e.clientX - joy.o.x, dy = e.clientY - joy.o.y, len = Math.hypot(dx, dy);
+        const k = len < 6 ? 0 : Math.min(1, len / 55) / len;
+        joy.x = dx * k; joy.z = dy * k;
+        joyEl.firstChild.style.transform = `translate(${Math.max(-28, Math.min(28, dx))}px, ${Math.max(-28, Math.min(28, dy))}px)`;
+      } else if (phase === 'up') {
+        joy.o = null; joy.x = joy.z = 0;
+        joyEl.classList.remove('on'); joyEl.firstChild.style.transform = '';
+      }
+    },
   });
 
   S.onFrame = dt => {
     if (!M) return;
-    if (P.t < 1) {
-      P.t = Math.min(1, P.t + dt * 6.5);
-      const a = at(P.from.c, P.from.r), b = at(P.c, P.r), k = P.t;
-      P.x = a.x + (b.x - a.x) * k; P.z = a.z + (b.z - a.z) * k;
-      if (P.t >= 1) {
-        arrive();
-      }
+    const k = S.keys;
+    let ix = joy.x, iz = joy.z;
+    if (k.ArrowLeft || k.KeyA) ix -= 1;
+    if (k.ArrowRight || k.KeyD) ix += 1;
+    if (k.ArrowUp || k.KeyW) iz -= 1;
+    if (k.ArrowDown || k.KeyS) iz += 1;
+    const len = Math.hypot(ix, iz);
+    if (len > 1) { ix /= len; iz /= len; }
+    const sp = 4.8, live = S.started && !S.answered && !Play.roundDone && !Play.finished;
+    if (P.knock) {
+      const n = P.knock;
+      n.t = Math.min(1, n.t + dt * 3.2);
+      const e = K3.ease(n.t);
+      P.x = n.fx + (n.tx - n.fx) * e; P.z = n.fz + (n.tz - n.fz) * e;
+      if (n.t >= 1) { block(n.door); P.knock = null; }
     } else {
-      /* مفتاح مضغوط باستمرار = يكمل السير */
-      for (const [code, d] of [['ArrowUp', 'up'], ['ArrowDown', 'down'], ['ArrowLeft', 'left'], ['ArrowRight', 'right'], ['KeyW', 'up'], ['KeyS', 'down'], ['KeyA', 'left'], ['KeyD', 'right']]) if (S.keys[code] && S.started && step(d)) break;
+      P.vx += ((live ? ix : 0) * sp - P.vx) * Math.min(1, dt * 10);
+      P.vz += ((live ? iz : 0) * sp - P.vz) * Math.min(1, dt * 10);
+      [P.x, P.z] = collide(P.x + P.vx * dt, P.z + P.vz * dt);
+      if (live) {
+        const door = M.doors.find(d => { if (d.state) return false; const p = at(d.c, d.r); return Math.hypot(p.x - P.x, p.z - P.z) < 1; });
+        if (door) reach(door);
+      }
     }
+    const moving = Math.hypot(P.vx, P.vz);
     if (hero) {
-      hero.position.set(P.x, .62 + Math.abs(Math.sin(S.t * 6)) * (P.t < 1 ? .12 : .04), P.z);
-      const yaw = { up: 0, down: Math.PI, left: Math.PI / 2, right: -Math.PI / 2 }[P.dir || 'up'];
-      hero.rotation.y += ((yaw - hero.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI) * Math.min(1, dt * 10);
-      hero.userData.body.rotation.x -= P.t < 1 ? dt * 9 : 0;
+      if (moving > .3) P.yaw = Math.atan2(-P.vx, -P.vz);
+      hero.rotation.y += ((P.yaw - hero.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI) * Math.min(1, dt * 10);
+      hero.position.set(P.x, .65 + Math.abs(Math.sin(S.t * 8)) * Math.min(.14, moving * .03), P.z);
+      hero.userData.body.rotation.y += dt * (1 + moving * .4);
       shadow.position.set(P.x, .02, P.z);
     }
     M.doors.forEach(d => { if (d.pad && !d.state) d.pad.material.opacity = .35 + Math.sin(S.t * 4) * .25; });
-    camera.position.x += (P.x - camera.position.x) * Math.min(1, dt * 3);
-    camera.position.z += (P.z + 6.4 - camera.position.z) * Math.min(1, dt * 3);
-    camera.position.y += (11 - camera.position.y) * Math.min(1, dt * 3);
-    camera.lookAt(camera.position.x, 0, camera.position.z - 8.6);
+    drawMap();
+    camera.position.x += (P.x - camera.position.x) * Math.min(1, dt * 4);
+    camera.position.z += (P.z + 7 - camera.position.z) * Math.min(1, dt * 4);
+    camera.position.y += (12 - camera.position.y) * Math.min(1, dt * 3);
+    camera.lookAt(camera.position.x, 0, camera.position.z - 9);
   };
   S.size();
   return S;
