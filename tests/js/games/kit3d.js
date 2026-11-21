@@ -118,7 +118,9 @@ const K3 = (() => {
     const hemi = new THREE.HemisphereLight(0xffffff, 0x8a8a8a, .62);
     const sun = new THREE.DirectionalLight(0xffffff, .58);
     sun.position.set(-8, 14, 10);
-    scene.add(hemi, sun);
+    const fill = new THREE.DirectionalLight(0xffffff, .22);
+    fill.position.set(9, 6, -8);
+    scene.add(hemi, sun, fill);
     const S = {
       wrap, cv, start, renderer, scene, camera, hemi, sun, W: 0, H: 0, t: 0, started: false,
       env: new THREE.Group(), fx: [], themeId: null, keys: {}, onFrame: null, onTheme: null,
@@ -144,6 +146,9 @@ const K3 = (() => {
       hemi.intensity = th.dark ? .5 : .62;
       sun.intensity = th.dark ? .45 : .58;
       hemi.groundColor = col(th.dark ? '#24204a' : '#9a8f80');
+      hemi.color = col('#FFFFFF').lerp(col(th.sky[1]), .25);
+      fill.color = col(th.accent).lerp(col('#FFFFFF'), .55);
+      fill.intensity = th.dark ? .32 : .2;
       clear(S.env);
       S.fx.length = 0;
       if (S.onTheme) S.onTheme(th);
@@ -489,13 +494,24 @@ const K3 = (() => {
   /* ---------- زينة القالب ---------- */
   function tree(th, s = 1) {
     const g = new THREE.Group();
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.12 * s, .16 * s, .9 * s, 7), mat('#8A5A30'));
-    trunk.position.y = .45 * s; g.add(trunk);
-    const crowns = th.deco === 'autumn' ? ['#E8761E', '#C2621B', '#D9A42B'] : ['#5FA052', '#4C9A4A', '#7DBA62'];
-    [[0, 1.25, 0, .55], [-.28, 1.0, .1, .38], [.3, 1.05, -.05, .4]].forEach(([x, y, z, r], i) => {
-      const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r * s, 1), mat(crowns[i % 3], { flatShading: true }));
-      m.position.set(x * s, y * s, z * s); g.add(m);
+    const bark = mat('#8A5A30');
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.1 * s, .17 * s, 1 * s, 7), bark);
+    trunk.position.y = .5 * s; g.add(trunk);
+    for (const [x, y, rz] of [[-.18, .8, .7], [.2, .85, -.7]]) { const br = new THREE.Mesh(new THREE.CylinderGeometry(.04 * s, .06 * s, .45 * s, 5), bark); br.position.set(x * s, y * s, 0); br.rotation.z = rz; g.add(br); }
+    const autumn = th.deco === 'autumn', night = th.deco === 'night';
+    const crowns = autumn ? ['#E8761E', '#C2621B', '#D9A42B', '#F08A2E'] : night ? ['#1F5A5A', '#24346A', '#1F7A6B', '#2E4A8A'] : ['#5FA052', '#4C9A4A', '#7DBA62', '#6DAA5C'];
+    [[0, 1.35, 0, .55], [-.34, 1.08, .12, .4], [.36, 1.12, -.06, .42], [.05, 1.0, .34, .36], [-.1, 1.62, -.1, .38], [.22, 1.5, .2, .3]].forEach(([x, y, z, r], i) => {
+      const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r * s, 1), mat(crowns[i % 4], { flatShading: true }));
+      m.position.set(x * s, y * s, z * s); m.rotation.set(i, i * 2, 0); g.add(m);
     });
+    /* ثمار أو أزهار صغيرة على الأوراق */
+    const dot = autumn ? '#A8432A' : night ? '#F6E7A8' : th.deco === 'trees' ? '#E5559A' : '#F7C948';
+    for (let i = 0; i < 6; i++) {
+      const a = i * 1.05, d = new THREE.Mesh(new THREE.SphereGeometry(.06 * s, 6, 4), night ? glow(dot) : mat(dot));
+      d.position.set(Math.cos(a) * .5 * s, (1.2 + (i % 3) * .15) * s, Math.sin(a) * .5 * s); g.add(d);
+    }
+    /* عشب حول الجذع */
+    for (let i = 0; i < 5; i++) { const t = new THREE.Mesh(new THREE.ConeGeometry(.05 * s, .22 * s, 4), mat(crowns[2])); const a = i * 1.3; t.position.set(Math.cos(a) * .22 * s, .1 * s, Math.sin(a) * .22 * s); t.rotation.z = Math.cos(a) * .3; g.add(t); }
     return g;
   }
   function pine(th, s = 1) {
@@ -639,6 +655,65 @@ const K3 = (() => {
     }
     return g;
   }
+  const SCATTER = {
+    trees:    { tuft: ['#4C9A4A', '#6DBA5F'], dot: ['#E5559A', '#F7C948', '#FFFFFF', '#F4A6C1'], pebble: '#B9A88A' },
+    autumn:   { tuft: ['#A86A2E', '#C98A3E'], dot: ['#E8761E', '#D9A42B', '#A8432A'], pebble: '#9C7A55' },
+    domes:    { tuft: ['#B8A060', '#A08A50'], dot: ['#E3B341', '#AB3920'], pebble: '#C9A96A' },
+    night:    { tuft: ['#24346A', '#2E4A8A'], dot: ['#F6E7A8', '#59C3F0'], pebble: '#3A4A80', glow: true },
+    crystals: { tuft: ['#DCEFFA', '#BFE3F3'], dot: ['#9CD5F2', '#FFFFFF'], pebble: '#CFE8F6', glow: true },
+    pines:    { tuft: ['#FFFFFF', '#E3EAF3'], dot: ['#C0392B', '#FFFFFF'], pebble: '#DCE5F0' },
+    palms:    { tuft: ['#7FB069', '#5FA052'], dot: ['#F4A6C1', '#FFF3DC', '#F7C948'], pebble: '#E3C88F' },
+    coral:    { tuft: ['#2E8C6A', '#3FA37A'], dot: ['#F27A6B', '#F7A35C', '#FFF3DC'], pebble: '#CDB27A' },
+    space:    { tuft: ['#6E52C8', '#8E6CF0'], dot: ['#F6E7A8', '#B48CFF'], pebble: '#4A3A8A', glow: true },
+    paper:    { tuft: ['#2B4C7E', '#5A6B88'], dot: ['#E8A3A3', '#F7C948'], pebble: '#FFFFFF' },
+  };
+  /* ينثر تفاصيل صغيرة على الأرض داخل مستطيل، مع تجنّب أماكن (avoid يعيد true للمكان الممنوع) */
+  function scatter(parent, th, { x0 = -20, x1 = 20, z0 = -20, z1 = 20, y = 0, count = 260, avoid = null, at = null } = {}) {
+    const P = SCATTER[th.deco] || SCATTER.trees, dummy = new THREE.Object3D(), c = new THREE.Color();
+    const make = (geo, material, n) => { const m = new THREE.InstancedMesh(geo, material, n); m.count = 0; parent.add(m); return m; };
+    const tuftGeo = new THREE.ConeGeometry(.07, .38, 4); tuftGeo.translate(0, .19, 0);
+    const tufts = make(tuftGeo, mat('#FFFFFF', { flatShading: true }), count * 3);
+    const pebbles = make(new THREE.DodecahedronGeometry(.13, 0), mat(P.pebble, { flatShading: true }), count);
+    const dots = make(new THREE.SphereGeometry(.075, 6, 4), P.glow ? new THREE.MeshBasicMaterial({ color: '#FFFFFF' }) : mat('#FFFFFF'), count);
+    let tries = 0;
+    for (let i = 0; i < count && tries < count * 6; tries++) {
+      let x, z, yy = y;
+      if (at) { const p = at(); if (!p) continue; ({ x, z } = p); yy = p.y ?? y; } else { x = rnd(x0, x1); z = rnd(z0, z1); }
+      if (avoid && avoid(x, z)) continue;
+      i++;
+      const kind = Math.random();
+      if (kind < .55) {
+        /* خصلة من ثلاث شفرات */
+        for (let k = 0; k < 3; k++) {
+          dummy.position.set(x + rnd(-.08, .08), yy, z + rnd(-.08, .08));
+          dummy.rotation.set(rnd(-.35, .35), rnd(0, 6), rnd(-.35, .35));
+          dummy.scale.setScalar(rnd(.6, 1.2)); dummy.updateMatrix();
+          tufts.setMatrixAt(tufts.count, dummy.matrix); tufts.setColorAt(tufts.count, c.set(P.tuft[k % 2])); tufts.count++;
+        }
+      } else if (kind < .8) {
+        dummy.position.set(x, yy + .04, z); dummy.rotation.set(rnd(0, 3), rnd(0, 3), 0);
+        dummy.scale.set(rnd(.6, 1.6), rnd(.4, .8), rnd(.6, 1.4)); dummy.updateMatrix();
+        pebbles.setMatrixAt(pebbles.count++, dummy.matrix);
+      } else {
+        dummy.position.set(x, yy + .2, z); dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(rnd(.8, 1.3)); dummy.updateMatrix();
+        dots.setMatrixAt(dots.count, dummy.matrix); dots.setColorAt(dots.count, c.set(P.dot[dots.count % P.dot.length])); dots.count++;
+        /* ساق صغيرة تحت الزهرة */
+        if (!P.glow) { dummy.position.set(x, yy, z); dummy.scale.set(.5, .55, .5); dummy.updateMatrix(); tufts.setMatrixAt(tufts.count, dummy.matrix); tufts.setColorAt(tufts.count, c.set(P.tuft[0])); tufts.count++; }
+      }
+    }
+    [tufts, pebbles, dots].forEach(m => { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; });
+    return { tufts, pebbles, dots };
+  }
+  /* مجموعة صغيرة متحركة من العشب والحصى (للمشاهد التي تتحرك فيها الأرض) */
+  function tuftPatch(th, n = 6) {
+    const g = new THREE.Group(), P = SCATTER[th.deco] || SCATTER.trees;
+    for (let i = 0; i < n; i++) {
+      const x = rnd(-.8, .8), z = rnd(-.8, .8);
+      if (Math.random() < .7) { const t = new THREE.Mesh(new THREE.ConeGeometry(.07, .4, 4), mat(P.tuft[i % 2], { flatShading: true })); t.position.set(x, .2, z); t.rotation.z = rnd(-.3, .3); g.add(t); }
+      else { const p = new THREE.Mesh(new THREE.DodecahedronGeometry(.14, 0), mat(P.pebble, { flatShading: true })); p.position.set(x, .06, z); p.scale.y = .6; g.add(p); }
+    }
+    return g;
+  }
   /* مشهد بعيد: جبال/تلال/كواكب في الأفق */
   function horizon(S, th, { radius = 60, y = 0, hills = true } = {}) {
     const g = new THREE.Group();
@@ -727,25 +802,59 @@ const K3 = (() => {
   /* أرضية بنقش القالب (خطوط الدفتر، رمل، عشب…) */
   function groundTexture(th, rep = 8) {
     const c = document.createElement('canvas');
-    c.width = c.height = 256;
-    const g = c.getContext('2d');
-    g.fillStyle = th.ground; g.fillRect(0, 0, 256, 256);
+    c.width = c.height = 512;
+    const g = c.getContext('2d'), N = 512, deco = th.deco;
+    g.fillStyle = th.ground; g.fillRect(0, 0, N, N);
     if (th.sketch) {
-      g.strokeStyle = '#BFD3EA'; g.lineWidth = 3;
-      for (let y = 0; y < 256; y += 32) { g.beginPath(); g.moveTo(0, y + 16); g.lineTo(256, y + 16); g.stroke(); }
+      g.strokeStyle = '#BFD3EA'; g.lineWidth = 4;
+      for (let y = 0; y < N; y += 64) { g.beginPath(); g.moveTo(0, y + 32); g.lineTo(N, y + 32); g.stroke(); }
+      g.strokeStyle = 'rgba(43,76,126,.18)'; g.lineWidth = 2;
+      for (let i = 0; i < 14; i++) { const x = rnd(0, N), y = rnd(0, N); g.beginPath(); g.moveTo(x, y); g.lineTo(x + 14, y - 10); g.stroke(); }
     } else {
-      for (let i = 0; i < 160; i++) {
-        g.fillStyle = Math.random() < .5 ? th.ground2 : 'rgba(255,255,255,.35)';
-        g.globalAlpha = rnd(.15, .5);
-        g.beginPath(); g.arc(Math.random() * 256, Math.random() * 256, rnd(2, 7), 0, 7); g.fill();
+      /* بقع ناعمة بلونين حتى لا تبدو الأرض مسطّحة */
+      for (let i = 0; i < 60; i++) {
+        const x = rnd(0, N), y = rnd(0, N), r = rnd(20, 70), gr = g.createRadialGradient(x, y, 0, x, y, r);
+        gr.addColorStop(0, Math.random() < .5 ? th.ground2 : 'rgba(255,255,255,.6)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+        g.globalAlpha = rnd(.12, .3); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      g.globalAlpha = 1;
+      if (deco === 'trees' || deco === 'autumn' || deco === 'night') {
+        /* شفرات عشب صغيرة */
+        const cols = deco === 'autumn' ? ['#A86A2E', '#C98A3E', '#8A5226'] : deco === 'night' ? ['#24346A', '#2E4A8A', '#1B2752'] : ['#4C9A4A', '#6DBA5F', '#3F7D3A'];
+        g.lineWidth = 2; g.lineCap = 'round';
+        for (let i = 0; i < 1400; i++) { const x = rnd(0, N), y = rnd(0, N), h = rnd(5, 11); g.strokeStyle = cols[i % 3]; g.globalAlpha = rnd(.35, .8); g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + rnd(-3, 3), y - h / 2, x + rnd(-4, 4), y - h); g.stroke(); }
+        if (deco === 'trees') for (let i = 0; i < 70; i++) { g.globalAlpha = .9; g.fillStyle = ['#F4A6C1', '#F7C948', '#FFFFFF', '#E5559A'][i % 4]; g.beginPath(); g.arc(rnd(0, N), rnd(0, N), rnd(2, 3.5), 0, 7); g.fill(); }
+        if (deco === 'autumn') for (let i = 0; i < 90; i++) { g.globalAlpha = .85; g.fillStyle = ['#E8761E', '#D9A42B', '#A8432A'][i % 3]; g.save(); g.translate(rnd(0, N), rnd(0, N)); g.rotate(rnd(0, 6)); g.beginPath(); g.ellipse(0, 0, 6, 3, 0, 0, 7); g.fill(); g.restore(); }
+      } else if (deco === 'palms' || deco === 'domes' || deco === 'coral') {
+        /* رمل بتموّجات الريح وحصى وأصداف */
+        g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 2.5;
+        for (let y = 0; y < N; y += 18) { g.beginPath(); for (let x = 0; x <= N; x += 16) g.lineTo(x, y + Math.sin(x / 40 + y) * 5); g.stroke(); }
+        g.strokeStyle = 'rgba(0,0,0,.07)';
+        for (let y = 9; y < N; y += 18) { g.beginPath(); for (let x = 0; x <= N; x += 16) g.lineTo(x, y + Math.sin(x / 40 + y) * 5); g.stroke(); }
+        for (let i = 0; i < 160; i++) { g.globalAlpha = rnd(.3, .7); g.fillStyle = Math.random() < .5 ? th.ground2 : '#FFFFFF'; g.beginPath(); g.ellipse(rnd(0, N), rnd(0, N), rnd(1.5, 4), rnd(1, 3), rnd(0, 3), 0, 7); g.fill(); }
+        if (deco !== 'domes') for (let i = 0; i < 26; i++) { g.globalAlpha = .9; g.fillStyle = ['#F4A6C1', '#FFF3DC', '#F7C948'][i % 3]; const x = rnd(0, N), y = rnd(0, N); g.beginPath(); g.moveTo(x, y); g.arc(x, y, 6, Math.PI * 1.1, Math.PI * 1.9); g.fill(); }
+      } else if (deco === 'pines' || deco === 'crystals') {
+        /* ثلج: آثار ناعمة ولمعات */
+        g.strokeStyle = 'rgba(159,179,209,.35)'; g.lineWidth = 3;
+        for (let i = 0; i < 40; i++) { const x = rnd(0, N), y = rnd(0, N); g.beginPath(); g.arc(x, y, rnd(10, 30), rnd(0, 3), rnd(3, 6)); g.stroke(); }
+        g.fillStyle = '#FFFFFF';
+        for (let i = 0; i < 260; i++) { g.globalAlpha = rnd(.4, 1); const x = rnd(0, N), y = rnd(0, N), r = rnd(.8, 2.2); g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+        g.fillStyle = 'rgba(120,170,220,.5)';
+        for (let i = 0; i < 60; i++) { g.globalAlpha = .6; g.beginPath(); g.arc(rnd(0, N), rnd(0, N), 1.2, 0, 7); g.fill(); }
+      } else if (deco === 'space') {
+        /* أرض كوكب: فوهات وغبار لامع */
+        for (let i = 0; i < 26; i++) { const x = rnd(0, N), y = rnd(0, N), r = rnd(8, 28); g.globalAlpha = .45; g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.strokeStyle = 'rgba(201,180,255,.45)'; g.lineWidth = 2.5; g.beginPath(); g.arc(x - 1, y - 1, r, Math.PI * .9, Math.PI * 1.9); g.stroke(); }
+        g.fillStyle = '#F6E7A8';
+        for (let i = 0; i < 150; i++) { g.globalAlpha = rnd(.3, .9); g.fillRect(rnd(0, N), rnd(0, N), 1.6, 1.6); }
       }
       g.globalAlpha = 1;
     }
     const t = texture(c);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(rep, rep);
+    t.repeat.set(rep / 2, rep / 2);
     return t;
   }
+
 
   /* ---------- مؤثرات عند الإجابة ---------- */
   function burstAt(S, v, ok, txt) {
@@ -769,6 +878,6 @@ const K3 = (() => {
 
   return {
     THEMES, theme, mat, glow, col, rnd, ease, fonts, sign, plate, recolorSign, textCanvas, texture, create, clear, controls, joystick, pick, groundPoint,
-    player, blob, starMesh, tree, pine, palm, prop, cloud, planet, horizon, weather, groundTexture, burstAt, tint, dotTex,
+    player, blob, starMesh, scatter, tuftPatch, tree, pine, palm, prop, cloud, planet, horizon, weather, groundTexture, burstAt, tint, dotTex,
   };
 })();
