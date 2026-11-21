@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwlda9bg126",
+  "type": "lane3d",
+  "name": "Reading 2",
+  "desc": "",
+  "count": 3,
+  "updated": 1795290975569
+ },
+ {
   "id": "gmwlkv06tyuw",
   "type": "boat3d",
   "name": "سورة العلق",
