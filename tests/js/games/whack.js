@@ -6,7 +6,7 @@
 'use strict';
 
 let WH = null;
-const WH_GRID = { cols: 3, rows: 3, dx: 3.3, dz: 3 };
+const WH_GRID = { cols: 3, rows: 3, dx: 4.6, dz: 3.9 };
 const WH_KINDS = ['star', 'moon', 'flower', 'snow', 'bubble', 'planet', 'pumpkin', 'sun', 'snowball', 'sketch'];
 
 function whackScene() {
@@ -16,10 +16,10 @@ function whackScene() {
   scene.add(field);
   S.holes = [];
   const sparks = [];
-  let mallet = null, swing = 0, aim = new THREE.Vector3(0, 1.8, 2), aimShown = false;
+  let mallet = null, swingT = -1, aim = new THREE.Vector3(0, 1.45, 2), aimShown = false;
 
-  camera.position.set(0, 10.5, 9.2);
-  camera.lookAt(0, 0, -.6);
+  camera.position.set(0, 13.2, 12);
+  camera.lookAt(0, 0, -1);
 
   /* ---------- الساحة والأنابيب ---------- */
   S.onTheme = th => {
@@ -27,12 +27,12 @@ function whackScene() {
     const ground = new THREE.Mesh(new THREE.CircleGeometry(60, 48), K3.mat(th.ground2, { map: K3.groundTexture(th, 26) }));
     ground.rotation.x = -Math.PI / 2; ground.position.y = -.02;
     field.add(ground);
-    const plaza = new THREE.Mesh(new THREE.CylinderGeometry(7.6, 8, .5, 48), K3.mat('#FFFFFF', { map: K3.groundTexture(th, 6) }));
+    const plaza = new THREE.Mesh(new THREE.CylinderGeometry(9.8, 10.2, .5, 56), K3.mat('#FFFFFF', { map: K3.groundTexture(th, 6) }));
     plaza.position.y = -.25; field.add(plaza);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(7.7, .16, 8, 72), K3.mat(th.wall2)); rim.rotation.x = Math.PI / 2; rim.position.y = .01; field.add(rim);
-    K3.scatter(field, th, { count: 260, at: () => { const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 7.3; return { x: Math.cos(a) * r, z: Math.sin(a) * r, y: 0 }; }, avoid: (x, z) => S.holes.some(h => Math.hypot(h.x - x, h.z - z) < 1.3) });
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(9.9, .18, 8, 80), K3.mat(th.wall2)); rim.rotation.x = Math.PI / 2; rim.position.y = .01; field.add(rim);
+    K3.scatter(field, th, { count: 360, at: () => { const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 9.5; return { x: Math.cos(a) * r, z: Math.sin(a) * r, y: 0 }; }, avoid: (x, z) => S.holes.some(h => Math.hypot(h.x - x, h.z - z) < 1.3) });
     for (let i = 0; i < 26; i++) {
-      const a = Math.PI * .9 + (i / 25) * Math.PI * 1.2, r = K3.rnd(9.5, 16);
+      const a = Math.PI * .9 + (i / 25) * Math.PI * 1.2, r = K3.rnd(12, 19);
       const p = K3.prop(th, K3.rnd(1.3, 2.2)); p.position.set(Math.cos(a) * r, 0, Math.sin(a) * r); p.rotation.y = Math.random() * 6;
       field.add(p);
     }
@@ -62,20 +62,39 @@ function whackScene() {
     scene.add(mallet);
   };
 
-  /* ---------- المطرقة ---------- */
+  /* ---------- المطرقة: مقبض يدور حول قبضة اليد، ورأس ثقيل في طرفه ---------- */
+  const HANDLE = 2.5;
   function makeMallet(th) {
     const g = new THREE.Group(), arm = new THREE.Group();
     g.add(arm);
-    const handle = new THREE.Mesh(new THREE.CylinderGeometry(.09, .11, 2.2, 10), K3.mat('#8A5A30'));
-    handle.position.set(0, 1.1, 0); arm.add(handle);
-    const grip = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, .6, 10), K3.mat(th.wall2)); grip.position.y = 1.95; arm.add(grip);
-    const head = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, 1.1, 20), K3.mat(th.accent));
-    head.rotation.z = Math.PI / 2; head.position.y = 0; arm.add(head);
-    for (const x of [-.45, .45]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(.45, .45, .14, 20), K3.mat(th.gold)); cap.rotation.z = Math.PI / 2; cap.position.x = x; arm.add(cap); }
-    arm.rotation.x = -.5;
-    g.userData.arm = arm;
+    const handle = new THREE.Mesh(new THREE.CylinderGeometry(.08, .1, HANDLE, 10), K3.mat('#8A5A30'));
+    handle.position.y = -HANDLE / 2; arm.add(handle);
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, .7, 10), K3.mat(th.wall2)); grip.position.y = -.35; arm.add(grip);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(.14, 10, 8), K3.mat(th.gold)); arm.add(knob);
+    const headG = new THREE.Group(); headG.position.y = -HANDLE; arm.add(headG);
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(.44, .44, 1.15, 22), K3.mat(th.accent));
+    head.rotation.z = Math.PI / 2; headG.add(head);
+    for (const x of [-.5, .5]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(.47, .47, .16, 22), K3.mat(th.gold)); cap.rotation.z = Math.PI / 2; cap.position.x = x; headG.add(cap); }
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.45, .05, 6, 22), K3.mat('#FFFFFF')); ring.rotation.y = Math.PI / 2; headG.add(ring);
+    g.userData = { arm, headG };
     g.visible = false;
+    const sh = K3.blob(.7, .28); sh.visible = false; scene.add(sh); g.userData.shadow = sh;
     return g;
+  }
+  /* مراحل الضربة (بالثواني): رفع للخلف، ثم ضربة سريعة، ثم ارتداد قصير، ثم عودة */
+  const SW = { up: .11, down: .08, hold: .07, back: .22 };
+  const SW_T = SW.up + SW.down + SW.hold + SW.back;
+  const HIT_MS = (SW.up + SW.down) * 1000;
+  const REST = -.75, RAISED = -1.95, STRIKE = .05;
+  const easeIn = k => k * k * k, easeOut = k => 1 - Math.pow(1 - k, 3);
+  function malletAngle(t) {
+    if (t < SW.up) return REST + (RAISED - REST) * easeOut(t / SW.up);
+    t -= SW.up;
+    if (t < SW.down) return RAISED + (STRIKE - RAISED) * easeIn(t / SW.down);
+    t -= SW.down;
+    if (t < SW.hold) return STRIKE - Math.sin(t / SW.hold * Math.PI) * .18;
+    t -= SW.hold;
+    return STRIKE + (REST - STRIKE) * easeOut(Math.min(1, t / SW.back));
   }
 
   /* ---------- الأشكال ---------- */
@@ -110,10 +129,10 @@ function whackScene() {
   /* ضربة على حفرة: تتحرك المطرقة إليها وتضرب */
   S.strike = h => {
     if (!S.onHit) return;
-    aim.set(h.x, 1.8, h.z + .2);
+    aim.set(h.x, 1.45, h.z);
     aimShown = true;
-    swing = 1;
-    setTimeout(() => S.onHit(h), 90);
+    swingT = 0;
+    setTimeout(() => S.onHit(h), HIT_MS);
   };
   S.burst = (h, good) => {
     const pos = new THREE.Vector3(h.x, 1.3, h.z);
@@ -124,7 +143,7 @@ function whackScene() {
 
   /* ---------- اللمس والفأرة: المطرقة تتبع اليد، والضغطة تضرب أقرب شكل ظاهر ---------- */
   S.cv.addEventListener('pointermove', e => {
-    const p = K3.groundPoint(S, e, 1.8);
+    const p = K3.groundPoint(S, e, 1.45);
     if (p) { aim.copy(p); aimShown = true; }
   });
   S.cv.addEventListener('pointerleave', () => { aimShown = false; });
@@ -133,12 +152,13 @@ function whackScene() {
     if (!S.started) return;
     const p = K3.groundPoint(S, e, .9);
     if (!p) return;
-    aim.set(p.x, 1.8, p.z); aimShown = true; swing = 1;
+    aim.set(p.x, 1.45, p.z); aimShown = true; swingT = 0;
     /* الشكل المضروب: أقربها إلى نقطة الضغطة (مع ارتفاعه) */
     const cand = S.holes.filter(h => h.up >= 0 && h.pop && !h.state && h.t > .25)
       .map(h => ({ h, d: Math.hypot(h.x - p.x, h.z - p.z) }))
       .filter(o => o.d < 1.7).sort((a, b) => a.d - b.d)[0];
-    if (cand && S.onHit) setTimeout(() => S.onHit(cand.h), 90);
+    if (cand) aim.set(cand.h.x, 1.45, cand.h.z);
+    if (cand && S.onHit) setTimeout(() => S.onHit(cand.h), HIT_MS);
     else FX.play('tick');
   });
 
@@ -163,10 +183,27 @@ function whackScene() {
     /* المطرقة: تلحق باليد وتضرب */
     if (mallet) {
       mallet.visible = aimShown && S.started;
-      mallet.position.lerp(aim, Math.min(1, dt * 18));
-      const arm = mallet.userData.arm;
-      if (swing > 0) { swing = Math.max(0, swing - dt * 4); arm.rotation.x = -.5 + Math.sin((1 - swing) * Math.PI) * 1.25; mallet.position.y = 1.8 - Math.sin((1 - swing) * Math.PI) * .9; }
-      else arm.rotation.x += (-.5 - arm.rotation.x) * Math.min(1, dt * 8);
+      /* القبضة فوق نقطة الهدف بطول المقبض، فيقع الرأس على الشكل تمامًا عند الضربة */
+      const want = new THREE.Vector3(aim.x, aim.y + HANDLE, aim.z);
+      mallet.position.lerp(want, Math.min(1, dt * (swingT >= 0 ? 30 : 14)));
+      const { arm, headG, shadow: msh } = mallet.userData;
+      if (swingT >= 0) {
+        swingT += dt;
+        arm.rotation.x = malletAngle(swingT);
+        /* لحظة الارتطام: الرأس ينضغط قليلًا */
+        const hit = swingT > SW.up + SW.down && swingT < SW.up + SW.down + SW.hold;
+        headG.scale.set(hit ? 1.12 : 1, hit ? .82 : 1, hit ? 1.12 : 1);
+        if (hit && !mallet.userData.thud) { mallet.userData.thud = true; FX.play('pop'); }
+        if (swingT >= SW_T) { swingT = -1; mallet.userData.thud = false; }
+      } else {
+        arm.rotation.x += (REST + Math.sin(S.t * 2.2) * .05 - arm.rotation.x) * Math.min(1, dt * 8);
+        headG.scale.set(1, 1, 1);
+      }
+      /* ميل جانبي بسيط مع حركة اليد، وظل الرأس على الأرض */
+      arm.rotation.z += ((want.x - mallet.position.x) * -.25 - arm.rotation.z) * Math.min(1, dt * 8);
+      const hp = new THREE.Vector3(); headG.getWorldPosition(hp);
+      msh.visible = mallet.visible; msh.position.set(hp.x, .03, hp.z);
+      msh.scale.setScalar(Math.max(.4, 1.3 - hp.y * .25));
     }
   };
   S.size();
