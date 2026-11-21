@@ -249,8 +249,6 @@ function whackScene() {
     impacts.forEach(o => { o.t += dt; if (o.ring) { o.m.scale.setScalar(1 + o.t * 6); o.m.material.opacity = Math.max(0, .8 - o.t * 2.2); } else { o.v.y -= 9 * dt; o.m.position.addScaledVector(o.v, dt); o.m.material.opacity = Math.max(0, .75 - o.t * 1.6); } if (o.t > .55) scene.remove(o.m); });
     for (let i = impacts.length - 1; i >= 0; i--) if (impacts[i].t > .55) impacts.splice(i, 1);
     if (shake > 0) { shake = Math.max(0, shake - dt); camera.position.set(Math.sin(S.t * 90) * shake * .5, 13.2 + Math.cos(S.t * 80) * shake * .4, 12); camera.lookAt(0, 0, -1); } else if (camera.position.x !== 0) { camera.position.set(0, 13.2, 12); camera.lookAt(0, 0, -1); }
-    if (false) {
-    }
   };
   S.size();
   S.cv.style.cursor = 'none';
