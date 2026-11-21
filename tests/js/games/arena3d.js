@@ -266,7 +266,6 @@ function arenaScene() {
     beam.position.y = 8; g.add(beam);
     const light = new THREE.PointLight(th.gold, 0, 16, 1.6); light.position.y = 2; g.add(light);
     const sparks = [];
-    for (let i = 0; i < 14; i++) { const sp = new THREE.Mesh(new THREE.SphereGeometry(.08, 6, 4), K3.glow(th.gold)); sp.visible = false; g.add(sp); sparks.push(sp); }
     /* مصابيح على جانبي الدرج تضيء مع البوابة */
     const lamps = [];
     for (let k = 1; k <= 4; k++) for (const sx of [-1, 1]) {
@@ -432,8 +431,10 @@ function arenaScene() {
       const out = Math.abs(p.x) > AR.half + 1 || Math.abs(p.z) > AR.half + 1;
       if (hz || wall || out || s.life <= 0) {
         scene.remove(s.g); shots.splice(i, 1);
-        boom(p.clone(), !!hz);
-        if (hz) { hz.dead = 5; hz.g.visible = false; }
+        /* موجة الانفجار تحطّم كل كرة شائكة قريبة، حتى لو لم تُصب مباشرة */
+        const blast = hazards.filter(h => !h.dead && Math.hypot(h.x - p.x, h.z - p.z) < 4.5);
+        boom(p.clone(), blast.length > 0);
+        blast.forEach((h, i) => { h.dead = 5; h.g.visible = false; if (h !== hz) setTimeout(() => boom(new THREE.Vector3(h.x, .7, h.z), false), 90 + i * 70); });
       }
     }
     for (let i = booms.length - 1; i >= 0; i--) {
