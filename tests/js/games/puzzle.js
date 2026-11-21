@@ -193,6 +193,8 @@ function build(stage, im, it) {
   };
   stage.addEventListener('pointerup', drop);
   stage.addEventListener('pointercancel', drop);
+  /* للفحص والعرض التجريبي فقط */
+  Play._pz = { pieces, target: p => target(p), L: () => L, stage };
 
   /* معاينة الصورة كاملة ما دام الزر مضغوطًا */
   const peekOn = e => { e.preventDefault(); frame.classList.add('peek'); stage.classList.add('peeking'); };

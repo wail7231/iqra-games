@@ -62,6 +62,7 @@ Play.register({
       });
     };
     token.targets = targets;   // للفحص من أدوات المطوّر
+    token.state = () => ({ W, H, g, vmax, bow, cv, arrow });
     let W = 0, H = 0, R = 30, g = 600, vmax = 900, missed = false, done = false;
     const bow = { x: 0, y: 0 };
     const size = () => {
