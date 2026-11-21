@@ -117,6 +117,27 @@ function skiScene() {
     rock.position.set(sx, .35, z + 10); rock.scale.y = .7;
     slope.add(rock);
     items.push({ kind: 'rock', g: rock, z: z + 10, x: sx, done: false });
+    /* عوائق أكثر: صخور وأشجار على المنحدر، وجذع ساقط يُقفز فوقه */
+    const obstacle = (kind, x, oz) => {
+      let g;
+      if (kind === 'tree') { g = K3.prop(th, 1.1); }
+      else { g = new THREE.Mesh(new THREE.DodecahedronGeometry(K3.rnd(.5, .75), 0), K3.mat(th.dark ? '#3A3570' : '#9C8A70', { flatShading: true })); g.position.y = .35; g.scale.y = .7; }
+      g.position.x = x; g.position.z = oz;
+      slope.add(g);
+      items.push({ kind: kind === 'tree' ? 'rock' : 'rock', g, z: oz, x, done: false, w: kind === 'tree' ? 1.1 : 1 });
+    };
+    for (const oz of [z + 5, z + 15, z + 27]) {
+      const n = 1 + (Math.random() < .5 ? 1 : 0);
+      for (let i = 0; i < n; i++) obstacle(Math.random() < .4 ? 'tree' : 'rock', K3.rnd(-SKI_W + 1, SKI_W - 1), oz + K3.rnd(-1.5, 1.5));
+    }
+    const lx = K3.rnd(-SKI_W + 3.5, SKI_W - 3.5), log = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.28, .32, 6, 10), K3.mat('#8A5A30', { flatShading: true }));
+    trunk.rotation.z = Math.PI / 2; trunk.position.y = .3; log.add(trunk);
+    for (const ex of [-3, 3]) { const end = new THREE.Mesh(new THREE.CircleGeometry(.29, 12), K3.mat('#D9B98A')); end.position.set(ex, .3, 0); end.rotation.y = ex > 0 ? Math.PI / 2 : -Math.PI / 2; log.add(end); }
+    const snow = new THREE.Mesh(new THREE.BoxGeometry(5.4, .08, .3), K3.mat(th.deco === 'pines' || th.deco === 'crystals' ? '#FFFFFF' : th.ground2)); snow.position.y = .6; log.add(snow);
+    log.position.set(lx, 0, z + 21);
+    slope.add(log);
+    items.push({ kind: 'log', g: log, z: z + 21, x: lx, done: false });
   }
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
@@ -203,7 +224,7 @@ function skiScene() {
       } else if (!it.done && it.z >= -.4) {
         it.done = true;
         if (it.kind === 'ramp' && Math.abs(it.x - P.x) < 1.6 && P.y < .3) { P.vy = 9.5; FX.play('good'); }
-        if (it.kind === 'rock' && Math.abs(it.x - P.x) < 1 && P.y < .5) { P.stumble = .6; FX.play('bad'); Play.board.classList.remove('shake'); void Play.board.offsetWidth; Play.board.classList.add('shake'); }
+        if (((it.kind === 'rock' && Math.abs(it.x - P.x) < (it.w || 1)) || (it.kind === 'log' && Math.abs(it.x - P.x) < 3.2)) && P.y < .5) { P.stumble = .6; FX.play('bad'); Play.board.classList.remove('shake'); void Play.board.offsetWidth; Play.board.classList.add('shake'); }
       }
     });
     for (let i = items.length - 1; i >= 0; i--) { const it = items[i]; if (it.kind !== 'deco' && (it.dead || it.z > 14)) { slope.remove(it.g); items.splice(i, 1); } }
