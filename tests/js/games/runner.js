@@ -1,11 +1,12 @@
 /* الكرة القافزة (ثلاثية الأبعاد، منظور جانبي كألعاب المنصّات) — كرة تتدحرج على أرض مجسّمة،
    وتأتي نحوها منصّات طافية على كل منها لافتة إجابة. ضغطة (أو مسافة / سهم أعلى) = قفزة.
+   قفزتان (الثانية في الهواء)، وأسفل (أو سحب للأسفل) = نزول سريع يضرب المنصّة.
    الهبوط على منصّة = اختيار إجابتها: الصحيحة تخضرّ (نقطة إن كانت أول اختيار)، والخاطئة تتفتت وتسقط وتُنقص قلبًا.
    إن مرّت كل المنصّات دون اختيار عادت من جديد. المشهد يبقى بين الأسئلة. الشكل يتبع قالب الشكل. */
 'use strict';
 
 let RUN = null;
-const RN = { r: .55, g: 24, jump: 10.2 };
+const RN = { r: .55, g: 24, jump: 12, slam: 26 };
 
 function runnerScene() {
   const S = K3.create({ fov: 46, fogNear: 28, fogFar: 80, ratio: .5, maxH: 460 });
@@ -84,7 +85,7 @@ function runnerScene() {
     const answers = fitAnswers(mixAnswers(S.q, 6, S.collected), 6);
     let x = Math.min(-16, ...S.plats.filter(p => !p.state).map(p => p.x - p.w - 5));
     answers.forEach(a => {
-      const p = addPlat(a, x, K3.rnd(1.1, 1.65), S.q);
+      const p = addPlat(a, x, K3.rnd(2, 2.7), S.q);
       x -= p.w + K3.rnd(4.5, 6.5);
     });
   };
@@ -99,11 +100,34 @@ function runnerScene() {
   /* ---------- القفز والهبوط ---------- */
   const jump = () => {
     if (!S.started) { S.begin(); return; }
-    if (P.y <= .001 || P.on) { P.vy = RN.jump; P.on = null; FX.play('tick'); }
+    /* قفزتان: الأولى من الأرض أو المنصّة، والثانية في الهواء مع دورة */
+    if (P.y <= .001 || P.on) { P.vy = RN.jump; P.on = null; P.jumps = 1; P.slam = false; FX.play('tick'); }
+    else if ((P.jumps || 0) < 2) { P.vy = RN.jump * .85; P.jumps = 2; P.flip = 1; P.slam = false; FX.play('pop'); }
   };
+  /* نزول سريع: الكرة تهوي بقوة لتضرب المنصّة تحتها */
+  const slam = () => {
+    if (!S.started || P.on || P.y <= .001 || P.slam) return;
+    P.slam = true; P.vy = -RN.slam; FX.play('tick');
+  };
+  S.slam = slam;
   S.jump = jump;
-  K3.controls(S, { dir(d) { if (d === 'up') jump(); }, tap() { jump(); } });
+  K3.controls(S, { dir(d) { if (d === 'up') jump(); if (d === 'down') slam(); }, tap() { jump(); } });
 
+  /* أثر الضربة: موجة حلقية وغبار واهتزاز خفيف */
+  const rings = [];
+  function slamHit(pos) {
+    const th = K3.theme();
+    const ring = new THREE.Mesh(new THREE.RingGeometry(.4, .7, 32), new THREE.MeshBasicMaterial({ color: th.gold, transparent: true, opacity: .8, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.set(0, pos.y + .05, 0);
+    scene.add(ring); rings.push({ m: ring, t: 0 });
+    for (let i = 0; i < 10; i++) {
+      const d = new THREE.Mesh(new THREE.SphereGeometry(.12, 6, 4), new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: .8 }));
+      const a = i / 10 * Math.PI * 2; d.position.set(0, pos.y + .1, 0); scene.add(d);
+      rings.push({ m: d, t: 0, v: new THREE.Vector3(Math.cos(a) * 3, 1.5, Math.sin(a) * 3) });
+    }
+    FX.play('pop');
+    Play.board.classList.remove('shake'); void Play.board.offsetWidth; Play.board.classList.add('shake');
+  }
   function land(p) {
     P.on = p;
     if (p.state || S.answered || Play.roundDone) return;
@@ -148,14 +172,16 @@ function runnerScene() {
       P.y += P.vy * dt;
       if (P.vy < 0) {
         const p = S.plats.find(p => p.state !== 'bad' && Math.abs(p.x) <= p.w / 2 + .15 && prev >= p.top - .02 && P.y <= p.top + .02);
-        if (p) { P.y = p.top; P.vy = 0; land(p); }
+        if (p) { P.y = p.top; P.vy = 0; P.jumps = 0; if (P.slam) slamHit(p.g.position); P.slam = false; land(p); }
       }
-      if (P.y <= 0) { P.y = 0; P.vy = 0; }
+      if (P.y <= 0) { if (P.slam) slamHit(new THREE.Vector3(0, 0, 0)); P.y = 0; P.vy = 0; P.jumps = 0; P.slam = false; }
     } else P.y = P.on.g.position.y;
     if (ball) {
       ball.position.set(0, P.y + RN.r, 0);
       P.roll += v * dt / RN.r;
       ball.userData.body.rotation.z = P.roll;
+      if (P.flip) { P.flip = Math.max(0, P.flip - dt * 2.6); ball.rotation.z = (1 - P.flip) * Math.PI * 2; } else ball.rotation.z = 0;
+      ball.scale.set(P.slam ? .85 : 1, P.slam ? 1.25 : 1, P.slam ? .85 : 1);
       ball.userData.body.rotation.y = Math.sin(S.t) * .2;
       const ground = P.on ? P.on.g.position.y : 0;
       shadow.position.set(0, ground + .03, 0);
@@ -164,6 +190,8 @@ function runnerScene() {
     /* حذف ما عبر، وإعادة منصّات السؤال إن فاتت كلها */
     for (let i = S.plats.length - 1; i >= 0; i--) { const p = S.plats[i]; if (p.x > 22 || p.fall > 2) { world.remove(p.g); S.plats.splice(i, 1); } }
     if (live && S.q && !S.answered && !Play.roundDone && !S.plats.some(p => p.round === S.q && !p.state && p.x < 1)) S.spawn();
+    rings.forEach(o => { o.t += dt; if (o.v) { o.v.y -= 10 * dt; o.m.position.addScaledVector(o.v, dt); } else o.m.scale.setScalar(1 + o.t * 7); o.m.material.opacity = Math.max(0, .8 - o.t * 1.8); if (o.t > .5) scene.remove(o.m); });
+    for (let i = rings.length - 1; i >= 0; i--) if (rings[i].t > .5) rings.splice(i, 1);
     camera.position.y += (3.6 + P.y * .35 - camera.position.y) * Math.min(1, dt * 3);
     camera.lookAt(-3.5, 1.8 + P.y * .3, 0);
   };
