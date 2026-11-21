@@ -113,11 +113,20 @@ const K3 = (() => {
     wrap.append(cv, start);
     const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    /* ظلال حقيقية ناعمة من الشمس */
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(fov, 1.6, .1, 300);
     const hemi = new THREE.HemisphereLight(0xffffff, 0x8a8a8a, .62);
     const sun = new THREE.DirectionalLight(0xffffff, .58);
     sun.position.set(-8, 14, 10);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1536, 1536);
+    Object.assign(sun.shadow.camera, { left: -24, right: 24, top: 24, bottom: -24, near: 1, far: 90 });
+    sun.shadow.bias = -.0006;
+    sun.shadow.normalBias = .03;
+    scene.add(sun.target);
     const fill = new THREE.DirectionalLight(0xffffff, .22);
     fill.position.set(9, 6, -8);
     scene.add(hemi, sun, fill);
@@ -166,6 +175,7 @@ const K3 = (() => {
       const p = v.clone().project(camera), r = cv.getBoundingClientRect();
       return { x: r.left + (p.x + 1) / 2 * r.width, y: r.top + (1 - p.y) / 2 * r.height };
     };
+    const sunDir = new THREE.Vector3(), sunFocus = new THREE.Vector3();
     let last = performance.now();
     function frame(now) {
       if (!wrap.isConnected) { renderer.dispose(); return; }
@@ -174,12 +184,32 @@ const K3 = (() => {
       S.t += dt;
       if (S.themeId !== Play.cfg.theme) S.applyTheme();
       if (S.onFrame) S.onFrame(dt);
+      /* الشمس تتبع ما تنظر إليه الكاميرا حتى تبقى الظلال حادة قرب اللاعب */
+      camera.getWorldDirection(sunDir);
+      const k = sunDir.y < -.05 ? Math.min(30, -camera.position.y / sunDir.y) : 14;
+      sunFocus.copy(camera.position).addScaledVector(sunDir, k * .8);
+      sun.target.position.copy(sunFocus);
+      sun.position.set(sunFocus.x - 14, sunFocus.y + 26, sunFocus.z + 16);
+      /* كل فترة: ما يُلقي الظل وما يستقبله (الأشياء الجديدة تُضاف تلقائيًا) */
+      if ((S.frames = (S.frames || 0) + 1) % 30 === 1) castShadows(scene);
       S.fx.forEach(f => f(dt, S.t));
       renderer.render(scene, camera);
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
     return S;
+  }
+  /* يُلقي الظل كل مجسّم صلب، ولا تُلقيه الأسطح المسطّحة ولا الشفافة ولا المتوهجة ولا العشب الكثير */
+  const FLAT = /Plane|Circle|Ring/;
+  function castShadows(root) {
+    root.traverse(m => {
+      if (!m.isMesh || m.userData.shadowDone) return;
+      m.userData.shadowDone = true;
+      const mats = [].concat(m.material);
+      const see = mats.every(x => !x.transparent || x.opacity > .9) && !mats.some(x => x.isMeshBasicMaterial);
+      m.castShadow = see && !FLAT.test(m.geometry.type) && !(m.isInstancedMesh && m.geometry.type === 'ConeGeometry');
+      m.receiveShadow = !mats.some(x => x.isMeshBasicMaterial);
+    });
   }
   function clear(g) {
     while (g.children.length) {

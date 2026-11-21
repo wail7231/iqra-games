@@ -1135,5 +1135,5 @@ async function init() {
 
 bindTheme();
 FX.bindToggle($('#soundBtn'));
-FX.bindFullscreen($('#fsBtn'), $('#playArea'));
+FX.bindFullscreen($('#fsBtn'), $('#playArea').parentElement);
 init();

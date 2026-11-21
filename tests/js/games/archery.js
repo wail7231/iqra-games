@@ -172,6 +172,7 @@ Play.register({
       ctx.translate(t.x + shake, t.y);
       if (t.broken) { ctx.globalAlpha = Math.max(0, 1 - t.broken); ctx.rotate(t.broken * .6); }
       if (th.glow) { ctx.shadowColor = th.edge; ctx.shadowBlur = 14; }
+      else if (!th.sketch) { ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 6; }
       /* حامل الهدف */
       ctx.strokeStyle = th.bow;
       ctx.lineWidth = 3;
@@ -181,7 +182,7 @@ Play.register({
         ctx.beginPath(); ctx.arc(0, 0, R * (1 - k * .19), 0, 7); ctx.fill();
         if (th.sketch) { ctx.strokeStyle = th.edge; ctx.lineWidth = 1.5; ctx.stroke(); }
       });
-      ctx.shadowBlur = 0;
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; ctx.shadowColor = "transparent";
       if (t.hit) { ctx.strokeStyle = '#3F8A3A'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, R + 4 + Math.sin(time * 10) * 2, 0, 7); ctx.stroke(); }
       t.stuck.forEach(s => drawArrow(s.dx, s.dy, s.a, th, .75));
       /* شريط الإجابة تحت الهدف */

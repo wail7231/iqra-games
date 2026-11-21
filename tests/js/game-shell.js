@@ -480,5 +480,6 @@ async function init() {
 
 bindTheme();
 FX.bindToggle($('#soundBtn'));
-FX.bindFullscreen($('#fsBtn'), $('#board'));
+/* ملء الشاشة يشمل اللعبة وشاشة النتيجة معًا، فتبقى أزرار «العب مرة أخرى» وغيرها قابلة للضغط */
+FX.bindFullscreen($('#fsBtn'), $('#playArea').parentElement);
 init();

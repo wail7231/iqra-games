@@ -1896,3 +1896,15 @@ a { color: inherit; text-decoration: none; }
 .k3-btn:active { transform: scale(.92); }
 .k3-jump { right: 18px; bottom: 18px; }
 @media (pointer: coarse) { .k3-btn { display: grid; } }
+
+/* ملء الشاشة يشمل منطقة اللعب وشاشة النتيجة: خلفية الصفحة، وتمرير إن طالت النتيجة، وزر خروج في النتيجة */
+.wrap:fullscreen, .wrap:-webkit-full-screen { max-width: none !important; width: 100%; height: 100%; padding: 0 !important; margin: 0; overflow: auto; background: var(--bg) var(--pattern); }
+.wrap:fullscreen > #playArea, .wrap:-webkit-full-screen > #playArea { width: 100%; }
+.is-fs #summary { position: relative; margin: 24px auto; max-width: 720px; }
+.fs-sum { display: none; }
+.is-fs .fs-sum { display: grid; }
+.k3-fire { right: 18px; bottom: 94px; width: 58px; height: 58px; }
+
+/* إطار ضوئي ناعم حول ساحات الألعاب المرسومة والمجسّمة: يبرز الوسط ويعطي عمقًا */
+.run-wrap::after, .arch-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(0, 0, 0, .16) 100%); }
+.board[data-theme="night"] .run-wrap::after, .board[data-theme="space"] .run-wrap::after { background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0, 0, 0, .32) 100%); }

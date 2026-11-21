@@ -29,7 +29,22 @@ const FX = (() => {
     o.start(t);
     o.stop(t + dur + .05);
   }
+  /* ضجيج منخفض يتلاشى: دويّ الانفجار */
+  function noise(start, dur, vol = .5, f0 = 1400, f1 = 90) {
+    const a = audio();
+    if (!a) return;
+    const n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 1.6);
+    const src = a.createBufferSource(), flt = a.createBiquadFilter(), g = a.createGain(), t = a.currentTime + start;
+    src.buffer = buf; flt.type = 'lowpass';
+    flt.frequency.setValueAtTime(f0, t); flt.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    src.connect(flt).connect(g).connect(a.destination);
+    src.start(t); src.stop(t + dur + .05);
+  }
   const SOUNDS = {
+    boom: () => { noise(0, .7, .55); tone(90, 0, .5, 'sine', .3, .45); },
+    shoot: () => { tone(880, 0, .12, 'square', .04, .35); noise(0, .1, .08, 4000, 800); },
     ok: () => { tone(659, 0, .16, 'triangle'); tone(988, .08, .3, 'triangle'); tone(1319, .16, .35, 'sine', .08); },
     bad: () => { tone(196, 0, .25, 'triangle', .12, .7); },
     good: () => tone(784, 0, .16, 'triangle', .12),
@@ -244,14 +259,16 @@ const FX = (() => {
     const req = root.requestFullscreen || root.webkitRequestFullscreen;
     if (!req) { btn.classList.add('hidden'); return; }
     const active = () => document.fullscreenElement || document.webkitFullscreenElement;
-    btn.addEventListener('click', () => {
+    /* كل أزرار ملء الشاشة في الصفحة (في اللوحة وفي شاشة النتيجة) تعمل بالطريقة نفسها */
+    const toggle = b => {
       if (active()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
       else req.call(root);
-      btn.blur();
-    });
+      b.blur();
+    };
+    new Set([btn, ...document.querySelectorAll('.fs-btn')]).forEach(b => b.addEventListener('click', () => toggle(b)));
     const sync = () => {
       document.body.classList.toggle('is-fs', !!active());
-      btn.title = active() ? 'الخروج من ملء الشاشة' : 'ملء الشاشة';
+      document.querySelectorAll('.fs-btn').forEach(b => { b.title = active() ? 'الخروج من ملء الشاشة' : 'ملء الشاشة'; });
       window.dispatchEvent(new Event('resize'));
     };
     document.addEventListener('fullscreenchange', sync);

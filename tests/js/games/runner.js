@@ -216,6 +216,7 @@ function runnerScene() {
     const h = 34;
     const good = p.state === 'good';
     if (th.glow) { ctx.shadowColor = good ? '#3F8A3A' : th.platEdge; ctx.shadowBlur = 14; }
+    else if (!th.sketch) { ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 6; }
     ctx.fillStyle = good ? '#3F8A3A' : p.state === 'bad' ? '#C0392B' : th.plat;
     ctx.strokeStyle = good ? '#2E6B2A' : th.platEdge;
     ctx.lineWidth = th.sketch ? 2.5 : 3;
@@ -227,6 +228,7 @@ function runnerScene() {
     if (th.deco === 'mountains' && !good) { ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.roundRect(p.x + 4, p.top - 3, p.w - 8, 7, 4); ctx.fill(); }
     if (th.sketch) { ctx.strokeStyle = 'rgba(43,76,126,.35)'; ctx.lineWidth = 1; for (let k = 10; k < p.w; k += 10) { ctx.beginPath(); ctx.moveTo(p.x + k, p.top + h); ctx.lineTo(p.x + k - 8, p.top + 2); ctx.stroke(); } }
     ctx.fillStyle = good || p.state === 'bad' ? '#FFFFFF' : th.ink;
+    ctx.shadowColor = 'transparent'; ctx.shadowOffsetY = 0;
     ctx.font = font(Math.min(18, Math.max(14, S.W * .018)));
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

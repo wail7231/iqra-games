@@ -2,13 +2,15 @@
    الأسهم أو WASD للحركة بالنسبة لاتجاه الكاميرا، Shift للركض، المسافة للقفز، والسحب بالفأرة (أو Q/E) لتدوير الكاميرا.
    على اللمس: عصا تحكم في النصف الأيسر، والسحب في النصف الأيمن يدير الكاميرا، وزر للقفز.
    المهمة في كل سؤال: صناديق موزّعة في الساحة (بعضها فوق منصّات تحتاج قفزًا) وعلى كل صندوق إجابة.
-   فتح صندوق الصحيحة يعطي مفتاحًا، وحين تُجمع المفاتيح المطلوبة تضيء البوابة ويشير إليها سهم، ودخولها = الفوز بالسؤال.
+   فتح صندوق الصحيحة يعطي مفتاحًا، وحين تُجمع المفاتيح المطلوبة تضيء البوابة الثابتة فوق منصّتها (يُصعد إليها بدرج) ويشير إليها سهم، ودخولها = الفوز بالسؤال.
+   قفزتان (الثانية في الهواء)، وقذائف بلا عدد (نقرة الفأرة أو F أو زر الإطلاق) تنفجر بقوة وتحطّم الكرات الشائكة.
    الصندوق الخاطئ ينفجر دخانًا ويدفع اللاعب ويُنقص قلبًا. كرات شائكة تتدحرج ذهابًا وإيابًا وتدفع من يلمسها.
    الشكل يتبع قالب الشكل. */
 'use strict';
 
 let ARENA = null;
 const AR = { half: 26, R: .45, run: 5.6, sprint: 9.4, jump: 10, g: 26 };
+const GATE_Z = -AR.half + 5, GATE_H = 2.6;
 
 function arenaScene() {
   const S = K3.create({ fov: 58, fogNear: 34, fogFar: 95, ratio: .62, maxH: 540 });
@@ -24,7 +26,7 @@ function arenaScene() {
   /* ---------- مخطط الساحة: يُولَّد مرة واحدة ويُرسم بألوان أي قالب ---------- */
   const layout = (() => {
     const L = [], H = AR.half;
-    const free = (x, z, r) => Math.hypot(x, z - 18) > 5 && L.every(b => Math.abs(b.x - x) > b.hw + r && Math.abs(b.z - z) > b.hd + r || Math.hypot(b.x - x, b.z - z) > Math.max(b.hw, b.hd) + r + 1.5);
+    const free = (x, z, r) => Math.hypot(x, z - 18) > 5 && Math.hypot(x, z) > 8 && !(Math.abs(x) < 10 && z < -H + 17) && L.every(b => Math.abs(b.x - x) > b.hw + r && Math.abs(b.z - z) > b.hd + r || Math.hypot(b.x - x, b.z - z) > Math.max(b.hw, b.hd) + r + 1.5);
     /* منصّات بدرجة جانبية للصعود */
     for (let i = 0, t = 0; i < 7 && t < 200; t++) {
       const x = K3.rnd(-H + 5, H - 5), z = K3.rnd(-H + 5, H - 5), w = K3.rnd(2, 3.2), d = K3.rnd(2, 3.2), h = Math.random() < .5 ? 1.2 : 2.3;
@@ -41,6 +43,9 @@ function arenaScene() {
       L.push({ x, z, hw, hd, h: wall ? 1.6 : 3.2, kind: wall ? 'wall' : 'pillar' });
       i++;
     }
+    /* منصّة البوابة الثابتة شمال الساحة، ودرج من أربع درجات يصعد إليها */
+    L.push({ x: 0, z: GATE_Z, hw: 3.4, hd: 3, h: 2.6, kind: 'gate', step: true });
+    for (let k = 1; k <= 4; k++) L.push({ x: 0, z: GATE_Z + 3 + (4 - k) * .9 + .45, hw: 1.5, hd: .45, h: k * .52, kind: 'stair', step: true });
     return L;
   })();
 
@@ -84,11 +89,12 @@ function arenaScene() {
       const body = new THREE.Mesh(b.kind === 'pillar' ? new THREE.CylinderGeometry(b.hw, b.hw * 1.1, b.h, 12) : new THREE.BoxGeometry(b.hw * 2, b.h, b.hd * 2), K3.mat('#FFFFFF', { map: t }));
       body.position.y = b.h / 2; g.add(body);
       if (th.sketch) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry), new THREE.LineBasicMaterial({ color: '#2B4C7E' })); e.position.copy(body.position); g.add(e); }
-      if (b.kind === 'plat' || b.kind === 'step') {
+      if (b.kind === 'plat' || b.kind === 'step' || b.kind === 'gate' || b.kind === 'stair') {
         const top = new THREE.Mesh(new THREE.BoxGeometry(b.hw * 2 + .12, .14, b.hd * 2 + .12), K3.mat(th.ground, { map: K3.groundTexture(th, 4) }));
         top.position.y = b.h + .02; g.add(top);
         const trim = new THREE.Mesh(new THREE.BoxGeometry(b.hw * 2 + .2, .1, b.hd * 2 + .2), K3.mat(th.wall2)); trim.position.y = b.h - .06; g.add(trim);
-        K3.scatter(g, th, { x0: -b.hw + .3, x1: b.hw - .3, z0: -b.hd + .3, z1: b.hd - .3, y: b.h + .09, count: Math.round(b.hw * b.hd * 2) });
+        if (b.kind !== 'stair' && b.kind !== 'gate') K3.scatter(g, th, { x0: -b.hw + .3, x1: b.hw - .3, z0: -b.hd + .3, z1: b.hd - .3, y: b.h + .09, count: Math.round(b.hw * b.hd * 2) });
+        if (b.kind === 'stair') for (const sx of [-1, 1]) { const post = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, .9, 6), K3.mat(th.wall2)); post.position.set(sx * 1.45, b.h + .45, 0); g.add(post); }
       } else if (b.kind === 'pillar') {
         const cap = new THREE.Mesh(new THREE.CylinderGeometry(b.hw * 1.25, b.hw * 1.1, .3, 12), K3.mat(th.wall2)); cap.position.y = b.h + .15; g.add(cap);
         const orb = new THREE.Mesh(new THREE.SphereGeometry(.28, 14, 10), K3.glow(th.gold)); orb.position.y = b.h + .55; g.add(orb);
@@ -97,8 +103,62 @@ function arenaScene() {
       }
       g.position.set(b.x, 0, b.z);
       world.add(g);
-      solids.push({ x: b.x, z: b.z, hw: b.kind === 'pillar' ? b.hw * .9 : b.hw, hd: b.kind === 'pillar' ? b.hw * .9 : b.hd, h: b.kind === 'pillar' ? b.h + .3 : b.h + (b.kind === 'wall' ? .16 : .09) });
+      solids.push({ x: b.x, z: b.z, hw: b.kind === 'pillar' ? b.hw * .9 : b.hw, hd: b.kind === 'pillar' ? b.hw * .9 : b.hd, h: b.kind === 'pillar' ? b.h + .3 : b.h + (b.kind === 'wall' ? .16 : .09), step: !!b.step });
     });
+    /* نافورة في وسط الساحة بماء يتحرك ورذاذ */
+    const fount = new THREE.Group();
+    const basin = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.4, .6, 32), K3.mat('#FFFFFF', { map: wallTex }));
+    basin.position.y = .3; fount.add(basin);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(2.2, .14, 8, 40), K3.mat(th.wall2)); rim.rotation.x = Math.PI / 2; rim.position.y = .62; fount.add(rim);
+    const waterC = { space: '#6E52C8', night: '#2E4A8A', notebook: '#BFD3EA', autumn: '#5E8C7A' }[Play.cfg.theme] || '#3FB0C8';
+    const water = new THREE.Mesh(new THREE.CircleGeometry(2.1, 32), new THREE.MeshPhongMaterial({ color: waterC, shininess: 120, transparent: true, opacity: .85, emissive: K3.col(waterC).multiplyScalar(.15) }));
+    water.rotation.x = -Math.PI / 2; water.position.y = .55; fount.add(water);
+    const column = new THREE.Mesh(new THREE.CylinderGeometry(.25, .4, 1.6, 12), K3.mat(th.wall2)); column.position.y = 1; fount.add(column);
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(.9, .4, .3, 20), K3.mat(th.gold)); bowl.position.y = 1.85; fount.add(bowl);
+    const jet = new THREE.Mesh(new THREE.ConeGeometry(.18, 1.1, 10, 1, true), new THREE.MeshBasicMaterial({ color: '#DDF6FF', transparent: true, opacity: .6 }));
+    jet.position.y = 2.5; fount.add(jet);
+    const drops = [];
+    for (let i = 0; i < 24; i++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.06, 6, 4), new THREE.MeshBasicMaterial({ color: '#E6FBFF', transparent: true, opacity: .85 })); fount.add(d); drops.push({ d, t: Math.random(), a: i / 24 * Math.PI * 2 }); }
+    jet.onBeforeRender = () => { const t = performance.now() / 1000; jet.scale.y = 1 + Math.sin(t * 6) * .08; water.material.emissiveIntensity = 1; drops.forEach(o => { const k = (t * .7 + o.t) % 1; o.d.position.set(Math.cos(o.a) * k * 1.6, 3 - k * k * 2.4 + k * 1.2, Math.sin(o.a) * k * 1.6); }); };
+    world.add(fount);
+    solids.push({ x: 0, z: 0, hw: 2.1, hd: 2.1, h: .62 });
+    /* مشاعل على السور برايات ملوّنة بينها */
+    for (let i = -3; i <= 3; i++) for (const [wx, wz, rot] of [[i * 7, -H - .5, 0], [i * 7, H + .5, Math.PI], [-H - .5, i * 7, Math.PI / 2], [H + .5, i * 7, -Math.PI / 2]]) {
+      if (Math.abs(i) === 3) continue;
+      const t = new THREE.Group();
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .08, .9, 6), K3.mat('#5A4632')); pole.position.y = 1.95; t.add(pole);
+      const cup = new THREE.Mesh(new THREE.CylinderGeometry(.18, .1, .2, 8), K3.mat(th.wall2)); cup.position.y = 2.45; t.add(cup);
+      const flame = new THREE.Mesh(new THREE.ConeGeometry(.13, .38, 8), K3.glow(th.dark ? '#7FD3F7' : '#FFB347')); flame.position.y = 2.7; t.add(flame);
+      const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: th.dark ? '#7FD3F7' : '#FFB347', transparent: true, opacity: .55, depthWrite: false })); halo.scale.set(1.6, 1.6, 1); halo.position.y = 2.7; t.add(halo);
+      flame.onBeforeRender = () => { const q = performance.now() / 120 + wx + wz; flame.scale.set(1 + Math.sin(q) * .12, 1 + Math.sin(q * 1.7) * .2, 1); halo.material.opacity = .45 + Math.sin(q * 1.3) * .12; };
+      t.position.set(wx, 0, wz); world.add(t);
+      if (i !== 0) {
+        const ban = new THREE.Mesh(new THREE.PlaneGeometry(1, 1.6, 1, 4), K3.mat(i % 2 ? th.accent : th.gold, { side: THREE.DoubleSide }));
+        ban.position.set(wx + (rot === 0 || rot === Math.PI ? 3.5 : 0), .7, wz + (rot === 0 || rot === Math.PI ? 0 : 3.5));
+        ban.rotation.y = rot; ban.translateZ(.56); world.add(ban);
+        const emb = new THREE.Mesh(new THREE.CircleGeometry(.25, 16), K3.mat('#FFFFFF', { side: THREE.DoubleSide })); emb.position.copy(ban.position); emb.rotation.y = rot; emb.translateZ(.01); emb.position.y += .25; world.add(emb);
+      }
+    }
+    /* صناديق خشب وبراميل قرب السور */
+    for (let i = 0; i < 14; i++) {
+      const side = i % 4, along = K3.rnd(-H + 3, H - 3), off = H - 1.2;
+      const x = side === 0 ? along : side === 1 ? along : side === 2 ? -off : off, z = side === 0 ? -off : side === 1 ? off : along;
+      if (Math.abs(x) < 10 && z < -H + 17) continue;
+      if (solids.some(b => Math.abs(b.x - x) < b.hw + 1 && Math.abs(b.z - z) < b.hd + 1)) continue;
+      const g = new THREE.Group();
+      if (i % 2) {
+        const crate = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), K3.mat('#B98446')); crate.position.y = .5; g.add(crate);
+        for (const y of [.08, .92]) { const band = new THREE.Mesh(new THREE.BoxGeometry(1.04, .1, 1.04), K3.mat('#7A4A2A')); band.position.y = y; g.add(band); }
+        const x1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, .1, .02), K3.mat('#7A4A2A')); x1.position.set(0, .5, .51); x1.rotation.z = .78; g.add(x1);
+        const x2 = x1.clone(); x2.rotation.z = -.78; g.add(x2);
+        solids.push({ x, z, hw: .5, hd: .5, h: 1 });
+      } else {
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, 1.1, 14), K3.mat('#A0603A')); barrel.position.y = .55; barrel.scale.set(1, 1, 1); g.add(barrel);
+        for (const y of [.2, .9]) { const hoop = new THREE.Mesh(new THREE.TorusGeometry(.44, .04, 6, 20), K3.mat('#5A5A66')); hoop.rotation.x = Math.PI / 2; hoop.position.y = y; g.add(hoop); }
+        solids.push({ x, z, hw: .42, hd: .42, h: 1.1 });
+      }
+      g.position.set(x, 0, z); g.rotation.y = Math.random() * 6; world.add(g);
+    }
     /* زينة خارج السور وتفاصيل على الأرض */
     for (let i = 0; i < 46; i++) {
       const a = i / 46 * Math.PI * 2, r = H * 1.25 + K3.rnd(1, 8);
@@ -171,7 +231,7 @@ function arenaScene() {
         for (let t = 0; t < 120; t++) {
           if (onPlat) { const b = plats[Math.floor(Math.random() * plats.length)]; x = b.x; z = b.z; y = b.h + .09; }
           else { x = K3.rnd(-AR.half + 3, AR.half - 3); z = K3.rnd(-AR.half + 3, AR.half - 3); y = 0; }
-          const clear = onPlat || !solids.some(b => Math.abs(b.x - x) < b.hw + 1.4 && Math.abs(b.z - z) < b.hd + 1.4);
+          const clear = onPlat || (!(Math.abs(x) < 7 && z < -AR.half + 14) && Math.hypot(x, z) > 4) && !solids.some(b => Math.abs(b.x - x) < b.hw + 1.4 && Math.abs(b.z - z) < b.hd + 1.4);
           if (clear && chests.every(c => Math.hypot(c.x - x, c.z - z) > 5) && Math.hypot(x - P.x, z - P.z) > 6) break;
         }
       }
@@ -185,38 +245,48 @@ function arenaScene() {
     });
   }
   /* ---------- البوابة ---------- */
-  function placePortal(pos) {
+  function placePortal() {
     const th = K3.theme();
     if (portal) world.remove(portal.g);
-    if (!pos) {
-      for (let t = 0; t < 100; t++) {
-        const x = K3.rnd(-AR.half + 4, AR.half - 4), z = K3.rnd(-AR.half + 4, AR.half - 4);
-        pos = { x, z };
-        if (!solids.some(b => Math.abs(b.x - x) < b.hw + 2.5 && Math.abs(b.z - z) < b.hd + 2.5) && Math.hypot(x - P.x, z - P.z) > 14 && chests.every(c => Math.hypot(c.x - x, c.z - z) > 4)) break;
-      }
-    }
+    const pos = { x: 0, z: GATE_Z };
     const g = new THREE.Group();
     const stone = K3.mat(th.wall2);
     const base = new THREE.Mesh(new THREE.CylinderGeometry(2, 2.2, .3, 32), stone); base.position.y = .15; g.add(base);
+    const runes = new THREE.Mesh(new THREE.RingGeometry(2.25, 2.45, 48), new THREE.MeshBasicMaterial({ color: '#777788', transparent: true, opacity: .6, side: THREE.DoubleSide }));
+    runes.rotation.x = -Math.PI / 2; runes.position.y = .32; g.add(runes);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(1.6, .22, 12, 40), K3.mat(th.gold, { emissive: K3.col(th.gold).multiplyScalar(.15) }));
     ring.position.y = 2; g.add(ring);
-    for (const sx of [-1, 1]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.2, .26, 2, 10), stone); p.position.set(sx * 1.6, 1, 0); g.add(p); }
-    const veil = new THREE.Mesh(new THREE.CircleGeometry(1.45, 40), new THREE.MeshBasicMaterial({ color: th.accent, transparent: true, opacity: .15, side: THREE.DoubleSide }));
+    for (const sx of [-1, 1]) {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(.2, .26, 2, 10), stone); p.position.set(sx * 1.6, 1, 0); g.add(p);
+      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(.2, 0), K3.mat('#8A8A9A')); gem.position.set(sx * 1.6, 2.25, 0); g.add(gem);
+    }
+    const veil = new THREE.Mesh(new THREE.CircleGeometry(1.45, 40), new THREE.MeshBasicMaterial({ color: '#8A8A9A', transparent: true, opacity: .15, side: THREE.DoubleSide }));
     veil.position.y = 2; g.add(veil);
-    const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 14, 24, 1, true), new THREE.MeshBasicMaterial({ color: th.gold, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
-    beam.position.y = 7; g.add(beam);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 16, 24, 1, true), new THREE.MeshBasicMaterial({ color: th.gold, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+    beam.position.y = 8; g.add(beam);
+    const light = new THREE.PointLight(th.gold, 0, 16, 1.6); light.position.y = 2; g.add(light);
     const sparks = [];
-    for (let i = 0; i < 10; i++) { const s = new THREE.Mesh(new THREE.SphereGeometry(.08, 6, 4), K3.glow(th.gold)); s.visible = false; g.add(s); sparks.push(s); }
-    g.position.set(pos.x, 0, pos.z);
-    g.rotation.y = Math.atan2(P.x - pos.x, P.z - pos.z);
+    for (let i = 0; i < 14; i++) { const sp = new THREE.Mesh(new THREE.SphereGeometry(.08, 6, 4), K3.glow(th.gold)); sp.visible = false; g.add(sp); sparks.push(sp); }
+    /* مصابيح على جانبي الدرج تضيء مع البوابة */
+    const lamps = [];
+    for (let k = 1; k <= 4; k++) for (const sx of [-1, 1]) {
+      const l = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), new THREE.MeshBasicMaterial({ color: '#6E6A7A' }));
+      l.position.set(sx * 1.45, k * .52 + .95 - GATE_H, 3 + (4 - k) * .9 + .45);
+      g.add(l); lamps.push(l);
+    }
+    g.position.set(pos.x, GATE_H + .09, pos.z);
     world.add(g);
-    portal = { g, ring, veil, beam, sparks, pos, open: false };
+    portal = { g, ring, veil, beam, sparks, pos, light, runes, lamps, gems: g.children.filter(c => c.geometry && c.geometry.type === 'OctahedronGeometry'), y: GATE_H + .09, open: false };
     if (P.keys >= S.need) openPortal();
   }
   function openPortal() {
     if (!portal || portal.open) return;
     portal.open = true;
-    portal.veil.material.color.set(K3.theme().gold);
+    const gold = K3.theme().gold;
+    portal.veil.material.color.set(gold);
+    portal.runes.material.color.set(gold);
+    portal.lamps.forEach(l => l.material.color.set(gold));
+    portal.gems.forEach(m => { m.material = K3.glow(gold); });
     portal.sparks.forEach(s => { s.visible = true; });
     FX.play('good');
   }
@@ -299,9 +369,108 @@ function arenaScene() {
     Play.finish(S.missed ? 0 : 1, { delay: 1100 });
   }
 
+  /* ---------- القذائف: بلا عدد، تنطلق إلى الأمام وتنفجر بقوة عند أول اصطدام ---------- */
+  const shots = [], booms = [];
+  let lastShot = 0;
+  function fire() {
+    if (!S.started || Play.finished || S.t - lastShot < .16) return;
+    lastShot = S.t;
+    const th = K3.theme(), g = new THREE.Group();
+    const core = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), K3.glow('#FFFFFF')); g.add(core);
+    const glowS = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: th.gold, transparent: true, opacity: .9, depthWrite: false })); glowS.scale.set(1.3, 1.3, 1); g.add(glowS);
+    const dir = new THREE.Vector3(Math.sin(P.yaw), 0, Math.cos(P.yaw));
+    g.position.set(P.x + dir.x * .8, P.y + 1.05, P.z + dir.z * .8);
+    scene.add(g);
+    shots.push({ g, dir, life: 1.4, trail: [] });
+    FX.play('shoot');
+  }
+  /* غيمة صغيرة (للقفزة الثانية) */
+  function puff(x, y, z) {
+    for (let i = 0; i < 8; i++) {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(.2, 8, 6), new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: .8 }));
+      const a = i / 8 * Math.PI * 2;
+      m.position.set(x, y, z); scene.add(m);
+      smoke.push({ m, v: new THREE.Vector3(Math.cos(a) * 2.2, -.3, Math.sin(a) * 2.2), life: .7 });
+    }
+  }
+  /* انفجار: وميض، وموجة صادمة، وشظايا ملوّنة، ودخان، واهتزاز الكاميرا */
+  function boom(pos, big = false) {
+    const th = K3.theme(), k = big ? 1.6 : 1;
+    const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: '#FFF3C4', transparent: true, opacity: 1, depthWrite: false }));
+    flash.position.copy(pos); scene.add(flash);
+    const core = new THREE.Mesh(new THREE.SphereGeometry(.5, 16, 12), new THREE.MeshBasicMaterial({ color: th.gold, transparent: true, opacity: .9 }));
+    core.position.copy(pos); scene.add(core);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(.6, .9, 40), new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: .8, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.set(pos.x, Math.max(.05, pos.y - .8), pos.z); scene.add(ring);
+    const light = new THREE.PointLight('#FFB347', 4 * k, 12 * k, 2); light.position.copy(pos); scene.add(light);
+    const bits = [];
+    const cols = [th.gold, th.accent, '#FFFFFF', '#FFB347'];
+    for (let i = 0; i < (big ? 34 : 22); i++) {
+      const m = new THREE.Mesh(i % 2 ? new THREE.BoxGeometry(.14, .14, .14) : new THREE.TetrahedronGeometry(.13), K3.glow(cols[i % 4]));
+      m.position.copy(pos); scene.add(m);
+      const a = Math.random() * Math.PI * 2, e = Math.random() * 1.2;
+      bits.push({ m, v: new THREE.Vector3(Math.cos(a) * Math.cos(e), Math.sin(e) + .4, Math.sin(a) * Math.cos(e)).multiplyScalar(K3.rnd(5, 10) * k), spin: K3.rnd(-10, 10) });
+    }
+    for (let i = 0; i < 7; i++) {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(K3.rnd(.35, .6) * k, 10, 8), new THREE.MeshBasicMaterial({ color: '#7A7484', transparent: true, opacity: .55 }));
+      m.position.copy(pos); scene.add(m);
+      smoke.push({ m, v: new THREE.Vector3(K3.rnd(-1.5, 1.5), K3.rnd(1, 2.5), K3.rnd(-1.5, 1.5)), life: 1.2 });
+    }
+    booms.push({ flash, core, ring, light, bits, t: 0, k });
+    cam.shake = Math.max(cam.shake || 0, big ? .45 : .25);
+    FX.play('boom');
+  }
+  function updateShots(dt) {
+    for (let i = shots.length - 1; i >= 0; i--) {
+      const s = shots[i], p = s.g.position;
+      p.addScaledVector(s.dir, 24 * dt);
+      s.life -= dt;
+      /* أثر مضيء خلف القذيفة */
+      if (Math.random() < .8) { const t = new THREE.Mesh(new THREE.SphereGeometry(.09, 6, 4), new THREE.MeshBasicMaterial({ color: K3.theme().gold, transparent: true, opacity: .7 })); t.position.copy(p); scene.add(t); smoke.push({ m: t, v: new THREE.Vector3(0, .3, 0), life: .35 }); }
+      const wall = solids.find(b => Math.abs(b.x - p.x) < b.hw + .1 && Math.abs(b.z - p.z) < b.hd + .1 && p.y < b.h + .1);
+      const hz = hazards.find(h => !h.dead && Math.hypot(h.x - p.x, h.z - p.z) < 1 && p.y < 1.7);
+      const out = Math.abs(p.x) > AR.half + 1 || Math.abs(p.z) > AR.half + 1;
+      if (hz || wall || out || s.life <= 0) {
+        scene.remove(s.g); shots.splice(i, 1);
+        boom(p.clone(), !!hz);
+        if (hz) { hz.dead = 5; hz.g.visible = false; }
+      }
+    }
+    for (let i = booms.length - 1; i >= 0; i--) {
+      const b = booms[i];
+      b.t += dt;
+      const t = b.t;
+      b.flash.scale.setScalar((1 + t * 22) * b.k); b.flash.material.opacity = Math.max(0, 1 - t * 3);
+      b.core.scale.setScalar((1 + t * 6) * b.k); b.core.material.opacity = Math.max(0, .9 - t * 2.4);
+      b.ring.scale.setScalar(1 + t * 14 * b.k); b.ring.material.opacity = Math.max(0, .8 - t * 1.6);
+      b.light.intensity = Math.max(0, 4 * b.k * (1 - t * 2.5));
+      b.bits.forEach(o => { o.v.y -= 18 * dt; o.m.position.addScaledVector(o.v, dt); if (o.m.position.y < .07) { o.m.position.y = .07; o.v.multiplyScalar(.5); o.v.y *= -.4; } o.m.rotation.x += o.spin * dt; o.m.rotation.y += o.spin * dt; o.m.scale.setScalar(Math.max(.01, 1 - Math.max(0, t - .8) * 1.5)); });
+      if (t > 1.5) { [b.flash, b.core, b.ring, b.light, ...b.bits.map(o => o.m)].forEach(m => scene.remove(m)); booms.splice(i, 1); }
+    }
+    /* الكرات المحطّمة تعود بعد لحظات في مكان آخر بعيد عن اللاعب */
+    hazards.forEach(h => {
+      if (!h.dead) return;
+      h.dead -= dt;
+      if (h.dead <= 0) {
+        h.dead = 0;
+        for (let t = 0; t < 40; t++) { h.x = K3.rnd(-AR.half + 4, AR.half - 4); h.z = K3.rnd(-AR.half + 4, AR.half - 8); if (Math.hypot(h.x - P.x, h.z - P.z) > 12 && !solids.some(b => Math.abs(b.x - h.x) < b.hw + 1.5 && Math.abs(b.z - h.z) < b.hd + 1.5)) break; }
+        h.g.visible = true; h.g.scale.setScalar(.01); h.grow = 0;
+      }
+    });
+  }
+  const fireBtn = el('button', 'k3-btn k3-fire', '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>');
+  fireBtn.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (!S.started) S.begin(); fire(); });
+  S.wrap.appendChild(fireBtn);
+  document.addEventListener('keydown', e => { if (S.wrap.isConnected && (e.code === 'KeyF' || e.code === 'KeyJ') && S.started) fire(); });
+
   /* ---------- التحكم: عصا يسارًا وكاميرا يمينًا على اللمس، وسحب الفأرة يدير الكاميرا ---------- */
   let mode = null;
-  const jump = () => { if (P.ground && !P.stun) { P.vy = AR.jump; P.ground = false; FX.play('tick'); } };
+  /* قفزتان: الأولى من الأرض، والثانية في الهواء مع دورة */
+  const jump = () => {
+    if (P.stun > .25) return;
+    if (P.ground) { P.vy = AR.jump; P.ground = false; P.jumps = 1; FX.play('tick'); }
+    else if ((P.jumps || 0) < 2) { P.vy = AR.jump * .92; P.jumps = 2; P.flip = 1; FX.play('pop'); puff(P.x, P.y + .2, P.z); }
+  };
   K3.controls(S, {
     hold(e, phase) {
       if (phase === 'down' && e) {
@@ -314,7 +483,7 @@ function arenaScene() {
         else if (mode === 'cam') { cam.yaw -= (e.clientX - cam.drag) * .009; cam.drag = e.clientX; }
       } else if (phase === 'up') { if (mode === 'joy') joy.hold(e, 'up'); mode = null; }
     },
-    tap(e) { if (!e || e.pointerType !== 'mouse') jump(); },
+    tap(e) { if (e && e.pointerType === 'mouse') fire(); else jump(); },
   });
   const jumpBtn = el('button', 'k3-btn k3-jump', '<svg viewBox="0 0 24 24"><path d="M12 19V6M6 11l6-6 6 6"/></svg>');
   jumpBtn.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (!S.started) S.begin(); jump(); });
@@ -345,7 +514,7 @@ function arenaScene() {
     g.putImageData(mapBase, 0, 0);
     chests.forEach(c => { if (c.state === 'gone' || c.state === 'bad') return; const [x, y] = toMap(c.x, c.z); g.fillStyle = c.state === 'good' ? '#4CAF50' : th.gold; g.fillRect(x - 3, y - 3, 6, 6); });
     if (portal) { const [x, y] = toMap(portal.pos.x, portal.pos.z); g.strokeStyle = portal.open ? th.gold : '#8A8A9A'; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, 5, 0, 7); g.stroke(); }
-    hazards.forEach(h => { const [x, y] = toMap(h.x, h.z); g.fillStyle = '#C0392B'; g.beginPath(); g.arc(x, y, 2.5, 0, 7); g.fill(); });
+    hazards.forEach(h => { if (h.dead) return; const [x, y] = toMap(h.x, h.z); g.fillStyle = '#C0392B'; g.beginPath(); g.arc(x, y, 2.5, 0, 7); g.fill(); });
     const [px, py] = toMap(P.x, P.z);
     g.save(); g.translate(px, py); g.rotate(-P.yaw + Math.PI);
     g.fillStyle = th.accent; g.strokeStyle = '#FFFFFF'; g.lineWidth = 1.5;
@@ -357,7 +526,7 @@ function arenaScene() {
   function collide(nx, nz, y) {
     const R = AR.R;
     for (let it = 0; it < 2; it++) for (const b of solids) {
-      if (y >= b.h - .3) continue;          // فوقه: لا يصدّ
+      if (y >= b.h - (b.step ? .72 : .3)) continue;          // فوقه (أو درجة يُصعد إليها): لا يصدّ
       const cx = Math.max(b.x - b.hw, Math.min(nx, b.x + b.hw)), cz = Math.max(b.z - b.hd, Math.min(nz, b.z + b.hd));
       const dx = nx - cx, dz = nz - cz, d2 = dx * dx + dz * dz;
       if (d2 >= R * R) continue;
@@ -367,7 +536,7 @@ function arenaScene() {
     }
     return [nx, nz];
   }
-  const floorAt = (x, z, y) => solids.reduce((m, b) => (Math.abs(b.x - x) < b.hw + AR.R * .5 && Math.abs(b.z - z) < b.hd + AR.R * .5 && y >= b.h - .3) ? Math.max(m, b.h) : m, 0);
+  const floorAt = (x, z, y) => solids.reduce((m, b) => (Math.abs(b.x - x) < b.hw + AR.R * .5 && Math.abs(b.z - z) < b.hd + AR.R * .5 && y >= b.h - (b.step ? .72 : .3)) ? Math.max(m, b.h) : m, 0);
 
   S.onFrame = dt => {
     if (!solids.length) return;
@@ -381,7 +550,7 @@ function arenaScene() {
     const ml = Math.hypot(mx, mz);
     const sprint = (k.ShiftLeft || k.ShiftRight || Math.hypot(joy.x, joy.z) > .95);
     const sp = sprint ? AR.sprint : AR.run;
-    if (P.stun > 0) P.stun -= dt;
+    if (P.stun > 0) P.stun = Math.max(0, P.stun - dt);
     else {
       P.vx += (mx * sp - P.vx) * Math.min(1, dt * (P.ground ? 10 : 4));
       P.vz += (mz * sp - P.vz) * Math.min(1, dt * (P.ground ? 10 : 4));
@@ -393,18 +562,20 @@ function arenaScene() {
     P.vy -= AR.g * dt;
     P.y += P.vy * dt;
     const fl = floorAt(P.x, P.z, P.y);
-    if (P.y <= fl) { if (!P.ground && P.vy < -6) FX.play('tick'); P.y = fl; P.vy = 0; P.ground = true; } else P.ground = P.y - fl < .02;
+    if (P.y <= fl) { if (!P.ground && P.vy < -6) FX.play('tick'); P.y = fl; P.vy = 0; P.ground = true; P.jumps = 0; } else P.ground = P.y - fl < .02;
+    if (P.flip) P.flip = Math.max(0, P.flip - dt * 2.4);
     /* اللاعب */
     if (hero) {
       const moving = Math.hypot(P.vx, P.vz);
       hero.position.set(P.x, P.y + .62 + (P.ground ? Math.abs(Math.sin(S.t * (sprint ? 14 : 10))) * Math.min(.18, moving * .03) : 0), P.z);
       hero.rotation.y += ((P.yaw - hero.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI) * Math.min(1, dt * 12);
       hero.userData.body.rotation.y += dt * (1 + moving * .5);
-      hero.rotation.x = P.ground ? 0 : Math.max(-.4, Math.min(.4, -P.vy * .04));
+      hero.rotation.x = P.flip ? (1 - P.flip) * Math.PI * 2 : P.ground ? 0 : Math.max(-.4, Math.min(.4, -P.vy * .04));
       shadow.position.set(P.x, fl + .03, P.z);
       shadow.scale.setScalar(Math.max(.4, 1 - (P.y - fl) * .15));
       /* السهم يشير إلى البوابة المفتوحة */
       arrow.visible = !!(portal && portal.open && !S.answered);
+      if (arrow.visible) arrow.children.forEach(m => { m.material.opacity = 1; });
       if (arrow.visible) {
         arrow.position.set(P.x, P.y + 2.1 + Math.sin(S.t * 4) * .1, P.z);
         arrow.rotation.y = Math.atan2(portal.pos.x - P.x, portal.pos.z - P.z);
@@ -447,10 +618,14 @@ function arenaScene() {
       portal.veil.material.opacity = portal.open ? .45 + Math.sin(S.t * 5) * .15 : .12;
       portal.beam.material.opacity += ((portal.open ? .22 : 0) - portal.beam.material.opacity) * Math.min(1, dt * 3);
       portal.sparks.forEach((s, i) => { const a = S.t * 2 + i * .63, r = 1.2 + Math.sin(S.t * 3 + i) * .3; s.position.set(Math.cos(a) * r, 2 + Math.sin(a) * r, Math.sin(S.t + i) * .3); });
-      if (portal.open && live && !S.answered && Math.hypot(portal.pos.x - P.x, portal.pos.z - P.z) < 1.6 && P.y < 1.5) win();
+      portal.light.intensity += ((portal.open ? 2.2 + Math.sin(S.t * 4) * .4 : 0) - portal.light.intensity) * Math.min(1, dt * 3);
+      if (portal.open && live && !S.answered && Math.hypot(portal.pos.x - P.x, portal.pos.z - P.z) < 1.6 && Math.abs(P.y - portal.y) < 1.2) win();
     }
     /* الكرات الشائكة: تتدحرج وترتدّ عن الجدران، وتدفع اللاعب */
+    updateShots(dt);
     hazards.forEach(h => {
+      if (h.dead) return;
+      if (h.grow != null && h.grow < 1) { h.grow = Math.min(1, h.grow + dt * 2); h.g.scale.setScalar(K3.ease(h.grow)); }
       if (live) {
         const nx = h.x + h.dx * h.sp * dt, nz = h.z + h.dz * h.sp * dt;
         const hit = Math.abs(nx) > AR.half - 1 || Math.abs(nz) > AR.half - 1 || solids.some(b => Math.abs(b.x - nx) < b.hw + .6 && Math.abs(b.z - nz) < b.hd + .6);
@@ -473,6 +648,7 @@ function arenaScene() {
     camera.position.x += (tx - camera.position.x) * Math.min(1, dt * 6);
     camera.position.z += (tz - camera.position.z) * Math.min(1, dt * 6);
     camera.position.y += (ty - camera.position.y) * Math.min(1, dt * 5);
+    if (cam.shake > 0) { cam.shake = Math.max(0, cam.shake - dt); const a = cam.shake * .6; camera.position.x += K3.rnd(-a, a); camera.position.y += K3.rnd(-a, a); }
     camera.lookAt(P.x, P.y + 1.2, P.z);
   };
   camera.position.set(0, 6, 26);
