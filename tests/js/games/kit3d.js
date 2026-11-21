@@ -670,7 +670,7 @@ const K3 = (() => {
   /* ينثر تفاصيل صغيرة على الأرض داخل مستطيل، مع تجنّب أماكن (avoid يعيد true للمكان الممنوع) */
   function scatter(parent, th, { x0 = -20, x1 = 20, z0 = -20, z1 = 20, y = 0, count = 260, avoid = null, at = null } = {}) {
     const P = SCATTER[th.deco] || SCATTER.trees, dummy = new THREE.Object3D(), c = new THREE.Color();
-    const make = (geo, material, n) => { const m = new THREE.InstancedMesh(geo, material, n); m.count = 0; parent.add(m); return m; };
+    const make = (geo, material, n) => { const m = new THREE.InstancedMesh(geo, material, n); m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(n * 3).fill(1), 3); m.count = 0; parent.add(m); return m; };
     const tuftGeo = new THREE.ConeGeometry(.07, .38, 4); tuftGeo.translate(0, .19, 0);
     const tufts = make(tuftGeo, mat('#FFFFFF', { flatShading: true }), count * 3);
     const pebbles = make(new THREE.DodecahedronGeometry(.13, 0), mat(P.pebble, { flatShading: true }), count);
