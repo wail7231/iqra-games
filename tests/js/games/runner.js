@@ -83,7 +83,7 @@ function runnerScene() {
   }
   S.spawn = () => {
     const answers = fitAnswers(mixAnswers(S.q, 6, S.collected), 6);
-    let x = Math.min(-16, ...S.plats.filter(p => !p.state).map(p => p.x - p.w - 5));
+    let x = Math.min(-9, ...S.plats.filter(p => !p.state).map(p => p.x - p.w - 5));
     answers.forEach(a => {
       const p = addPlat(a, x, K3.rnd(2, 2.7), S.q);
       x -= p.w + K3.rnd(4.5, 6.5);
@@ -92,8 +92,8 @@ function runnerScene() {
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
-    S.plats.filter(p => !p.state).forEach(p => { world.remove(p.g); p.state = 'gone'; });
-    S.plats = S.plats.filter(p => p.state !== 'gone');
+    /* بلا توقف: منصّات السؤال السابق تغوص بهدوء، ومنصّات السؤال الجديد تأتي مباشرة بعدها */
+    S.plats.filter(p => !p.state).forEach(p => { p.state = 'old'; p.fade = 0; });
     S.spawn();
   };
 
@@ -161,17 +161,18 @@ function runnerScene() {
     S.plats.forEach(p => {
       p.x += v * dt;
       p.g.position.x = p.x;
-      if (p.state === 'bad') { p.fall += dt; p.g.position.y = p.top - p.fall * p.fall * 9; p.g.rotation.z = p.fall * 1.2; }
+      if (p.state === 'old') { p.fade += dt * 1.5; p.g.position.y = p.top - p.fade * 2.5; p.g.scale.setScalar(Math.max(.01, 1 - p.fade)); if (p.fade >= 1) p.fall = 3; }
+      else if (p.state === 'bad') { p.fall += dt; p.g.position.y = p.top - p.fall * p.fall * 9; p.g.rotation.z = p.fall * 1.2; }
       else p.g.position.y = p.top + Math.sin(S.t * 1.6 + p.ph) * .05;
     });
     /* الكرة: جاذبية وهبوط على منصّة أو على الأرض */
-    if (P.on && (P.on.state === 'bad' || Math.abs(P.on.x) > P.on.w / 2 + .1)) P.on = null;
+    if (P.on && (P.on.state === 'bad' || P.on.state === 'old' || Math.abs(P.on.x) > P.on.w / 2 + .1)) P.on = null;
     if (!P.on) {
       const prev = P.y;
       P.vy -= RN.g * dt;
       P.y += P.vy * dt;
       if (P.vy < 0) {
-        const p = S.plats.find(p => p.state !== 'bad' && Math.abs(p.x) <= p.w / 2 + .15 && prev >= p.top - .02 && P.y <= p.top + .02);
+        const p = S.plats.find(p => p.state !== 'bad' && p.state !== 'old' && Math.abs(p.x) <= p.w / 2 + .15 && prev >= p.top - .02 && P.y <= p.top + .02);
         if (p) { P.y = p.top; P.vy = 0; P.jumps = 0; if (P.slam) slamHit(p.g.position); P.slam = false; land(p); }
       }
       if (P.y <= 0) { if (P.slam) slamHit(new THREE.Vector3(0, 0, 0)); P.y = 0; P.vy = 0; P.jumps = 0; P.slam = false; }
