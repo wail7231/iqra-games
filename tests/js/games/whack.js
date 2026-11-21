@@ -62,39 +62,70 @@ function whackScene() {
     scene.add(mallet);
   };
 
-  /* ---------- المطرقة: مقبض يدور حول قبضة اليد، ورأس ثقيل في طرفه ---------- */
-  const HANDLE = 2.5;
+  /* ---------- المطرقة: تُمسك مائلة من اليمين، وتهوي إلى اليسار فيضرب وجه رأسها الشكل ---------- */
+  const HANDLE = 2.6, HEAD_LEN = 1.15;
   function makeMallet(th) {
     const g = new THREE.Group(), arm = new THREE.Group();
     g.add(arm);
+    /* المقبض ممدود من اليد نحو اليسار (‎-x)، والرأس عمودي في طرفه */
     const handle = new THREE.Mesh(new THREE.CylinderGeometry(.08, .1, HANDLE, 10), K3.mat('#8A5A30'));
-    handle.position.y = -HANDLE / 2; arm.add(handle);
-    const grip = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, .7, 10), K3.mat(th.wall2)); grip.position.y = -.35; arm.add(grip);
-    const knob = new THREE.Mesh(new THREE.SphereGeometry(.14, 10, 8), K3.mat(th.gold)); arm.add(knob);
-    const headG = new THREE.Group(); headG.position.y = -HANDLE; arm.add(headG);
-    const head = new THREE.Mesh(new THREE.CylinderGeometry(.44, .44, 1.15, 22), K3.mat(th.accent));
-    head.rotation.z = Math.PI / 2; headG.add(head);
-    for (const x of [-.5, .5]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(.47, .47, .16, 22), K3.mat(th.gold)); cap.rotation.z = Math.PI / 2; cap.position.x = x; headG.add(cap); }
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(.45, .05, 6, 22), K3.mat('#FFFFFF')); ring.rotation.y = Math.PI / 2; headG.add(ring);
+    handle.rotation.z = Math.PI / 2; handle.position.x = -HANDLE / 2; arm.add(handle);
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(.13, .13, .75, 10), K3.mat(th.wall2));
+    grip.rotation.z = Math.PI / 2; grip.position.x = -.38; arm.add(grip);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(.15, 10, 8), K3.mat(th.gold)); arm.add(knob);
+    const headG = new THREE.Group(); headG.position.x = -HANDLE; arm.add(headG);
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(.46, .46, HEAD_LEN, 24), K3.mat(th.accent));
+    headG.add(head);
+    for (const y of [-.52, .52]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(.49, .49, .16, 24), K3.mat(th.gold)); cap.position.y = y; headG.add(cap); }
+    const band = new THREE.Mesh(new THREE.TorusGeometry(.47, .05, 6, 24), K3.mat('#FFFFFF')); band.rotation.x = Math.PI / 2; headG.add(band);
     g.userData = { arm, headG };
     g.visible = false;
     const sh = K3.blob(.7, .28); sh.visible = false; scene.add(sh); g.userData.shadow = sh;
+    /* دائرة الهدف: حلقة متقطعة تنبض حيث ستنزل المطرقة */
+    const target = new THREE.Group();
+    for (let i = 0; i < 12; i++) {
+      const seg = new THREE.Mesh(new THREE.RingGeometry(1.08, 1.24, 8, 1, i / 12 * Math.PI * 2, Math.PI / 9), new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: .85, side: THREE.DoubleSide, depthWrite: false }));
+      target.add(seg);
+    }
+    const dot = new THREE.Mesh(new THREE.CircleGeometry(.12, 16), new THREE.MeshBasicMaterial({ color: th.gold, transparent: true, opacity: .9, depthWrite: false }));
+    target.add(dot);
+    target.rotation.x = -Math.PI / 2;
+    target.visible = false;
+    scene.add(target);
+    g.userData.target = target;
     return g;
   }
-  /* مراحل الضربة (بالثواني): رفع للخلف، ثم ضربة سريعة، ثم ارتداد قصير، ثم عودة */
-  const SW = { up: .11, down: .08, hold: .07, back: .22 };
+  /* مراحل الضربة (بالثواني): رفع للأعلى فوق الكتف، ثم هويّ سريع، ثم ارتداد خفيف، ثم عودة إلى الحمل المائل */
+  const SW = { up: .12, down: .09, hold: .08, back: .24 };
   const SW_T = SW.up + SW.down + SW.hold + SW.back;
   const HIT_MS = (SW.up + SW.down) * 1000;
-  const REST = -.75, RAISED = -1.95, STRIKE = .05;
+  /* زاوية المقبض حول z: ‎-π/2 = المقبض عمودي للأعلى، ‎0 = أفقي نحو اليسار (لحظة الضربة) */
+  const REST = -.85, RAISED = -1.85, STRIKE = .06;
   const easeIn = k => k * k * k, easeOut = k => 1 - Math.pow(1 - k, 3);
   function malletAngle(t) {
     if (t < SW.up) return REST + (RAISED - REST) * easeOut(t / SW.up);
     t -= SW.up;
     if (t < SW.down) return RAISED + (STRIKE - RAISED) * easeIn(t / SW.down);
     t -= SW.down;
-    if (t < SW.hold) return STRIKE - Math.sin(t / SW.hold * Math.PI) * .18;
+    if (t < SW.hold) return STRIKE - Math.sin(t / SW.hold * Math.PI) * .22;
     t -= SW.hold;
     return STRIKE + (REST - STRIKE) * easeOut(Math.min(1, t / SW.back));
+  }
+  /* أثر الضربة: موجة حلقية ناعمة، غبار خفيف، واهتزاز بسيط للكاميرا */
+  const impacts = [];
+  let shake = 0;
+  function impact(x, y, z, good) {
+    const th = K3.theme();
+    const ring = new THREE.Mesh(new THREE.RingGeometry(.5, .72, 40), new THREE.MeshBasicMaterial({ color: good === false ? '#FF8A80' : '#FFFFFF', transparent: true, opacity: .8, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.set(x, y, z);
+    scene.add(ring); impacts.push({ m: ring, t: 0, ring: true });
+    for (let i = 0; i < 9; i++) {
+      const d = new THREE.Mesh(new THREE.SphereGeometry(K3.rnd(.1, .2), 8, 6), new THREE.MeshBasicMaterial({ color: i % 3 ? '#FFFFFF' : th.gold, transparent: true, opacity: .75 }));
+      const ang = i / 9 * Math.PI * 2;
+      d.position.set(x, y, z); scene.add(d);
+      impacts.push({ m: d, t: 0, v: new THREE.Vector3(Math.cos(ang) * 2.4, K3.rnd(1.2, 2.4), Math.sin(ang) * 2.4) });
+    }
+    shake = .12;
   }
 
   /* ---------- الأشكال ---------- */
@@ -129,7 +160,7 @@ function whackScene() {
   /* ضربة على حفرة: تتحرك المطرقة إليها وتضرب */
   S.strike = h => {
     if (!S.onHit) return;
-    aim.set(h.x, 1.45, h.z);
+    aim.set(h.x, 1.7, h.z);
     aimShown = true;
     swingT = 0;
     setTimeout(() => S.onHit(h), HIT_MS);
@@ -143,7 +174,7 @@ function whackScene() {
 
   /* ---------- اللمس والفأرة: المطرقة تتبع اليد، والضغطة تضرب أقرب شكل ظاهر ---------- */
   S.cv.addEventListener('pointermove', e => {
-    const p = K3.groundPoint(S, e, 1.45);
+    const p = K3.groundPoint(S, e, 1.7);
     if (p) { aim.copy(p); aimShown = true; }
   });
   S.cv.addEventListener('pointerleave', () => { aimShown = false; });
@@ -152,12 +183,12 @@ function whackScene() {
     if (!S.started) return;
     const p = K3.groundPoint(S, e, .9);
     if (!p) return;
-    aim.set(p.x, 1.45, p.z); aimShown = true; swingT = 0;
+    aim.set(p.x, 1.7, p.z); aimShown = true; swingT = 0;
     /* الشكل المضروب: أقربها إلى نقطة الضغطة (مع ارتفاعه) */
     const cand = S.holes.filter(h => h.up >= 0 && h.pop && !h.state && h.t > .25)
       .map(h => ({ h, d: Math.hypot(h.x - p.x, h.z - p.z) }))
       .filter(o => o.d < 1.7).sort((a, b) => a.d - b.d)[0];
-    if (cand) aim.set(cand.h.x, 1.45, cand.h.z);
+    if (cand) aim.set(cand.h.x, 1.7, cand.h.z);
     if (cand && S.onHit) setTimeout(() => S.onHit(cand.h), HIT_MS);
     else FX.play('tick');
   });
@@ -183,27 +214,42 @@ function whackScene() {
     /* المطرقة: تلحق باليد وتضرب */
     if (mallet) {
       mallet.visible = aimShown && S.started;
-      /* القبضة فوق نقطة الهدف بطول المقبض، فيقع الرأس على الشكل تمامًا عند الضربة */
-      const want = new THREE.Vector3(aim.x, aim.y + HANDLE, aim.z);
+      /* اليد إلى يمين الهدف بطول المقبض، فيقع وجه الرأس على أعلى الشكل تمامًا عند الضربة */
+      const want = new THREE.Vector3(aim.x + HANDLE, aim.y + HEAD_LEN / 2 + .25, aim.z + .15);
       mallet.position.lerp(want, Math.min(1, dt * (swingT >= 0 ? 30 : 14)));
       const { arm, headG, shadow: msh } = mallet.userData;
       if (swingT >= 0) {
         swingT += dt;
-        arm.rotation.x = malletAngle(swingT);
+        arm.rotation.z = malletAngle(swingT);
         /* لحظة الارتطام: الرأس ينضغط قليلًا */
         const hit = swingT > SW.up + SW.down && swingT < SW.up + SW.down + SW.hold;
-        headG.scale.set(hit ? 1.12 : 1, hit ? .82 : 1, hit ? 1.12 : 1);
-        if (hit && !mallet.userData.thud) { mallet.userData.thud = true; FX.play('pop'); }
+        headG.scale.set(hit ? 1.12 : 1, hit ? .84 : 1, hit ? 1.12 : 1);
+        if (hit && !mallet.userData.thud) { mallet.userData.thud = true; FX.play('pop'); impact(aim.x, aim.y - .1, aim.z); }
         if (swingT >= SW_T) { swingT = -1; mallet.userData.thud = false; }
       } else {
-        arm.rotation.x += (REST + Math.sin(S.t * 2.2) * .05 - arm.rotation.x) * Math.min(1, dt * 8);
+        arm.rotation.z += (REST + Math.sin(S.t * 2.2) * .05 - arm.rotation.z) * Math.min(1, dt * 8);
         headG.scale.set(1, 1, 1);
       }
       /* ميل جانبي بسيط مع حركة اليد، وظل الرأس على الأرض */
-      arm.rotation.z += ((want.x - mallet.position.x) * -.25 - arm.rotation.z) * Math.min(1, dt * 8);
+      /* ميل خفيف نحو الكاميرا حتى يظهر الرأس بوضوح */
+      arm.rotation.x = -.18 + (want.z - mallet.position.z) * .1;
       const hp = new THREE.Vector3(); headG.getWorldPosition(hp);
       msh.visible = mallet.visible; msh.position.set(hp.x, .03, hp.z);
       msh.scale.setScalar(Math.max(.4, 1.3 - hp.y * .25));
+      /* دائرة الهدف: تلتصق بأقرب أنبوب ظاهر شكله، وإلا تبقى تحت المطرقة */
+      const tg = mallet.userData.target, near = S.holes.map(h => ({ h, d: Math.hypot(h.x - aim.x, h.z - aim.z) })).sort((a, b) => a.d - b.d)[0];
+      tg.visible = mallet.visible;
+      const snap = near && near.d < 1.9;
+      tg.position.lerp(new THREE.Vector3(snap ? near.h.x : aim.x, .82, snap ? near.h.z : aim.z), Math.min(1, dt * 16));
+      tg.rotation.z += dt * 1.2;
+      tg.scale.setScalar((snap && near.h.pop && !near.h.state ? 1.08 : .95) + Math.sin(S.t * 6) * .04);
+      tg.children.forEach(m => { m.material.opacity = snap && near.h.pop && !near.h.state ? .95 : .55; });
+    }
+    /* آثار الضربات واهتزاز الكاميرا الخفيف */
+    impacts.forEach(o => { o.t += dt; if (o.ring) { o.m.scale.setScalar(1 + o.t * 6); o.m.material.opacity = Math.max(0, .8 - o.t * 2.2); } else { o.v.y -= 9 * dt; o.m.position.addScaledVector(o.v, dt); o.m.material.opacity = Math.max(0, .75 - o.t * 1.6); } if (o.t > .55) scene.remove(o.m); });
+    for (let i = impacts.length - 1; i >= 0; i--) if (impacts[i].t > .55) impacts.splice(i, 1);
+    if (shake > 0) { shake = Math.max(0, shake - dt); camera.position.set(Math.sin(S.t * 90) * shake * .5, 13.2 + Math.cos(S.t * 80) * shake * .4, 12); camera.lookAt(0, 0, -1); } else if (camera.position.x !== 0) { camera.position.set(0, 13.2, 12); camera.lookAt(0, 0, -1); }
+    if (false) {
     }
   };
   S.size();
