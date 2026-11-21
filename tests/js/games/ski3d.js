@@ -61,6 +61,10 @@ function skiScene() {
       p.rotation.y = Math.random() * 6;
       slope.add(p);
       items.push({ g: p, kind: 'deco', z: p.position.z });
+      const t = K3.tuftPatch(th, 6);
+      t.position.set(sx * K3.rnd(SKI_W + 1.3, SKI_W + 3), 0, z + K3.rnd(-3, 3));
+      slope.add(t);
+      items.push({ g: t, kind: 'deco', z: t.position.z, near: true });
     }
   }
   function flag(color) {
@@ -188,7 +192,7 @@ function skiScene() {
       if (it.dead) return;
       it.z += v * dt;
       it.g.position.z = it.z;
-      if (it.kind === 'deco') { if (it.z > 10) { it.z -= 90; it.g.position.x = Math.sign(it.g.position.x) * K3.rnd(SKI_W + 2.5, SKI_W + 9); } return; }
+      if (it.kind === 'deco') { if (it.z > 10) { it.z -= 90; it.g.position.x = Math.sign(it.g.position.x) * (it.near ? K3.rnd(SKI_W + 1.3, SKI_W + 3) : K3.rnd(SKI_W + 2.5, SKI_W + 9)); } return; }
       farthest = Math.min(farthest, it.z);
       if (it.kind === 'row') {
         it.gates.forEach(g => g.userData.flags.forEach(f => {

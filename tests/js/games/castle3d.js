@@ -55,6 +55,7 @@ function castleScene() {
       const p = K3.prop(th, K3.rnd(1.2, 2)); p.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
       S.env.add(p);
     }
+    K3.scatter(S.env, th, { x0: -30, x1: 30, z0: -30, z1: 30, count: 600, avoid: (x, z) => Math.hypot(x, z) < CT.walk + 1.2 });
     K3.horizon(S, th, { radius: 80 });
     K3.weather(S, th, { w: 20, h: 40, d: 30, cz: 0 });
     for (let i = 0; i < 12; i++) {

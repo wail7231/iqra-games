@@ -122,6 +122,8 @@ function maze3dScene() {
       const e = new THREE.LineBasicMaterial({ color: '#2B4C7E' });
       segs.forEach(([x, z, h]) => { const l = new THREE.LineSegments(new THREE.EdgesGeometry(geo), e); l.position.set(x, MZ.wallH / 2, z); l.rotation.y = h ? 0 : Math.PI / 2; world.add(l); });
     }
+    /* عشب وحصى وأزهار حول المتاهة، وحصى قليل في الممرات */
+    K3.scatter(world, th, { x0: -W / 2 - 14, x1: W / 2 + 14, z0: -H / 2 - 14, z1: H / 2 + 10, count: 520, avoid: (x, z) => Math.abs(x) < W / 2 + .7 && Math.abs(z) < H / 2 + .7 });
     /* زينة حول المتاهة */
     for (let i = 0; i < 22; i++) {
       const a = Math.PI * K3.rnd(.92, 2.08), rr = Math.max(W, H) * .5 + K3.rnd(2.5, 9);

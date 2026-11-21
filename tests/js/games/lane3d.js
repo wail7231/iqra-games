@@ -49,6 +49,11 @@ function laneScene() {
       p.rotation.y = Math.random() * 6;
       S.env.add(p); side.push(p);
     }
+    for (let i = 0; i < 26; i++) {
+      const p = K3.tuftPatch(th, 7), sx = i % 2 ? 1 : -1;
+      p.position.set(sx * K3.rnd(4.3, 6.5), 0, -i * 4.5);
+      S.env.add(p); side.push(p);
+    }
     K3.horizon(S, th, { radius: 75 });
     K3.weather(S, th, { w: 18, h: 12, d: 60, cz: -25 });
     /* اللاعب */
@@ -192,7 +197,7 @@ function laneScene() {
       shadow.scale.setScalar(1 - Math.min(.5, P.y / 5));
     }
     if (stripes) stripes.offset.y += v * dt / (120 / 14);
-    side.forEach(p => { p.position.z += v * dt; if (p.position.z > 8) p.position.z -= 18 * 6.5; });
+    side.forEach(p => { p.position.z += v * dt; if (p.position.z > 8) p.position.z -= 117; });
     S.env.children.forEach(c => c.children && c.children.forEach(w => { if (w.userData.sway != null) w.rotation.z = Math.sin(S.t * 2 + w.userData.sway) * .25; }));
     rows.forEach(r => {
       r.z += v * dt;

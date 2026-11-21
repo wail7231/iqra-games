@@ -47,6 +47,7 @@ function boatScene() {
       p.position.set(Math.cos(a) * r, .35, Math.sin(a) * r); p.rotation.y = Math.random() * 6;
       S.env.add(p);
     }
+    K3.scatter(S.env, th, { count: 420, at: () => { const a = Math.random() * Math.PI * 2, r = LAKE_R + K3.rnd(1.2, 14); return { x: Math.cos(a) * r, z: Math.sin(a) * r, y: .35 }; } });
     K3.horizon(S, th, { radius: 80 });
     K3.weather(S, th, { w: 30, h: 14, d: 50, cz: 0 });
     /* جزر وصخور داخل البحيرة يلتفّ حولها القارب */

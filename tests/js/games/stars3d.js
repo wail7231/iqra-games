@@ -40,6 +40,7 @@ function starsScene() {
       p.position.set(Math.cos(a) * (ARENA_R + 2.2), -.5, Math.sin(a) * (ARENA_R + 2.2));
       if (Math.sin(a) < .3) arena.add(p);
     }
+    K3.scatter(arena, th, { count: 260, at: () => { const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * (ARENA_R - .2); return { x: Math.cos(a) * r, z: Math.sin(a) * r, y: 0 }; } });
     S.env.add(arena);
     K3.horizon(S, th, { radius: 75, y: -12, hills: false });
     K3.weather(S, th, { w: 26, h: 14, d: 44, cz: -2, cy: -2 });

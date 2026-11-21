@@ -49,6 +49,7 @@ function islandsScene() {
     if (th.sketch) { [top, rock].forEach(m => { const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), new THREE.LineBasicMaterial({ color: '#2B4C7E' })); e.position.copy(m.position); e.rotation.copy(m.rotation); g.add(e); }); }
     const lip = new THREE.Mesh(new THREE.CylinderGeometry(R * 1.02, R * 1.02, .08, 9), K3.mat(th.ground2, { flatShading: true }));
     lip.position.y = -.3; g.add(lip);
+    const patch = K3.tuftPatch(th, a ? 4 : 7); patch.scale.setScalar(.75); patch.position.y = 0; g.add(patch);
     if (!a && Math.random() < .55) {
       const p = K3.prop(th, .38);
       p.position.set(K3.rnd(-.4, .4), 0, K3.rnd(-.5, -.2));
