@@ -33,6 +33,7 @@ const GAME_TYPES = {
   islands3d: { name: 'الجزر الطائرة', three: true, editor: 'editor.html', player: 'game.html', desc: 'قفز بين جزر تطفو في السماء حتى جزيرة الإجابة الصحيحة.' },
   maze3d:    { name: 'المتاهة المجسّمة', three: true, editor: 'editor.html', player: 'game.html', desc: 'متاهة بجدران مرتفعة، ادخل باب الإجابة الصحيحة.' },
   stars3d:   { name: 'جمع النجوم', three: true, editor: 'editor.html', player: 'game.html', desc: 'مركبة تجمع من الساحة النجوم التي تحمل الإجابات الصحيحة.' },
+  arena3d:   { name: 'مغامرة الساحة', three: true, editor: 'editor.html', player: 'game.html', desc: 'تجوّل بحرية في ساحة واسعة، افتح صندوق الإجابة الصحيحة لتأخذ المفتاح، ثم ادخل البوابة.' },
   boat3d:    { name: 'القارب الحر', three: true, editor: 'editor.html', player: 'game.html', desc: 'قُد القارب بحرية في البحيرة واجمع العوّامات التي تحمل الإجابات الصحيحة.' },
   ski3d:     { name: 'التزلّج على المنحدر', three: true, editor: 'editor.html', player: 'game.html', desc: 'انزلق على المنحدر بين الأعلام، ومرّ من بوابة الإجابة الصحيحة.' },
   castle3d:  { name: 'القلعة الدوّارة', three: true, editor: 'editor.html', player: 'game.html', desc: 'دُر حول البرج واقفز إلى درجة الإجابة الصحيحة لتصعد طابقًا.' },

@@ -83,7 +83,7 @@ function arenaScene() {
       const t = wallTex.clone(); t.needsUpdate = true; t.repeat.set(Math.max(1, b.hw), Math.max(1, b.h / 1.2));
       const body = new THREE.Mesh(b.kind === 'pillar' ? new THREE.CylinderGeometry(b.hw, b.hw * 1.1, b.h, 12) : new THREE.BoxGeometry(b.hw * 2, b.h, b.hd * 2), K3.mat('#FFFFFF', { map: t }));
       body.position.y = b.h / 2; g.add(body);
-      if (th.sketch) g.add(Object.assign(new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry), new THREE.LineBasicMaterial({ color: '#2B4C7E' })), { position: body.position.clone() }));
+      if (th.sketch) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry), new THREE.LineBasicMaterial({ color: '#2B4C7E' })); e.position.copy(body.position); g.add(e); }
       if (b.kind === 'plat' || b.kind === 'step') {
         const top = new THREE.Mesh(new THREE.BoxGeometry(b.hw * 2 + .12, .14, b.hd * 2 + .12), K3.mat(th.ground, { map: K3.groundTexture(th, 4) }));
         top.position.y = b.h + .02; g.add(top);
@@ -132,7 +132,7 @@ function arenaScene() {
     scene.add(hero, shadow, arrow);
     hazards.forEach(h => scene.remove(h.g));
     makeHazards(th);
-    if (S.q) { const keep = chests.map(c => ({ a: c.a, x: c.x, z: c.z, y: c.y, state: c.state })); spawnChests(keep); placePortal(portal && portal.pos); }
+    if (S.q) { const keep = chests.length ? chests.map(c => ({ a: c.a, x: c.x, z: c.z, y: c.y, state: c.state })) : null; spawnChests(keep); placePortal(portal && portal.pos); }
     paintMap();
   };
 
