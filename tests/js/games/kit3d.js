@@ -87,13 +87,23 @@ const K3 = (() => {
   /* ---------- المشهد ---------- */
   function skyTexture(th) {
     const c = document.createElement('canvas');
-    c.width = 4; c.height = 256;
+    c.width = 256; c.height = 256;
     const g = c.getContext('2d');
     const gr = g.createLinearGradient(0, 0, 0, 256);
-    gr.addColorStop(0, th.sky[0]); gr.addColorStop(1, th.sky[1]);
-    g.fillStyle = gr; g.fillRect(0, 0, 4, 256);
+    gr.addColorStop(0, th.sky[0]); gr.addColorStop(.72, th.sky[1]); gr.addColorStop(1, th.sky[1]);
+    g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+    /* توهّج دافئ (أو بارد ليلًا) قرب الأفق */
+    const glowC = th.dark ? 'rgba(120,140,255,.22)' : th.deco === 'pines' || th.deco === 'crystals' ? 'rgba(255,255,255,.45)' : 'rgba(255,236,190,.55)';
+    const hg = g.createLinearGradient(0, 150, 0, 256); hg.addColorStop(0, 'rgba(255,255,255,0)'); hg.addColorStop(.7, glowC); hg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = hg; g.fillRect(0, 150, 256, 106);
+    /* غيوم رقيقة ممدودة في الأعلى */
+    if (!th.sketch) {
+      g.fillStyle = th.dark ? 'rgba(180,170,255,.07)' : 'rgba(255,255,255,.35)';
+      for (let i = 0; i < 9; i++) { g.beginPath(); g.ellipse(rnd(0, 256), rnd(20, 140), rnd(30, 70), rnd(4, 9), 0, 0, 7); g.fill(); }
+    }
     return texture(c);
   }
+
   const dotTex = (() => {
     let t = null;
     return () => {
@@ -660,7 +670,41 @@ const K3 = (() => {
     return g;
   }
   /* قطعة زينة واحدة حسب القالب */
+  /* مجموعة صخور طبيعية بألوان القالب، وعليها طحلب أو ثلج */
+  function rocks(th, s = 1) {
+    const g = new THREE.Group();
+    const base = { pines: '#9FB3D1', crystals: '#B9D6E8', space: '#4A3A8A', night: '#3A4A80', palms: '#C9A96A', coral: '#B98A5A', autumn: '#8A6A4A', paper: '#FFFFFF' }[th.deco] || '#9C8F80';
+    const top = { pines: '#FFFFFF', crystals: '#FFFFFF', trees: '#6DAA5C', autumn: '#C98A3E', night: '#2E4A8A', domes: '#C9A96A' }[th.deco];
+    for (let i = 0; i < 4; i++) {
+      const r = rnd(.25, .55) * s * (i ? .75 : 1);
+      const geo = new THREE.DodecahedronGeometry(r, 0), p = geo.attributes.position;
+      for (let k = 0; k < p.count; k++) p.setXYZ(k, p.getX(k) * rnd(.85, 1.15), p.getY(k) * rnd(.6, .9), p.getZ(k) * rnd(.85, 1.15));
+      geo.computeVertexNormals();
+      const m = new THREE.Mesh(geo, mat(col(base).offsetHSL(0, 0, rnd(-.08, .06)), { flatShading: true }));
+      m.position.set(i ? rnd(-.6, .6) * s : 0, r * .5, i ? rnd(-.6, .6) * s : 0); m.rotation.y = rnd(0, 6);
+      g.add(m);
+      if (th.sketch) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: '#2B4C7E' })); e.position.copy(m.position); e.rotation.copy(m.rotation); g.add(e); }
+      if (top && !th.sketch) { const cap = new THREE.Mesh(new THREE.SphereGeometry(r * .7, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2.4), mat(top, { flatShading: true })); cap.position.set(m.position.x, m.position.y + r * .35, m.position.z); cap.scale.y = .5; g.add(cap); }
+    }
+    return g;
+  }
+  /* شجيرة من كرات خضراء بدرجات، وفيها أزهار أو ثمار صغيرة */
+  function bush(th, s = 1) {
+    const g = new THREE.Group();
+    const cols = { autumn: ['#C2621B', '#E8761E', '#A8432A'], pines: ['#2F5D50', '#3F6E60', '#FFFFFF'], crystals: ['#9CD5F2', '#BFE3F3', '#FFFFFF'], night: ['#1F5A5A', '#24346A', '#1F7A6B'], space: ['#6E52C8', '#8E6CF0', '#B48CFF'], coral: ['#2E8C6A', '#3FA37A', '#1F7A6B'], paper: ['#FFFFFF', '#EEF3FA', '#FFFFFF'], domes: ['#8FA05A', '#A8B86A', '#7A8A4A'] }[th.deco] || ['#4C9A4A', '#5FA052', '#6DBA5F'];
+    for (let i = 0; i < 6; i++) {
+      const r = rnd(.28, .45) * s;
+      const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), mat(cols[i % 3], { flatShading: true }));
+      m.position.set(rnd(-.45, .45) * s, r * .8 + (i > 3 ? .2 * s : 0), rnd(-.35, .35) * s); g.add(m);
+    }
+    const dot = { trees: '#E5559A', palms: '#F7C948', autumn: '#A8432A', pines: '#C0392B', night: '#F6E7A8', domes: '#AB3920' }[th.deco];
+    if (dot) for (let i = 0; i < 7; i++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.05 * s, 6, 4), th.deco === 'night' ? glow(dot) : mat(dot)); const a = i * .9; d.position.set(Math.cos(a) * .45 * s, (.4 + (i % 3) * .12) * s, Math.sin(a) * .35 * s); g.add(d); }
+    return g;
+  }
   function prop(th, s = 1) {
+    const roll = Math.random();
+    if (roll < .14) return rocks(th, s);
+    if (roll < .26) return bush(th, s);
     switch (th.deco) {
       case 'trees': case 'autumn': return Math.random() < .8 ? tree(th, s) : flowers(th, s);
       case 'pines': return pine(th, s);
@@ -759,9 +803,23 @@ const K3 = (() => {
       }
     } else if (th.deco !== 'paper') {
       const hillCol = { palms: '#2BB3C0', pines: '#DCE5F0', crystals: '#CFE8F6', coral: '#2E9CA8', autumn: '#D9A86C', trees: '#9CCB7E', domes: '#E9D3A8' }[th.deco] || th.ground2;
+      /* سلسلة بعيدة فاتحة خلف السلسلة القريبة */
+      const farCol = col(hillCol).lerp(col(th.sky[1]), .55);
+      for (let i = 0; i < (hills ? 18 : 0); i++) {
+        const a = Math.PI + (i / 17) * Math.PI + rnd(-.05, .05), h = rnd(10, 20), geo = new THREE.ConeGeometry(rnd(10, 16), h, 9, 3), p = geo.attributes.position;
+        for (let k = 0; k < p.count; k++) if (p.getY(k) < h / 2 - .1) p.setXYZ(k, p.getX(k) * rnd(.85, 1.15), p.getY(k) + rnd(-.6, .6), p.getZ(k) * rnd(.85, 1.15));
+        geo.computeVertexNormals();
+        const m = new THREE.Mesh(geo, mat(farCol, { flatShading: true, fog: false }));
+        m.position.set(Math.cos(a) * radius * 1.35, y + h / 2 - 1.5, Math.sin(a) * radius * 1.35);
+        g.add(m);
+        if (th.deco !== 'palms' && th.deco !== 'coral') { const cap = new THREE.Mesh(new THREE.ConeGeometry(h * .2 * 1.1, h * .22, 9), mat(th.deco === 'domes' || th.deco === 'autumn' ? '#F7EBD6' : '#FFFFFF', { flatShading: true, fog: false })); cap.position.set(m.position.x, y + h - 1.5 - h * .11, m.position.z); g.add(cap); }
+      }
       for (let i = 0; i < (hills ? 14 : 0); i++) {
         const a = Math.PI + (i / 13) * Math.PI, h = rnd(5, 12);
-        const m = new THREE.Mesh(new THREE.ConeGeometry(rnd(7, 12), h, 6), mat(hillCol, { flatShading: true }));
+        const hg = new THREE.ConeGeometry(rnd(7, 12), h, 8, 3), hp = hg.attributes.position;
+        for (let k = 0; k < hp.count; k++) if (hp.getY(k) < h / 2 - .1) hp.setXYZ(k, hp.getX(k) * rnd(.85, 1.12), hp.getY(k) + rnd(-.4, .4), hp.getZ(k) * rnd(.85, 1.12));
+        hg.computeVertexNormals();
+        const m = new THREE.Mesh(hg, mat(hillCol, { flatShading: true }));
         m.position.set(Math.cos(a) * radius, y + h / 2 - 1, Math.sin(a) * radius);
         g.add(m);
         if (th.deco === 'pines' || th.deco === 'crystals') { const cap = new THREE.Mesh(new THREE.ConeGeometry(2.6, 2.6, 6), mat('#FFFFFF', { flatShading: true })); cap.position.set(m.position.x, y + h - 2.3, m.position.z); g.add(cap); }
@@ -908,6 +966,6 @@ const K3 = (() => {
 
   return {
     THEMES, theme, mat, glow, col, rnd, ease, fonts, sign, plate, recolorSign, textCanvas, texture, create, clear, controls, joystick, pick, groundPoint,
-    player, blob, starMesh, scatter, tuftPatch, tree, pine, palm, prop, cloud, planet, horizon, weather, groundTexture, burstAt, tint, dotTex,
+    player, blob, starMesh, scatter, tuftPatch, rocks, bush, tree, pine, palm, prop, cloud, planet, horizon, weather, groundTexture, burstAt, tint, dotTex,
   };
 })();
