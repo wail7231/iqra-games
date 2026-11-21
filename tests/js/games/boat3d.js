@@ -19,7 +19,7 @@ function boatScene() {
   const field = new THREE.Group();
   scene.add(field);
   const joy = K3.joystick(S);
-  let water, waterGeo, boat, wake = [], rocks = [], buoys = [];
+  let water, waterGeo, boat, wake = [], rocks = [], buoys = [], drifters = [];
   const P = S.P = { x: 0, z: 8, a: Math.PI, v: 0, push: null };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   const maxV = () => 6 + Play.cfg.speed * .7;
@@ -52,7 +52,7 @@ function boatScene() {
     K3.weather(S, th, { w: 30, h: 14, d: 50, cz: 0 });
     /* جزر وصخور داخل البحيرة يلتفّ حولها القارب */
     rocks = [];
-    const spots = [[-9, -6, 2.2], [10, -10, 2.6], [6, 9, 1.8], [-12, 10, 2], [0, -17, 2.4], [16, 3, 1.6], [-17, -2, 1.7]];
+    const spots = [[-9, -6, 2.2], [10, -10, 2.6], [6, 9, 1.8], [-12, 10, 2], [0, -17, 2.4], [16, 3, 1.6], [-17, -2, 1.7], [-3, 3, 1.2], [12, 14, 1.5], [-6, -15, 1.3], [18, -6, 1.2], [-15, 15, 1.4], [3, -8, 1], [-19, 7, 1.1]];
     spots.forEach(([x, z, r]) => {
       const g = new THREE.Group();
       const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 0), K3.mat(th.dark ? '#3A3570' : th.sketch ? '#FFFFFF' : '#9C8A70', { flatShading: true }));
@@ -65,6 +65,30 @@ function boatScene() {
       S.env.add(g);
       rocks.push({ x, z, r: r * .95 });
     });
+    /* عوائق طافية تتهادى مع الموج: براميل وجذوع وصناديق تدفع القارب إن اصطدم بها */
+    drifters.forEach(d => scene.remove(d.g));
+    drifters = [];
+    for (let i = 0; i < 12; i++) {
+      const g = new THREE.Group(), kind = i % 3;
+      if (kind === 0) {
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.45, .45, 1.1, 14), K3.mat(i % 2 ? '#C0392B' : '#A0603A'));
+        barrel.rotation.z = Math.PI / 2; g.add(barrel);
+        for (const x of [-.35, .35]) { const hoop = new THREE.Mesh(new THREE.TorusGeometry(.46, .05, 6, 20), K3.mat('#5A5A66')); hoop.rotation.y = Math.PI / 2; hoop.position.x = x; g.add(hoop); }
+      } else if (kind === 1) {
+        const log = new THREE.Mesh(new THREE.CylinderGeometry(.3, .34, 2.6, 10), K3.mat('#8A5A30', { flatShading: true }));
+        log.rotation.z = Math.PI / 2; g.add(log);
+        for (const x of [-1.3, 1.3]) { const end = new THREE.Mesh(new THREE.CircleGeometry(.3, 12), K3.mat('#D9B98A')); end.position.x = x; end.rotation.y = x > 0 ? Math.PI / 2 : -Math.PI / 2; g.add(end); }
+      } else {
+        const crate = new THREE.Mesh(new THREE.BoxGeometry(1, .8, 1), K3.mat('#B98446')); g.add(crate);
+        const band = new THREE.Mesh(new THREE.BoxGeometry(1.04, .1, 1.04), K3.mat('#7A4A2A')); g.add(band);
+      }
+      let x, z;
+      for (let t = 0; t < 40; t++) { const a = Math.random() * Math.PI * 2, rr = K3.rnd(4, LAKE_R - 3); x = Math.cos(a) * rr; z = Math.sin(a) * rr; if (rocks.every(k => Math.hypot(k.x - x, k.z - z) > k.r + 2) && Math.hypot(x - P.x, z - P.z) > 5) break; }
+      g.position.set(x, 0, z);
+      scene.add(g);
+      const a = Math.random() * Math.PI * 2;
+      drifters.push({ g, x, z, vx: Math.cos(a) * K3.rnd(.6, 1.3), vz: Math.sin(a) * K3.rnd(.6, 1.3), r: kind === 1 ? 1.3 : .7, ph: Math.random() * 6, spin: K3.rnd(-.3, .3), hit: 0 });
+    }
     if (boat) scene.remove(boat);
     boat = makeBoat(th);
     scene.add(boat);
@@ -225,6 +249,21 @@ function boatScene() {
     const r = Math.hypot(nx, nz);
     if (r > LAKE_R - 1.4) { nx *= (LAKE_R - 1.4) / r; nz *= (LAKE_R - 1.4) / r; P.v *= .7; }
     rocks.forEach(k => { const dx = nx - k.x, dz = nz - k.z, d = Math.hypot(dx, dz), m = k.r + 1.1; if (d < m) { nx = k.x + dx / d * m; nz = k.z + dz / d * m; P.v *= .85; } });
+    /* العوائق الطافية: تتحرك وترتد عن الصخور والحافة، والاصطدام بها يدفع القارب */
+    drifters.forEach(d => {
+      d.x += d.vx * dt; d.z += d.vz * dt;
+      const rr = Math.hypot(d.x, d.z);
+      if (rr > LAKE_R - 2) { d.vx = -d.vx; d.vz = -d.vz; d.x *= (LAKE_R - 2.1) / rr; d.z *= (LAKE_R - 2.1) / rr; }
+      rocks.forEach(k => { if (Math.hypot(k.x - d.x, k.z - d.z) < k.r + d.r) { d.vx = -d.vx; d.vz = -d.vz; } });
+      d.g.position.set(d.x, wave(d.x, d.z, S.t) + .05, d.z);
+      d.g.rotation.y += d.spin * dt; d.g.rotation.x = Math.sin(S.t * 1.4 + d.ph) * .12;
+      d.hit = Math.max(0, d.hit - dt);
+      const dx = nx - d.x, dz = nz - d.z, dd = Math.hypot(dx, dz), m = d.r + 1;
+      if (dd < m && dd > 0) {
+        nx = d.x + dx / dd * m; nz = d.z + dz / dd * m;
+        if (!d.hit && Math.abs(P.v) > 1.5) { d.hit = 1; P.v *= -.35; d.vx -= dx / dd * 1.5; d.vz -= dz / dd * 1.5; FX.play('bad'); Play.board.classList.remove('shake'); void Play.board.offsetWidth; Play.board.classList.add('shake'); }
+      }
+    });
     P.x = nx; P.z = nz;
     if (boat) {
       const h = wave(P.x, P.z, t);
