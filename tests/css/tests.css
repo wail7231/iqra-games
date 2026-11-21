@@ -1926,7 +1926,7 @@ a { color: inherit; text-decoration: none; }
    ملء الشاشة للألعاب ذات البطاقات: المحتوى في وسط الشاشة وبحجم يناسبها،
    والأزرار تحته مباشرة (لا في أسفل الشاشة فوق الزينة)
    ========================================================= */
-.is-fs #board { justify-content: center; padding-bottom: 70px; }
+.is-fs #board { justify-content: safe center; padding-bottom: 70px; }
 .is-fs #board .round-actions { margin-top: 14px; }
 .is-fs #board > :is(.round-head, .word-row, .lines-wrap, .letter-slots, .letter-bank, .letters-word, .hang-wrap, .blanks-text, .word-bank, .spot-text, .group-cols, .group-pool, .match-rows, .match-pool, .plant-wrap, .wheel-result, .round-actions, .next-round, .quiz-grid) {
   width: min(100%, 1100px); margin-inline: auto; zoom: var(--fs-zoom, 1);
