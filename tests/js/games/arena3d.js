@@ -240,6 +240,8 @@ function arenaScene() {
     }
   }
 
+  S.chests = () => chests;
+  S.portal = () => portal;
   S.setQuestion = q => {
     S.q = q; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
