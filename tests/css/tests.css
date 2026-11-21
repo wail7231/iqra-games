@@ -1950,3 +1950,8 @@ a { color: inherit; text-decoration: none; }
 .tpl-sub:first-of-type { margin-top: 6px; }
 .tpl-badge { display: inline-grid; place-items: center; min-width: 40px; height: 26px; padding: 0 8px; border-radius: 8px; background: linear-gradient(135deg, #7A4FB0, #2E7D9A); color: #fff; font: 700 13px var(--font-latin, sans-serif); letter-spacing: .04em; box-shadow: 0 3px 10px rgba(46, 125, 154, .35); }
 .tpl-badge.flat { background: linear-gradient(135deg, #C77D16, #AB3920); box-shadow: 0 3px 10px rgba(171, 57, 32, .3); }
+
+/* عدّ تنازلي كبير فوق الساحات المجسّمة */
+.k3-count { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; pointer-events: none; font: 800 clamp(70px, 12vw, 140px) var(--font-display, sans-serif); color: #fff; text-shadow: 0 6px 24px rgba(0, 0, 0, .45), 0 0 2px rgba(0, 0, 0, .6); }
+.k3-count.pulse { animation: countPop .6s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes countPop { from { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } to { transform: scale(1); } }

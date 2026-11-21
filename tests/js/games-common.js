@@ -19,7 +19,7 @@ const GAME_TYPES = {
   letters: { name: 'ترتيب الحروف', editor: 'editor.html', player: 'game.html', desc: 'رتّب الحروف لتكوّن الكلمة، بين حروف زائدة متشابهة.' },
   hangman: { name: 'هانج مان', editor: 'editor.html', player: 'game.html', desc: 'خمّن حروف الكلمة المخفية قبل أن يكتمل الرسم أو تنفجر البالونات.' },
   blanks:  { name: 'أكمل الفراغات', editor: 'editor.html', player: 'game.html', desc: 'ضع الكلمات المناسبة في فراغات النص ثم تأكّد.' },
-  whack:   { name: 'اصطد الصحيح', editor: 'editor.html', player: 'game.html', desc: 'أشكال تخرج من الحفر، اضرب التي تحمل إجابة صحيحة.' },
+  whack:   { name: 'اصطد الصحيح', three: true, editor: 'editor.html', player: 'game.html', desc: 'أشكال تقفز من الأنابيب، اضربها بالمطرقة إن حملت إجابة صحيحة.' },
   spot:    { name: 'أين الخطأ؟', editor: 'editor.html', player: 'game.html', desc: 'كلمة في النص استُبدلت بغيرها، اكتشفها.' },
   group:   { name: 'المصنِّف', editor: 'editor.html', player: 'game.html', desc: 'اسحب كل بطاقة إلى مجموعتها الصحيحة.' },
   match:   { name: 'المطابقة', editor: 'editor.html', player: 'game.html', desc: 'صِل كل عنصر بما يناسبه من العمود الآخر.' },
