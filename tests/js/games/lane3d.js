@@ -125,6 +125,29 @@ function laneScene() {
     h.position.z = hz;
     scene.add(h);
     rows.push({ g: h, z: hz, kind, done: false });
+    /* عوائق إضافية في حارة أو حارتين: صناديق وبراميل ومخاريط يُتفادى بتغيير الحارة أو القفز */
+    for (const bz of [z + 10, z + 31]) {
+      const lanes = shuffle([0, 1, 2]).slice(0, Math.random() < .45 ? 2 : 1), g = new THREE.Group();
+      lanes.forEach(l => {
+        const pick = Math.random(), o = new THREE.Group();
+        if (pick < .4) {
+          const crate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1, 1.1), K3.mat('#B98446'));
+          crate.position.y = .5; o.add(crate);
+          for (const y of [.08, .92]) { const band = new THREE.Mesh(new THREE.BoxGeometry(1.24, .1, 1.14), K3.mat('#7A4A2A')); band.position.y = y; o.add(band); }
+        } else if (pick < .75) {
+          const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.45, .45, 1.05, 14), K3.mat(th.accent));
+          barrel.position.y = .53; o.add(barrel);
+          for (const y of [.2, .86]) { const hoop = new THREE.Mesh(new THREE.TorusGeometry(.46, .05, 6, 20), K3.mat('#FFFFFF')); hoop.rotation.x = Math.PI / 2; hoop.position.y = y; o.add(hoop); }
+        } else {
+          for (const dx of [-.45, .45]) { const cone = new THREE.Mesh(new THREE.ConeGeometry(.28, .85, 12), K3.mat('#E8590C')); cone.position.set(dx, .42, 0); o.add(cone); const stripe = new THREE.Mesh(new THREE.CylinderGeometry(.17, .21, .14, 12), K3.mat('#FFFFFF')); stripe.position.set(dx, .46, 0); o.add(stripe); }
+        }
+        o.position.x = LANE_X[l];
+        g.add(o);
+      });
+      g.position.z = bz;
+      scene.add(g);
+      rows.push({ g, z: bz, kind: 'block', lanes, done: false });
+    }
   };
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
@@ -147,7 +170,7 @@ function laneScene() {
   function pass(r) {
     r.done = true;
     if (r.kind !== 'gate') {
-      const hit = r.kind === 'low' ? P.y < .45 : P.duck <= 0 && P.y < 1.1;
+      const hit = r.kind === 'block' ? r.lanes.includes(P.lane) && P.y < .9 : r.kind === 'low' ? P.y < .45 : P.duck <= 0 && P.y < 1.1;
       if (hit) { P.stumble = .6; FX.play('bad'); Play.board.classList.remove('shake'); void Play.board.offsetWidth; Play.board.classList.add('shake'); }
       else FX.play('tick');
       return;
