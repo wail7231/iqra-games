@@ -1908,3 +1908,16 @@ a { color: inherit; text-decoration: none; }
 /* إطار ضوئي ناعم حول ساحات الألعاب المرسومة والمجسّمة: يبرز الوسط ويعطي عمقًا */
 .run-wrap::after, .arch-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(0, 0, 0, .16) 100%); }
 .board[data-theme="night"] .run-wrap::after, .board[data-theme="space"] .run-wrap::after { background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0, 0, 0, .32) 100%); }
+
+/* بطاقات الألعاب: لمعة علوية ناعمة وظل أعمق، فتبدو كقطع حقيقية يمكن الإمساك بها */
+.board :is(.word-chip, .line-card, .letter-tile, .hang-key, .sort-card, .bank-chip, .quiz-opt, .spot-word, .match-row > *) {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 55%);
+}
+.board:is([data-theme="night"], [data-theme="space"]) :is(.word-chip, .line-card, .letter-tile, .hang-key, .sort-card, .bank-chip, .quiz-opt, .spot-word, .match-row > *) {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 55%);
+}
+.board :is(.word-chip, .line-card, .letter-tile, .sort-card, .bank-chip, .quiz-opt) { transition: transform .12s ease, box-shadow .15s ease, filter .15s ease; }
+.board :is(.word-chip, .line-card, .letter-tile, .sort-card, .bank-chip, .quiz-opt):hover { filter: brightness(1.04); }
+/* إطار اللوحة: ضوء ناعم من الأعلى وظل داخلي خفيف عند الحواف */
+.board::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit; background: radial-gradient(ellipse at 50% -10%, rgba(255, 255, 255, .35), transparent 55%), radial-gradient(ellipse at 50% 50%, transparent 65%, rgba(0, 0, 0, .07) 100%); }
+.board:is([data-theme="night"], [data-theme="space"])::before { background: radial-gradient(ellipse at 50% -10%, rgba(150, 170, 255, .14), transparent 55%), radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0, 0, 0, .25) 100%); }
