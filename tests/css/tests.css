@@ -1921,3 +1921,22 @@ a { color: inherit; text-decoration: none; }
 /* إطار اللوحة: ضوء ناعم من الأعلى وظل داخلي خفيف عند الحواف */
 .board::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit; background: radial-gradient(ellipse at 50% -10%, rgba(255, 255, 255, .35), transparent 55%), radial-gradient(ellipse at 50% 50%, transparent 65%, rgba(0, 0, 0, .07) 100%); }
 .board:is([data-theme="night"], [data-theme="space"])::before { background: radial-gradient(ellipse at 50% -10%, rgba(150, 170, 255, .14), transparent 55%), radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0, 0, 0, .25) 100%); }
+
+/* =========================================================
+   ملء الشاشة للألعاب ذات البطاقات: المحتوى في وسط الشاشة وبحجم يناسبها،
+   والأزرار تحته مباشرة (لا في أسفل الشاشة فوق الزينة)
+   ========================================================= */
+.is-fs #board { justify-content: center; padding-bottom: 70px; }
+.is-fs #board .round-actions { margin-top: 14px; }
+.is-fs #board > :is(.round-head, .word-row, .lines-wrap, .letter-slots, .letter-bank, .letters-word, .hang-wrap, .blanks-text, .word-bank, .spot-text, .group-cols, .group-pool, .match-rows, .match-pool, .plant-wrap, .wheel-result, .round-actions, .next-round, .quiz-grid) {
+  width: min(100%, 1100px); margin-inline: auto; zoom: var(--fs-zoom, 1);
+}
+.is-fs #board > .round-head { width: auto; }
+@media (min-width: 1100px) { .is-fs #board { --fs-zoom: 1.2; } }
+@media (min-width: 1400px) { .is-fs #board { --fs-zoom: 1.4; } }
+@media (min-width: 1800px) { .is-fs #board { --fs-zoom: 1.65; } }
+@media (min-width: 1100px) and (max-height: 760px) { .is-fs #board { --fs-zoom: 1.1; } }
+/* العجلة: بحجم ارتفاع الشاشة */
+.is-fs .wheel-stage2 { width: min(62vh, 660px); }
+/* المحتوى الطويل (كثير من الجمل) يبقى قابلًا للتمرير بلا قص */
+.is-fs #board { overflow-y: auto; }
