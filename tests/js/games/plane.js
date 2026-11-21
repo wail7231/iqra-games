@@ -417,6 +417,8 @@ function skyScene() {
       if (!S.answered && !Play.roundDone && !S.clouds.some(c => c.q === S.q && !c.state)) S.spawn();
     }
     ctx.clearRect(0, 0, S.W, S.H);
+    S.land = (S.land || 0) - (S.running && !Play.finished ? speed() * dt * .4 : 6 * dt);
+    farLand(ctx, Play.cfg.theme, S.W, S.H, S.land);
     S.clouds.forEach(c => drawCloud(c, th));
     drawPlane(th);
     requestAnimationFrame(frame);

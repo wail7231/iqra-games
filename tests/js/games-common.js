@@ -81,6 +81,80 @@ function needHead(text, need) {
   return paint;
 }
 
+/* تفاصيل صغيرة على الأرض حسب القالب: عشب، أزهار، حصى، أصداف، لمعات ثلج */
+const GROUND_BITS = {
+  classic: { tuft: '#A88A50', dots: ['#E3B341', '#AB3920'], stone: '#C9A96A' },
+  night: { tuft: '#2E4A8A', dots: ['#F6E7A8', '#59C3F0'], stone: '#24346A', glow: true },
+  garden: { tuft: '#3F7D3A', dots: ['#E5559A', '#F7C948', '#FFFFFF'], stone: '#B9A88A' },
+  ice: { tuft: '#BFE3F3', dots: ['#FFFFFF', '#9CD5F2'], stone: '#DDEFF8', glow: true },
+  notebook: { tuft: '#2B4C7E', dots: ['#E8A3A3'], stone: '#DCE3EC', sketch: true },
+  ocean: { tuft: '#2E8C6A', dots: ['#F4A6C1', '#FFF3DC'], stone: '#CDB27A' },
+  space: { tuft: '#6E52C8', dots: ['#F6E7A8', '#B48CFF'], stone: '#1E1446', glow: true },
+  autumn: { tuft: '#8A5226', dots: ['#E8761E', '#D9A42B', '#A8432A'], stone: '#9C7A55' },
+  summer: { tuft: '#5FA052', dots: ['#F4A6C1', '#FFF3DC', '#E8590C'], stone: '#E3B871' },
+  winter: { tuft: '#DCE5F0', dots: ['#FFFFFF', '#C0392B'], stone: '#C9D6E8', glow: true },
+};
+function groundBits(ctx, theme, W, y, h, off = 0, seed = 1) {
+  const B = GROUND_BITS[theme] || GROUND_BITS.classic;
+  const hash = k => { const v = Math.sin(k * 127.1 + seed * 311.7) * 43758.5453; return v - Math.floor(v); };
+  const span = 46, first = Math.floor(-off / span) - 1;
+  ctx.save();
+  for (let k = first; k < first + W / span + 3; k++) {
+    const x = k * span + off + hash(k) * 30, r = hash(k + 7), yy = y + 6 + hash(k + 3) * (h - 12);
+    if (r < .45) {
+      ctx.strokeStyle = B.tuft; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      for (let j = -1; j <= 1; j++) { ctx.beginPath(); ctx.moveTo(x + j * 3, yy); ctx.quadraticCurveTo(x + j * 4, yy - 5, x + j * 6, yy - 9 - hash(k + j) * 4); ctx.stroke(); }
+    } else if (r < .72) {
+      ctx.fillStyle = B.stone; ctx.globalAlpha = B.sketch ? .5 : .85;
+      ctx.beginPath(); ctx.ellipse(x, yy, 4 + hash(k + 9) * 4, 2.5 + hash(k + 5) * 2, 0, 0, 7); ctx.fill();
+      if (B.sketch) { ctx.strokeStyle = '#2B4C7E'; ctx.lineWidth = 1; ctx.stroke(); }
+      ctx.globalAlpha = 1;
+    } else {
+      const c = B.dots[k % B.dots.length];
+      if (B.glow) { ctx.shadowColor = c; ctx.shadowBlur = 6; }
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, yy - 3, 2.6, 0, 7); ctx.fill();
+      ctx.shadowBlur = 0;
+      if (!B.glow) { ctx.strokeStyle = B.tuft; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, yy - 1); ctx.lineTo(x, yy + 4); ctx.stroke(); }
+    }
+  }
+  ctx.restore();
+}
+/* تلال أو مشهد بعيد بطبقتين (للطائرة) */
+function farLand(ctx, theme, W, H, off) {
+  const L = {
+    classic: ['#E9D3A8', '#D9BE8C', 'domes'], night: ['#1E2B5C', '#16224A', 'domes'], garden: ['#B8DDA0', '#9CCB7E', 'trees'],
+    ice: ['#DDEFF8', '#CDE7F4', 'peaks'], notebook: ['rgba(43,76,126,.08)', 'rgba(43,76,126,.14)', 'peaks'], ocean: ['#9ED8DE', '#7CC7CF', 'waves'],
+    space: ['#2A1D5E', '#3A2A7A', 'craters'], autumn: ['#F2D3A8', '#E2B07A', 'trees'], summer: ['#7FD3E8', '#F2D49B', 'waves'], winter: ['#DCE5F0', '#C9D6E8', 'peaks'],
+  }[theme] || ['#E9D3A8', '#D9BE8C', 'domes'];
+  [[.25, 70, 22, L[0]], [.5, 40, 14, L[1]]].forEach(([sp, base, amp, col], li) => {
+    const o = off * sp;
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(0, H);
+    for (let x = 0; x <= W + 20; x += 20) {
+      const wx = x + o;
+      const y = L[2] === 'peaks' ? H - base - Math.abs(((wx / 140) % 2 + 2) % 2 - 1) * amp * 2.2 : L[2] === 'waves' && li ? H - base * .5 - Math.sin(wx / 30) * 3 : H - base - Math.sin(wx / 110 + li) * amp - Math.sin(wx / 43) * amp * .3;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H); ctx.fill();
+    if (L[2] === 'peaks' && !li) {
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      for (let k = -1; k < W / 280 + 2; k++) { const px = k * 280 - (o % 280) + 140; ctx.beginPath(); ctx.moveTo(px - 26, H - base - amp * 1.4); ctx.lineTo(px, H - base - amp * 2.2); ctx.lineTo(px + 26, H - base - amp * 1.4); ctx.fill(); }
+    }
+    if (li === 1 && (L[2] === 'domes' || L[2] === 'trees')) {
+      for (let k = -1; k < W / 190 + 2; k++) {
+        const px = k * 190 - (o % 190) + 60, py = H - base - 6;
+        ctx.fillStyle = col;
+        if (L[2] === 'domes') { ctx.beginPath(); ctx.arc(px, py - 10, 16, Math.PI, 0); ctx.fill(); ctx.fillRect(px - 16, py - 10, 32, 14); ctx.fillRect(px + 26, py - 44, 6, 48); ctx.beginPath(); ctx.arc(px + 29, py - 44, 5, Math.PI, 0); ctx.fill(); }
+        else { ctx.beginPath(); ctx.arc(px, py - 18, 14, 0, 7); ctx.arc(px + 12, py - 10, 10, 0, 7); ctx.arc(px - 12, py - 10, 10, 0, 7); ctx.fill(); }
+      }
+    }
+    if (li === 1 && L[2] === 'craters') {
+      ctx.fillStyle = 'rgba(0,0,0,.25)';
+      for (let k = -1; k < W / 120 + 2; k++) { const px = k * 120 - (o % 120) + 40; ctx.beginPath(); ctx.ellipse(px, H - base * .45, 16, 4, 0, 0, 7); ctx.fill(); }
+    }
+  });
+}
+
 /* ================= شكل اللاعب حسب قالب الشكل (مشترك بين الكرة القافزة وقطعة الضفدع والقوس) =================
    أشكال بلا أرواح: نجمة، قمر، زهرة، ندفة ثلج، رسم بالقلم، فقاعة، كوكب، يقطينة، لؤلؤة، بلّوطة.
    rot يدير النقش (للتدحرج)، والأجزاء الثابتة (حلقة الكوكب، العنق) لا تدور. */

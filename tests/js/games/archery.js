@@ -145,6 +145,10 @@ Play.register({
 
     /* ---------- الرسم ---------- */
     function drawGround(th) {
+      ctx.globalAlpha = .55; ctx.fillStyle = th.hills;
+      ctx.beginPath(); ctx.moveTo(0, H - 90);
+      for (let x = 0; x <= W; x += 40) ctx.lineTo(x, H - 110 - Math.sin(x / 140 + 2) * 26);
+      ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill(); ctx.globalAlpha = 1;
       ctx.fillStyle = th.hills;
       ctx.beginPath();
       ctx.moveTo(0, H - 60);
@@ -157,6 +161,9 @@ Play.register({
       gr.addColorStop(1, th.ground2);
       ctx.fillStyle = gr;
       ctx.fillRect(0, H - 46, W, 46);
+      groundBits(ctx, Play.cfg.theme, W, H - 44, 40, 0, 5);
+      ctx.fillStyle = th.dots; ctx.strokeStyle = th.bow; ctx.lineWidth = 2;
+      [W * .06, W * .94].forEach((fx, i) => { ctx.beginPath(); ctx.moveTo(fx, H - 46); ctx.lineTo(fx, H - 96); ctx.stroke(); const wv = Math.sin(performance.now() / 300 + i) * 4; ctx.beginPath(); ctx.moveTo(fx, H - 96); ctx.lineTo(fx + (i ? -26 : 26), H - 89 + wv); ctx.lineTo(fx, H - 80); ctx.fill(); });
       if (th.sketch) { ctx.strokeStyle = th.edge; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, H - 46); ctx.lineTo(W, H - 46); ctx.stroke(); }
     }
     function drawTarget(t, th, time) {

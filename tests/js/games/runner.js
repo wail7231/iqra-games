@@ -109,6 +109,15 @@ function runnerScene() {
 
   /* ---------- الرسم ---------- */
   function drawBack(th) {
+    /* غيوم بعيدة تتحرك ببطء */
+    if (!th.sketch) {
+      ctx.fillStyle = th.glow ? 'rgba(157,179,217,.14)' : 'rgba(255,255,255,.75)';
+      for (let k = -1; k < S.W / 260 + 2; k++) {
+        const cx = ((k * 260 + S.dist * .05) % (S.W + 260) + S.W + 260) % (S.W + 260) - 130, cy = 40 + (k % 3 + 3) % 3 * 26;
+        ctx.beginPath(); ctx.arc(cx, cy, 16, 0, 7); ctx.arc(cx + 18, cy - 8, 20, 0, 7); ctx.arc(cx + 38, cy, 15, 0, 7); ctx.fill();
+        ctx.fillRect(cx, cy, 38, 14);
+      }
+    }
     const off = S.dist * .15;
     ctx.fillStyle = th.far;
     ctx.beginPath();
@@ -199,6 +208,7 @@ function runnerScene() {
     if (th.glow) { ctx.shadowColor = th.groundTop; ctx.shadowBlur = 12; }
     ctx.beginPath(); ctx.moveTo(0, S.gy); ctx.lineTo(S.W, S.gy); ctx.stroke();
     ctx.shadowBlur = 0;
+    groundBits(ctx, Play.cfg.theme, S.W, S.gy + 4, S.H - S.gy - 6, S.dist, 3);
   }
   function drawPlat(p, th) {
     ctx.save();

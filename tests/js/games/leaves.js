@@ -142,6 +142,24 @@ function pondScene() {
     }
     if (th.moon) { ctx.fillStyle = 'rgba(246,231,168,.18)'; ctx.beginPath(); ctx.ellipse(S.W * .2, S.H * .2, 46, 18, 0, 0, 7); ctx.fill(); }
     if (th.rim) { ctx.strokeStyle = th.rim; ctx.lineWidth = 10; ctx.strokeRect(5, 5, S.W - 10, S.H - 10); }
+    drawBanks(th);
+  }
+  /* ضفاف البركة: حجارة وقصب يتمايل في الزوايا */
+  function drawBanks(th) {
+    const B = GROUND_BITS[Play.cfg.theme] || GROUND_BITS.classic;
+    const corners = [[0, S.H, 1, -1], [S.W, S.H, -1, -1], [0, 0, 1, 1], [S.W, 0, -1, 1]];
+    corners.forEach(([cx, cy, sx, sy], ci) => {
+      ctx.fillStyle = B.stone; ctx.globalAlpha = .9;
+      for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.ellipse(cx + sx * (12 + k * 15), cy + sy * (8 + (k % 2) * 10), 13 - k * 1.5, 9 - k, 0, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      if (ci > 1) return;
+      ctx.strokeStyle = B.tuft; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      for (let k = 0; k < 6; k++) {
+        const bx = cx + sx * (10 + k * 9), sw = Math.sin(S.t * 1.5 + k) * 4, h = 34 + (k % 3) * 12;
+        ctx.beginPath(); ctx.moveTo(bx, cy); ctx.quadraticCurveTo(bx + sw, cy - h * .5, bx + sw * 1.6, cy - h); ctx.stroke();
+        if (k % 2 === 0 && !B.glow) { ctx.fillStyle = '#8A5A30'; ctx.beginPath(); ctx.ellipse(bx + sw * 1.6, cy - h - 4, 3.5, 8, 0, 0, 7); ctx.fill(); }
+      }
+    });
   }
   function drawLeaf(l, th) {
     if (l.sink >= 1) return;
@@ -190,6 +208,7 @@ function pondScene() {
     /* لمعة خفيفة */
     if (!th.sketch) { ctx.fillStyle = 'rgba(255,255,255,.13)'; ctx.beginPath(); ctx.ellipse(-l.r * .3, -l.r * .38, l.r * .38, l.r * .16, -.5, 0, 7); ctx.fill(); }
     if (th.snowy && !l.sink) { ctx.fillStyle = 'rgba(159,179,209,.45)'; [[.5, .3, .1], [-.55, .2, .08], [.2, -.6, .07]].forEach(([x, y, s]) => { ctx.beginPath(); ctx.arc(x * l.r, y * l.r, s * l.r, 0, 7); ctx.fill(); }); }
+    if (!l.t && !l.sink && !th.flowers && th.shape === 'pad' && !th.sketch) { ctx.fillStyle = (GROUND_BITS[Play.cfg.theme] || GROUND_BITS.classic).dots[0]; for (let k = 0; k < 6; k++) { const a = k * 1.047; ctx.beginPath(); ctx.ellipse(Math.cos(a) * 6, Math.sin(a) * 6, 6, 3, a, 0, 7); ctx.fill(); } ctx.fillStyle = '#F7C948'; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, 7); ctx.fill(); }
     if (th.flowers && !l.t) { ctx.fillStyle = '#F4A6C1'; for (let k = 0; k < 5; k++) { const a = k * 1.256; ctx.beginPath(); ctx.arc(Math.cos(a) * 8, Math.sin(a) * 8, 6, 0, 7); ctx.fill(); } }
     if (l.t) {
       const ink = l.good ? '#FFFFFF' : th.ink;
