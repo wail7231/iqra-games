@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwsb4r8lec3",
+  "type": "arena3d",
+  "name": "سورة الاعلى",
+  "desc": "",
+  "count": 2,
+  "updated": 1795380485180
+ },
+ {
   "id": "gmwqyc4d1opk",
   "type": "arena3d",
   "name": "تفسير",
