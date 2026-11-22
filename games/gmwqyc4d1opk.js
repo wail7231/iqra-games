@@ -12,9 +12,9 @@ window.__GAME__ = {
   {
    "q": "Chose the surahs we took so far",
    "correct": [
-    "Alnas",
-    "Almasad",
-    "Alkawthar"
+    "Correct1",
+    "correcct2",
+    "correct3"
    ],
    "wrong": [
     "Alshams",
@@ -25,5 +25,5 @@ window.__GAME__ = {
   }
  ],
  "created": 1795298437909,
- "updated": 1795353142004
+ "updated": 1795367247774
 };

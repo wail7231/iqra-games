@@ -6,7 +6,7 @@ window.__GAMES_INDEX__ = [
   "name": "تفسير",
   "desc": "",
   "count": 1,
-  "updated": 1795353142004
+  "updated": 1795367247774
  },
  {
   "id": "gmwlda9bg126",
