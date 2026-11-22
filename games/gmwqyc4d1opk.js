@@ -21,9 +21,9 @@ window.__GAME__ = {
     "Altakweer",
     "Alborouj"
    ],
-   "need": "one"
+   "need": "all"
   }
  ],
  "created": 1795298437909,
- "updated": 1795352865636
+ "updated": 1795353142004
 };
