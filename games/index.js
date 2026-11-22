@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwqyc4d1opk",
+  "type": "arena3d",
+  "name": "تفسير",
+  "desc": "",
+  "count": 1,
+  "updated": 1795352865636
+ },
+ {
   "id": "gmwlda9bg126",
   "type": "lane3d",
   "name": "Reading 2",
