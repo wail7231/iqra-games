@@ -22,8 +22,15 @@ window.__GAME__ = {
    "wrong": [
     "false"
    ]
+  },
+  {
+   "q": "ان الى ربك الرجعى",
+   "correct": "false",
+   "wrong": [
+    "true"
+   ]
   }
  ],
  "created": 1795380395493,
- "updated": 1795380485180
+ "updated": 1795380578163
 };

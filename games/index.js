@@ -5,8 +5,8 @@ window.__GAMES_INDEX__ = [
   "type": "arena3d",
   "name": "سورة الاعلى",
   "desc": "",
-  "count": 2,
-  "updated": 1795380485180
+  "count": 3,
+  "updated": 1795380578163
  },
  {
   "id": "gmwqyc4d1opk",
