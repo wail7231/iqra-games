@@ -1,5 +1,6 @@
-/* الممر الجاري (ثلاثي الأبعاد) — كرة تجري للأمام في ممر من ثلاث حارات، وتأتي نحوها صفوف من البوابات
-   على كل بوابة إجابة. يمين/يسار = تبديل الحارة، أعلى = قفزة فوق الحاجز المنخفض، أسفل = انخفاض تحت العارضة.
+/* الممر الجاري (ثلاثي الأبعاد) — كرة تجري للأمام في ممر من ثلاث حارات، وتأتي نحوها بوابات متتابعة:
+   كل بوابة تحمل إجابة واحدة في حارة عشوائية، وتتكرر الإجابات بترتيب مخلوط حتى يُعبر من الصحيحة
+   (تجاوز البوابة بتغيير الحارة بلا عقوبة). يمين/يسار = تبديل الحارة، أعلى = قفزة فوق الحاجز المنخفض، أسفل = انخفاض تحت العارضة.
    العبور من بوابة الصحيحة نقطة (إن كانت أول اختيار)، والخاطئة تنهار وتُنقص قلبًا.
    المشهد يبقى بين الأسئلة فتستمر الكرة في الجري. الشكل يتبع قالب الشكل. */
 'use strict';
@@ -64,7 +65,7 @@ function laneScene() {
     scene.add(ball, shadow);
     /* البوابات الموجودة تُعاد بألوان القالب الجديد */
     rows.splice(0).forEach(r => scene.remove(r.g));
-    if (S.q && !S.answered) S.spawnRow(-40);
+    if (S.q && !S.answered) { queue = []; S.spawnRow(-34); }
   };
 
   /* ---------- البوابات ---------- */
@@ -104,56 +105,72 @@ function laneScene() {
     }
     return g;
   }
+  const GATE_GAP = 17;            // المسافة بين بوابة وأخرى
+  let queue = [], lastText = null, lastLane = -1;
+  /* الإجابة التالية: دورة مخلوطة من كل الإجابات (عدا ما جُمع)، بلا تكرار الإجابة نفسها مرتين متتاليتين */
+  function nextAnswer() {
+    if (!queue.length) {
+      queue = shuffle(mixAnswers(S.q, Infinity, S.collected));
+      if (queue.length > 1 && queue[0].t === lastText) queue.push(queue.shift());
+    }
+    const ans = queue.shift();
+    lastText = ans.t;
+    return ans;
+  }
+  function addObstacle(z, th, avoidLane) {
+    if (Math.random() < .45) {
+      const kind = Math.random() < .5 ? 'low' : 'high';
+      const h = hurdle(kind, th);
+      h.position.z = z;
+      scene.add(h);
+      rows.push({ g: h, z, kind, done: false });
+      return;
+    }
+    const lanes = shuffle([0, 1, 2].filter(l => l !== avoidLane)).slice(0, Math.random() < .4 ? 2 : 1), g = new THREE.Group();
+    lanes.forEach(l => {
+      const pick = Math.random(), o = new THREE.Group();
+      if (pick < .4) {
+        const crate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1, 1.1), K3.mat('#B98446'));
+        crate.position.y = .5; o.add(crate);
+        for (const y of [.08, .92]) { const band = new THREE.Mesh(new THREE.BoxGeometry(1.24, .1, 1.14), K3.mat('#7A4A2A')); band.position.y = y; o.add(band); }
+      } else if (pick < .75) {
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.45, .45, 1.05, 14), K3.mat(th.accent));
+        barrel.position.y = .53; o.add(barrel);
+        for (const y of [.2, .86]) { const hoop = new THREE.Mesh(new THREE.TorusGeometry(.46, .05, 6, 20), K3.mat('#FFFFFF')); hoop.rotation.x = Math.PI / 2; hoop.position.y = y; o.add(hoop); }
+      } else {
+        for (const dx of [-.45, .45]) { const cone = new THREE.Mesh(new THREE.ConeGeometry(.28, .85, 12), K3.mat('#E8590C')); cone.position.set(dx, .42, 0); o.add(cone); const stripe = new THREE.Mesh(new THREE.CylinderGeometry(.17, .21, .14, 12), K3.mat('#FFFFFF')); stripe.position.set(dx, .46, 0); o.add(stripe); }
+      }
+      o.position.x = LANE_X[l];
+      g.add(o);
+    });
+    g.position.z = z;
+    scene.add(g);
+    rows.push({ g, z, kind: 'block', lanes, done: false });
+  }
+  /* بوابة واحدة لإجابة واحدة في حارة عشوائية، وبعدها عائق في منتصف المسافة إلى البوابة التالية */
   S.spawnRow = (z = -48) => {
     const th = K3.theme();
-    const answers = mixAnswers(S.q, 3, S.collected).slice(0, 3);
-    const lanes = shuffle([0, 1, 2]).slice(0, answers.length);
+    const ans = nextAnswer();
+    let lane = Math.floor(Math.random() * 3);
+    if (lane === lastLane && Math.random() < .6) lane = (lane + 1 + Math.floor(Math.random() * 2)) % 3;
+    lastLane = lane;
     const g = new THREE.Group();
     g.position.z = z;
-    const gates = answers.map((a, k) => { const gt = gate(a, th); gt.position.x = LANE_X[lanes[k]]; gt.userData.lane = lanes[k]; g.add(gt); return gt; });
-    /* حارة بلا إجابة: حاجز يُقفز فوقه */
-    [0, 1, 2].filter(l => !lanes.includes(l)).forEach(l => {
-      const b = new THREE.Mesh(new THREE.BoxGeometry(1.8, .5, .5), K3.mat(th.wall2));
-      b.position.set(LANE_X[l], .25, 0); g.add(b);
-    });
+    const gt = gate(ans, th);
+    gt.position.x = LANE_X[lane]; gt.userData.lane = lane;
+    g.add(gt);
     scene.add(g);
-    rows.push({ g, z, kind: 'gate', gates, q: S.q, done: false });
-    /* حاجز بين الصفوف: منخفض للقفز أو عارضة للانخفاض */
-    const hz = z + 20;
-    const kind = Math.random() < .5 ? 'low' : 'high';
-    const h = hurdle(kind, th);
-    h.position.z = hz;
-    scene.add(h);
-    rows.push({ g: h, z: hz, kind, done: false });
-    /* عوائق إضافية في حارة أو حارتين: صناديق وبراميل ومخاريط يُتفادى بتغيير الحارة أو القفز */
-    for (const bz of [z + 10, z + 31]) {
-      const lanes = shuffle([0, 1, 2]).slice(0, Math.random() < .45 ? 2 : 1), g = new THREE.Group();
-      lanes.forEach(l => {
-        const pick = Math.random(), o = new THREE.Group();
-        if (pick < .4) {
-          const crate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1, 1.1), K3.mat('#B98446'));
-          crate.position.y = .5; o.add(crate);
-          for (const y of [.08, .92]) { const band = new THREE.Mesh(new THREE.BoxGeometry(1.24, .1, 1.14), K3.mat('#7A4A2A')); band.position.y = y; o.add(band); }
-        } else if (pick < .75) {
-          const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.45, .45, 1.05, 14), K3.mat(th.accent));
-          barrel.position.y = .53; o.add(barrel);
-          for (const y of [.2, .86]) { const hoop = new THREE.Mesh(new THREE.TorusGeometry(.46, .05, 6, 20), K3.mat('#FFFFFF')); hoop.rotation.x = Math.PI / 2; hoop.position.y = y; o.add(hoop); }
-        } else {
-          for (const dx of [-.45, .45]) { const cone = new THREE.Mesh(new THREE.ConeGeometry(.28, .85, 12), K3.mat('#E8590C')); cone.position.set(dx, .42, 0); o.add(cone); const stripe = new THREE.Mesh(new THREE.CylinderGeometry(.17, .21, .14, 12), K3.mat('#FFFFFF')); stripe.position.set(dx, .46, 0); o.add(stripe); }
-        }
-        o.position.x = LANE_X[l];
-        g.add(o);
-      });
-      g.position.z = bz;
-      scene.add(g);
-      rows.push({ g, z: bz, kind: 'block', lanes, done: false });
-    }
+    rows.push({ g, z, kind: 'gate', gates: [gt], q: S.q, done: false });
+    addObstacle(z + GATE_GAP / 2, th, lane);
   };
+  /* أبعد بوابة قادمة لهذا السؤال، لنضع التالية بعدها */
+  const farthestGate = () => Math.min(0, ...rows.filter(r => r.kind === 'gate' && !r.dead && r.q === S.q).map(r => r.z));
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
     rows.filter(r => r.kind === 'gate' && !r.done).forEach(r => { scene.remove(r.g); r.dead = true; });
-    S.spawnRow(rows.length ? Math.min(-36, Math.min(...rows.filter(r => !r.dead).map(r => r.z), 0) - 20) : -40);
+    queue = []; lastText = null;
+    S.spawnRow(-34);
   };
 
   /* ---------- التحكم ---------- */
@@ -177,14 +194,14 @@ function laneScene() {
     }
     if (r.q !== S.q || S.answered || Play.roundDone) return;
     const gt = r.gates.find(g => g.userData.lane === P.lane);
-    if (!gt) { S.spawnRow(); return; }
+    if (!gt) return;
     const a = gt.userData.a, pt = new THREE.Vector3(gt.position.x, 2.4, 0);
     if (a.ok) {
       K3.tint(gt, '#4CAF50', .7);
       gt.userData.veil.material.color.set('#7FD36B'); gt.userData.veil.material.opacity = .45;
       S.collected.push(a.t);
       if (S.paint) S.paint(S.collected.length);
-      if (S.collected.length < S.need) { K3.burstAt(S, pt, true, '✓'); FX.play('good'); S.spawnRow(); return; }
+      if (S.collected.length < S.need) { K3.burstAt(S, pt, true, '✓'); FX.play('good'); queue = queue.filter(x => x.t !== a.t); return; }
       S.answered = true;
       K3.burstAt(S, pt, true, S.missed ? '✓' : '+١');
       FX.play('ok');
@@ -195,7 +212,7 @@ function laneScene() {
       S.missed = true;
       K3.burstAt(S, pt, false);
       FX.play('bad');
-      if (!Play.mistake()) S.spawnRow();
+      Play.mistake();
     }
   }
 
@@ -233,7 +250,7 @@ function laneScene() {
     });
     for (let i = rows.length - 1; i >= 0; i--) if (rows[i].z > 12 || rows[i].dead) { if (!rows[i].dead) scene.remove(rows[i].g); rows.splice(i, 1); }
     /* إن لم يبقَ صف بوابات أمام الكرة لهذا السؤال يأتي صف جديد */
-    if (run && S.q && !S.answered && !Play.roundDone && !rows.some(r => r.kind === 'gate' && !r.done && r.q === S.q)) S.spawnRow();
+    if (run && S.q && !S.answered && !Play.roundDone) { let far = farthestGate(); while (far > -62) { far -= GATE_GAP; S.spawnRow(far); } }
     camera.position.x += (P.x * .45 - camera.position.x) * Math.min(1, dt * 4);
     camera.lookAt(camera.position.x * .6, 1, -7);
   };
