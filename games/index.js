@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwtokxwr36w",
+  "type": "whack",
+  "name": "احرف الادغام",
+  "desc": "",
+  "count": 1,
+  "updated": 1795463513979
+ },
+ {
   "id": "gmwsb4r8lec3",
   "type": "arena3d",
   "name": "سورة الاعلى",
