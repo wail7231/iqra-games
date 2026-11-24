@@ -66,7 +66,7 @@ function shootScene() {
     /* البندقية الضوئية أسفل يمين الشاشة */
     if (gun) camera.remove(gun);
     gun = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(.32, .3, 1.3), K3.mat(th.wall2)); gun.add(body);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(.32, .3, 1.3), K3.mat('#4A505C')); gun.add(body); const stripe = new THREE.Mesh(new THREE.BoxGeometry(.33, .08, 1.1), K3.mat(th.accent)); stripe.position.y = .02; gun.add(stripe);
     const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.08, .1, .9, 12), K3.mat('#5A5A66')); barrel.rotation.x = Math.PI / 2; barrel.position.set(0, .06, -.95); gun.add(barrel);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(.11, .035, 6, 16), K3.glow(th.gold)); ring.position.set(0, .06, -1.38); gun.add(ring);
     const grip = new THREE.Mesh(new THREE.BoxGeometry(.22, .5, .3), K3.mat('#8A5A30')); grip.position.set(0, -.32, .25); grip.rotation.x = .3; gun.add(grip);
