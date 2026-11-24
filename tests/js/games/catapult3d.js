@@ -17,7 +17,7 @@ function catapultScene() {
   const A = { yaw: 0, power: 0, pulling: false, sx: 0, sy: 0, yaw0: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   camera.position.set(0, 7, 15.6);
-  camera.lookAt(0, 1.3, -6);
+  camera.lookAt(0, .2, -4);
 
   S.onTheme = th => {
     K3.clear(field);
