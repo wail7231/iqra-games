@@ -110,8 +110,8 @@ function subScene() {
     g.add(ball);
     const rim = new THREE.Mesh(new THREE.TorusGeometry(1.15, .025, 6, 40), new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: .5 })); g.add(rim);
     const hl = new THREE.Mesh(new THREE.SphereGeometry(.2, 10, 8), K3.glow('#FFFFFF')); hl.scale.set(1.4, .7, .4); hl.position.set(-.45, .55, .85); g.add(hl);
-    const sign = K3.sign(a.t, { h: .75, px: 64 }); sign.renderOrder = 8; sign.material.depthTest = false;
-    if (sign.scale.x > 2.6) sign.scale.set(2.6, 2.6 / sign.userData.ratio, 1);
+    const sign = K3.sign(a.t, { h: 1, px: 72 }); sign.renderOrder = 8; sign.material.depthTest = false;
+    if (sign.scale.x > 3.2) sign.scale.set(3.2, 3.2 / sign.userData.ratio, 1);
     g.add(sign);
     g.userData = { ball, sign };
     return g;
