@@ -65,9 +65,9 @@ function balloonScene() {
     K3.scatter(S.env, th, { x0: -60, x1: 60, z0: -70, z1: 30, count: 700, avoid: (x, z) => nearSpot(x, z, BL.padR + .5) });
     K3.horizon(S, th, { radius: 95 });
     K3.weather(S, th, { w: 40, h: 22, d: 60, cz: -10 });
-    /* غيوم تمرّ مع الريح على ارتفاع المنطاد وفوقه */
+    /* ظلال غيوم عابرة تنزلق على الأرض مع الريح (الغيوم نفسها فوق الكاميرا) */
     clouds = [];
-    if (!th.sketch) for (let i = 0; i < 10; i++) { const c = K3.cloud(K3.rnd(1.6, 3), th.dark ? '#5A6A9A' : '#FFFFFF', .92); c.position.set(K3.rnd(-60, 60), K3.rnd(15, 22), K3.rnd(-70, 20)); S.env.add(c); clouds.push(c); }
+    if (!th.sketch) for (let i = 0; i < 9; i++) { const c = K3.blob(K3.rnd(4, 7), th.dark ? .18 : .12); c.scale.set(1.6, 1, 1); c.position.set(K3.rnd(-60, 60), .08 + i * .002, K3.rnd(-70, 25)); S.env.add(c); clouds.push(c); }
     /* المنطاد وظله ودائرة الهبوط المتوقّع */
     if (balloon) scene.remove(balloon);
     balloon = makeBalloon(th); scene.add(balloon);
@@ -133,10 +133,10 @@ function balloonScene() {
     /* كمّ الريح على عمود بجانب المنصة */
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 2.6, 6), K3.mat('#5A5A66')); pole.position.set(BL.padR + .7, 1.3, 0); g.add(pole);
     const sock = new THREE.Mesh(new THREE.CylinderGeometry(.22, .1, 1, 10, 1, true), K3.mat('#E8761E', { side: THREE.DoubleSide })); sock.geometry.translate(0, -.5, 0); sock.position.set(BL.padR + .7, 2.5, 0); sock.rotation.order = 'YXZ'; g.add(sock);
-    const sign = K3.sign(a.t, { h: 1.25, px: 76 });
-    if (sign.scale.x > 4.8) sign.scale.set(4.8, 4.8 / sign.userData.ratio, 1);
-    sign.position.y = 2.6; g.add(sign);
-    const stand = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.8, 6), K3.mat('#6B4A2E')); stand.position.y = 1.2; g.add(stand);
+    const sign = K3.sign(a.t, { h: 1.9, px: 80 });
+    if (sign.scale.x > 7) sign.scale.set(7, 7 / sign.userData.ratio, 1);
+    sign.position.y = 3.3; g.add(sign);
+    const stand = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 2.4, 6), K3.mat('#6B4A2E')); stand.position.y = 1.5; g.add(stand);
     g.userData = { face, sign, sock };
     return g;
   }
