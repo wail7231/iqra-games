@@ -6,18 +6,18 @@
 'use strict';
 
 let CATA = null;
-const CP = { g: 14, base: new THREE.Vector3(0, 0, 9) };
+const CP = { g: 14, base: new THREE.Vector3(0, 0, 6.6) };
 
 function catapultScene() {
   const S = K3.create({ fov: 50, fogNear: 34, fogFar: 95, ratio: .6, maxH: 540 });
   const { scene, camera } = S;
   const field = new THREE.Group();
   scene.add(field);
-  let towers = [], blocks = [], stone = null, cat = null, dots = [], dust = [];
+  let towers = [], blocks = [], stone = null, cat = null, dots = [], dust = [], decor = [];
   const A = { yaw: 0, power: 0, pulling: false, sx: 0, sy: 0, yaw0: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
-  camera.position.set(0, 5.4, 14.2);
-  camera.lookAt(0, 2.2, -8);
+  camera.position.set(0, 7, 15.6);
+  camera.lookAt(0, 1.3, -6);
 
   S.onTheme = th => {
     K3.clear(field);
@@ -55,6 +55,10 @@ function catapultScene() {
     const beam = new THREE.Mesh(new THREE.BoxGeometry(.22, .22, 3.2), wood); beam.position.z = 1.1; arm.add(beam);
     const cup = new THREE.Mesh(new THREE.SphereGeometry(.45, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), dark); cup.rotation.x = Math.PI; cup.position.set(0, .2, 2.6); arm.add(cup);
     const cw = new THREE.Mesh(new THREE.BoxGeometry(.7, .7, .7), K3.mat('#5A5A66')); cw.position.set(0, -.3, -.6); arm.add(cw);
+    for (const sx of [-1, 1]) { const brace = new THREE.Mesh(new THREE.BoxGeometry(.14, 1.9, .14), wood); brace.position.set(sx * .9, 1.25, -.6); brace.rotation.x = .55; g.add(brace); }
+    for (const sx of [-1, 1]) for (const z of [-1.3, 1.3]) { const plate = new THREE.Mesh(new THREE.BoxGeometry(.34, .34, .06), K3.mat('#5A5A66')); plate.position.set(sx * .9, .55, z); g.add(plate); }
+    const rope = new THREE.Mesh(new THREE.TorusGeometry(.14, .04, 6, 12), K3.mat('#C9A96A')); rope.rotation.y = Math.PI / 2; rope.position.set(0, 2.1, .2); g.add(rope);
+    for (let i = 0; i < 6; i++) { const rk = new THREE.Mesh(new THREE.DodecahedronGeometry(.3, 0), K3.mat('#7A7484', { flatShading: true })); rk.position.set(1.9 + (i % 3) * .5, .25 + (i > 2 ? .4 : 0), .6 + (i % 2) * .4); g.add(rk); }
     g.userData.arm = arm; g.userData.cup = cup;
     g.position.copy(CP.base);
     return g;
@@ -64,6 +68,7 @@ function catapultScene() {
   function buildTowers(keep) {
     const th = K3.theme();
     towers.forEach(t => { field.remove(t.flag); t.blocks.forEach(b => field.remove(b.m)); });
+    decor.forEach(d => field.remove(d)); decor = [];
     blocks = []; towers = [];
     const list = keep && keep.length ? keep : mixAnswers(S.q, 6, []).map(a => ({ a }));
     const n = list.length;
@@ -77,14 +82,23 @@ function catapultScene() {
         const bx = x + (l === levels - 1 ? 0 : (i ? .5 : -.5)), by = .45 + l * .9;
         m.position.set(bx, by, z);
         field.add(m);
+        const slit = new THREE.Mesh(new THREE.PlaneGeometry(.14, .42), K3.mat('#2A1E14')); slit.position.set(0, .05, w / 2 + .01); m.add(slit);
+        const sill = new THREE.Mesh(new THREE.BoxGeometry(.3, .06, .08), K3.mat(th.gold)); sill.position.set(0, -.2, w / 2 + .03); m.add(sill);
+        const seam = new THREE.Mesh(new THREE.BoxGeometry(w + .02, .05, w + .02), K3.mat('#000000', { transparent: true, opacity: .18 })); seam.position.y = .43; m.add(seam);
+        if (l === 0 && i === 0) { const door = new THREE.Mesh(new THREE.PlaneGeometry(.42, .62), K3.mat('#6B4A2E')); door.position.set(.47, -.13, w / 2 + .012); m.add(door); const knob = new THREE.Mesh(new THREE.SphereGeometry(.04, 6, 4), K3.mat(th.gold)); knob.position.set(.6, -.13, w / 2 + .03); m.add(knob); }
+        if (l === levels - 1) for (const [cx, cz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const cr = new THREE.Mesh(new THREE.BoxGeometry(.3, .3, .3), K3.mat(cols[(l + 1) % 3], { flatShading: true })); cr.position.set(cx * (w / 2 - .15), .6, cz * (w / 2 - .15)); m.add(cr); }
         const b = { m, v: new THREE.Vector3(), spin: new THREE.Vector3(), falling: false, rest: m.position.clone() };
         tb.push(b); blocks.push(b);
       }
       const top = .9 * levels;
+      const plinth = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.65, .16, 10), K3.mat(th.dark ? '#3A4A80' : '#9C8F80', { flatShading: true })); plinth.position.set(x, .02, z); field.add(plinth);
+      const target = new THREE.Mesh(new THREE.RingGeometry(1.75, 1.95, 32), K3.glow(th.gold, { transparent: true, opacity: .5 })); target.rotation.x = -Math.PI / 2; target.position.set(x, .04, z); field.add(target);
+      decor.push(plinth, target);
       const flag = new THREE.Group();
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 2.6, 8), K3.mat("#5A4632")); pole.position.y = 1.3; flag.add(pole);
       const sign = K3.plate(it.a.t, 3.1, 1, { px: 76 }); sign.position.set(0, 1.85, .05); flag.add(sign);
       const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.mat(th.gold)); ball.position.y = 2.65; flag.add(ball);
+      const pen = new THREE.Mesh(new THREE.ConeGeometry(.22, .7, 3), K3.mat(th.accent, { flatShading: true })); pen.rotation.z = -Math.PI / 2; pen.position.set(.38, 2.45, 0); flag.add(pen);
       flag.position.set(x, top, z);
       field.add(flag);
       towers.push({ a: it.a, x, z, top, blocks: tb, flag, sign, state: it.state || '', fly: 0 });
