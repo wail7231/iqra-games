@@ -100,7 +100,7 @@ function catapultScene() {
   /* ---------- الرمي: سرعة البداية من القوة والاتجاه ---------- */
   const launchVel = () => {
     const sp = 8 + A.power * 13;
-    return new THREE.Vector3(Math.sin(A.yaw) * -1 * Math.cos(.75) * sp * -1, Math.sin(.75) * sp, -Math.cos(A.yaw) * Math.cos(.75) * sp);
+    return new THREE.Vector3(-Math.sin(A.yaw) * Math.cos(.75) * sp, Math.sin(.75) * sp, -Math.cos(A.yaw) * Math.cos(.75) * sp);
   };
   const cupPos = () => new THREE.Vector3(CP.base.x, 2.6, CP.base.z - .6);
   S.fire = () => {

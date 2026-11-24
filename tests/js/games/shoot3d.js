@@ -152,7 +152,6 @@ function shootScene() {
   S.cv.addEventListener('pointermove', e => aimFrom(e));
   S.cv.addEventListener('pointerleave', () => cross.classList.remove('on'));
   S.cv.addEventListener('pointerdown', e => { e.preventDefault(); const p = aimFrom(e); S.fireAt(p.nx, p.ny); });
-  S.start.addEventListener('pointerdown', e => { e.preventDefault(); S.begin(); });
 
   function burst(pos, colors, n = 18) {
     for (let i = 0; i < n; i++) {
@@ -170,7 +169,7 @@ function shootScene() {
     const pt = S.screen(pos);
     if (t.a.ok) {
       t.state = 'good'; t.t = 0;
-      K3.tint(t.g.userData.label, '#4CAF50', .7);
+      K3.tint(t.g, '#4CAF50', .45);
       burst(pos, [K3.theme().gold, '#FFFFFF', '#7FD36B'], 22);
       S.collected.push(t.a.t);
       if (S.paint) S.paint(S.collected.length);
