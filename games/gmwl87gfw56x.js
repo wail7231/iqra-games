@@ -1,7 +1,7 @@
 /* لعبة «holy books» — صُنعت بأداة الألعاب التفاعلية، IQRA Network */
 window.__GAME__ = {
  "id": "gmwl87gfw56x",
- "type": "runner",
+ "type": "islands3d",
  "name": "holy books",
  "desc": "",
  "settings": {

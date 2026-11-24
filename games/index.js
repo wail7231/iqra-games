@@ -66,7 +66,7 @@ window.__GAMES_INDEX__ = [
  },
  {
   "id": "gmwl87gfw56x",
-  "type": "runner",
+  "type": "islands3d",
   "name": "holy books",
   "desc": "",
   "count": 2,
