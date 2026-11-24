@@ -130,6 +130,7 @@ const K3 = (() => {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(fov, 1.6, .1, 300);
     const hemi = new THREE.HemisphereLight(0xffffff, 0x8a8a8a, .62);
+    S.hemi = hemi;
     const sun = new THREE.DirectionalLight(0xffffff, .58);
     sun.position.set(-8, 14, 10);
     sun.castShadow = true;
