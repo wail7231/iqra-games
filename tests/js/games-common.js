@@ -40,6 +40,8 @@ const GAME_TYPES = {
   darts3d:   { name: 'القوس والسهم', three: true, editor: 'editor.html', player: 'game.html', desc: 'قف وسط الساحة، ودُر بنظرك حولك، وأطلق السهم على هدف الإجابة الصحيحة.' },
   catapult3d:{ name: 'المنجنيق والقلعة', three: true, editor: 'editor.html', player: 'game.html', desc: 'وجّه المنجنيق واضبط قوته، واهدم برج الإجابة الصحيحة.' },
   sub3d:     { name: 'صيد الفقاعات', three: true, editor: 'editor.html', player: 'game.html', desc: 'غُص بالغواصة بين المرجان وافقع فقاعة الإجابة الصحيحة.' },
+  lighthouse3d: { name: 'سفن المنارة', three: true, editor: 'editor.html', player: 'game.html', desc: 'أدر ضوء المنارة وأرسل الإشارة إلى سفينة الإجابة الصحيحة لترسو في الميناء.' },
+  balloon3d: { name: 'منطاد المظلات', three: true, editor: 'editor.html', player: 'game.html', desc: 'طِر بالمنطاد فوق الحقول وأسقط الصندوق بالمظلة على منصة الإجابة الصحيحة.' },
   runner:  { name: 'الكرة القافزة', three: true, editor: 'editor.html', player: 'game.html', desc: 'اقفز بالكرة على المنصة التي تحمل الإجابة الصحيحة.' },
 };
 const ICON_MAZE = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v8h4M16 8v12M8 16h4v4M12 8h4"/></svg>';

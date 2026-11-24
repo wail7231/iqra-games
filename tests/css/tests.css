@@ -1989,3 +1989,8 @@ a { color: inherit; text-decoration: none; }
 .round-head.k3-qover .round-q { font-size: clamp(16px, 1.8vw, 22px) !important; line-height: 1.5; margin: 0; }
 .round-head.k3-qover .round-sub { font-size: 13px; margin: 0; }
 .is-fs #board.k3-full { padding: 8px !important; justify-content: center; --fs-zoom: 1 !important; overflow: hidden !important; }
+
+/* منطاد المظلات: سهم الريح في أعلى الساحة */
+.k3-wind { position: absolute; z-index: 3; top: 12px; right: 12px; width: 54px; height: 54px; padding: 7px; border-radius: 50%; background: rgba(255, 255, 255, .85); box-shadow: 0 3px 10px rgba(0, 0, 0, .2); pointer-events: none; opacity: 0; transition: opacity .3s; }
+.k3-wind.on { opacity: 1; }
+.k3-wind svg { width: 100%; height: 100%; fill: var(--b-accent, #AB3920); }
