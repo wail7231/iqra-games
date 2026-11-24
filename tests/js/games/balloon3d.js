@@ -17,6 +17,13 @@ function balloonScene() {
   const P = S.P = { x: 0, z: 14, vx: 0, vz: 0 };
   const wind = S.wind = new THREE.Vector3();
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
+  /* مواضع المنصات محددة سلفًا ومتباعدة، فلا تقع قرية أو شجرة فوق منصة مهما تغيّر السؤال */
+  const SPOTS = [];
+  for (let t = 0; t < 600 && SPOTS.length < 14; t++) {
+    const x = K3.rnd(-BL.area + 3, BL.area - 3), z = K3.rnd(-BL.area - 12, 4);
+    if (SPOTS.every(p => Math.hypot(p.x - x, p.z - z) > 10.5) && Math.hypot(x - P.x, z - P.z) > 9) SPOTS.push({ x, z });
+  }
+  const nearSpot = (x, z, r) => SPOTS.some(p => Math.hypot(p.x - x, p.z - z) < r);
   const windArrow = el('div', 'k3-wind', '<svg viewBox="0 0 40 40"><path d="M20 4l8 12h-5v18h-6V16h-5z"/></svg>');
   S.wrap.appendChild(windArrow);
 
@@ -44,17 +51,18 @@ function balloonScene() {
     }
     for (const [x, z, w, d] of [[0, -20, 3, 130], [-20, 0, 130, 2.6], [22, -35, 2.6, 90]]) { const road = new THREE.Mesh(new THREE.PlaneGeometry(w, d), K3.mat(th.path)); road.rotation.x = -Math.PI / 2; road.position.set(x, .05, z); S.env.add(road); }
     /* قرى صغيرة بعيدة عن المنصات */
-    for (let v = 0; v < 6; v++) {
-      const cx = K3.rnd(-50, 50), cz = K3.rnd(-60, 25);
-      if (pads.some(p => Math.hypot(p.x - cx, p.z - cz) < 9)) continue;
+    for (let v = 0, made = 0; v < 40 && made < 6; v++) {
+      const cx = K3.rnd(-55, 55), cz = K3.rnd(-65, 25);
+      if (nearSpot(cx, cz, 11)) continue;
+      made++;
       for (let k = 0; k < 5; k++) { const h = house(th); h.position.set(cx + K3.rnd(-5, 5), 0, cz + K3.rnd(-5, 5)); h.rotation.y = Math.floor(Math.random() * 4) * Math.PI / 2; S.env.add(h); }
     }
     for (let i = 0; i < 70; i++) {
       const x = K3.rnd(-70, 70), z = K3.rnd(-80, 35);
-      if (pads.some(p => Math.hypot(p.x - x, p.z - z) < 5)) continue;
+      if (nearSpot(x, z, 5.5)) continue;
       const p = K3.prop(th, K3.rnd(1.3, 2.4)); p.position.set(x, 0, z); S.env.add(p);
     }
-    K3.scatter(S.env, th, { x0: -60, x1: 60, z0: -70, z1: 30, count: 700, avoid: (x, z) => pads.some(p => Math.hypot(p.x - x, p.z - z) < BL.padR + .4) });
+    K3.scatter(S.env, th, { x0: -60, x1: 60, z0: -70, z1: 30, count: 700, avoid: (x, z) => nearSpot(x, z, BL.padR + .5) });
     K3.horizon(S, th, { radius: 95 });
     K3.weather(S, th, { w: 40, h: 22, d: 60, cz: -10 });
     /* غيوم تمرّ مع الريح على ارتفاع المنطاد وفوقه */
@@ -136,10 +144,11 @@ function balloonScene() {
     const th = K3.theme();
     pads.forEach(p => scene.remove(p.g));
     pads = [];
-    const list = keep || mixAnswers(S.q, 6, []).map(a => ({ a }));
-    list.forEach(it => {
+    const list = keep || mixAnswers(S.q, 12, []).map(a => ({ a }));
+    const free = shuffle(SPOTS.slice());
+    list.forEach((it, k) => {
       let { x, z } = it;
-      if (x == null) for (let t = 0; t < 80; t++) { x = K3.rnd(-BL.area + 3, BL.area - 3); z = K3.rnd(-BL.area - 12, 4); if (pads.every(p => Math.hypot(p.x - x, p.z - z) > 11) && Math.hypot(x - P.x, z - P.z) > 8) break; }
+      if (x == null) ({ x, z } = free[k % free.length]);
       const g = makePad(it.a, th); g.position.set(x, 0, z); scene.add(g);
       const p = { a: it.a, g, x, z, state: it.state || '', t: 0 };
       if (p.state === 'good') K3.tint(g, '#4CAF50', .5); else if (p.state === 'bad') K3.tint(g, '#C0392B', .5);
