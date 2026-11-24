@@ -40,7 +40,7 @@ function balloonScene() {
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(170, 170), K3.mat(th.ground, { map: K3.groundTexture(th, 34) }));
     ground.rotation.x = -Math.PI / 2; ground.position.z = -14; S.env.add(ground);
     /* رقع حقول بألوان قريبة من القالب، بخطوط حراثة */
-    const fieldCols = [th.ground2, th.path, K3.col(th.ground).lerp(K3.col(th.gold), .35).getStyle(), K3.col(th.ground2).lerp(K3.col('#FFFFFF'), .2).getStyle()];
+    const fieldCols = [th.ground2, th.path, K3.col(th.ground).lerp(K3.col('#FFFFFF'), .22).getStyle(), K3.col(th.ground2).lerp(K3.col('#000000'), .08).getStyle()];
     const rowsTex = (() => { const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, 64, 64); g.fillStyle = 'rgba(0,0,0,.12)'; for (let y = 0; y < 64; y += 8) g.fillRect(0, y, 64, 3); const t = K3.texture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3); return t; })();
     for (let i = 0; i < 30; i++) {
       const w = K3.rnd(6, 13), d = K3.rnd(6, 13);
@@ -294,12 +294,12 @@ function balloonScene() {
     windArrow.classList.toggle('on', S.started);
     /* الكاميرا خلف المنطاد ومن فوقه، تنظر إلى الأرض أمامه */
     camera.position.x += (P.x - camera.position.x) * Math.min(1, dt * 2.5);
-    camera.position.y += (BL.y + 7.5 - camera.position.y) * Math.min(1, dt * 2.5);
-    camera.position.z += (P.z + 15 - camera.position.z) * Math.min(1, dt * 2.5);
-    look.set(P.x, 1.5, P.z - 7);
+    camera.position.y += (BL.y + 15 - camera.position.y) * Math.min(1, dt * 2.5);
+    camera.position.z += (P.z + 14 - camera.position.z) * Math.min(1, dt * 2.5);
+    look.set(P.x, 0, P.z - 9);
     camera.lookAt(look);
   };
-  camera.position.set(0, BL.y + 7.5, P.z + 15);
+  camera.position.set(0, BL.y + 15, P.z + 14);
   S.size();
   return S;
 }

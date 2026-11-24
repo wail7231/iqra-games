@@ -7,7 +7,7 @@
 'use strict';
 
 let LIGHT = null;
-const LH = { x: -8, z: 6, top: 8.3, far: -58, near: -10 };
+const LH = { x: -8, z: 6, top: 8.3, far: -40, near: -5 };
 const LH_WATER = {
   classic: ['#3FA9BC', '#7FD0DC'], night: ['#0E1A44', '#24346A'], garden: ['#3F96BA', '#8CD0F2'], ice: ['#4F9FD0', '#BFE3F3'],
   notebook: ['#D6E3F2', '#FFFFFF'], ocean: ['#0E7C86', '#3FB0B8'], space: ['#2A1D5E', '#6E52C8'], autumn: ['#3F6E66', '#7FA894'],
@@ -22,8 +22,8 @@ function lighthouseScene() {
   const B = { yaw: .1, target: null, flash: 0, pending: null, cool: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   S.B = B;
-  camera.position.set(0, 8.5, 17);
-  camera.lookAt(0, 1, -16);
+  camera.position.set(2, 9.5, 19);
+  camera.lookAt(1, 1, -14);
   const speed = () => .9 + (Play.cfg.speed || 4) * .2;
   const yawTo = (x, z) => Math.atan2(x - LH.x, -(z - LH.z));
 
@@ -113,7 +113,11 @@ function lighthouseScene() {
     K3.weather(S, th, { w: 40, h: 14, d: 60, cz: -20 });
     /* شعاع المنارة: مخروط ضوء شفاف يبدأ من المصباح، وهالة حوله */
     const bg = new THREE.ConeGeometry(4.2, 46, 28, 1, true); bg.translate(0, -23, 0); bg.rotateX(Math.PI / 2);
-    beam = new THREE.Mesh(bg, new THREE.MeshBasicMaterial({ color: '#FFF3C4', transparent: true, opacity: th.dark ? .2 : .13, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, fog: false }));
+    /* تدرّج الشفافية على طول الشعاع: ساطع عند المصباح ويختفي في آخره */
+    const ac = document.createElement('canvas'); ac.width = 4; ac.height = 128; const ag = ac.getContext('2d');
+    const gr = ag.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, '#FFFFFF'); gr.addColorStop(.55, '#777777'); gr.addColorStop(1, '#000000');
+    ag.fillStyle = gr; ag.fillRect(0, 0, 4, 128);
+    beam = new THREE.Mesh(bg, new THREE.MeshBasicMaterial({ color: '#FFF3C4', alphaMap: K3.texture(ac), transparent: true, opacity: th.dark ? .32 : .2, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, fog: false }));
     beam.position.set(LH.x, LH.top + .15, LH.z); beam.rotation.order = 'YXZ';
     S.env.add(beam);
     beamGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: '#FFF3C4', transparent: true, opacity: .9, depthWrite: false, fog: false }));
@@ -154,8 +158,8 @@ function lighthouseScene() {
     const flag = new THREE.Mesh(new THREE.PlaneGeometry(.6, .32), K3.mat(th.accent, { side: THREE.DoubleSide })); flag.position.set(.3, 5.05, -.3); body.add(flag);
     const bowLamp = new THREE.Mesh(new THREE.SphereGeometry(.1, 8, 6), K3.glow('#FFE08A')); bowLamp.position.set(0, .8, -2.35); body.add(bowLamp);
     /* لافتة الإجابة فوق الصاري (تواجه الكاميرا دائمًا)، وحلقة على الماء حين يقع الضوء على السفينة */
-    const sign = K3.sign(a.t, { h: 1.15, px: 76 });
-    if (sign.scale.x > 4.2) sign.scale.set(4.2, 4.2 / sign.userData.ratio, 1);
+    const sign = K3.sign(a.t, { h: 1.7, px: 80 });
+    if (sign.scale.x > 6.4) sign.scale.set(6.4, 6.4 / sign.userData.ratio, 1);
     sign.position.set(0, 6.1, 0); g.add(sign);
     const ring = new THREE.Mesh(new THREE.RingGeometry(2.6, 3.1, 40), K3.glow('#FFF3C4', { transparent: true, opacity: 0, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .25; g.add(ring);
     g.userData = { body, sign, ring, flag, sail };
@@ -169,7 +173,7 @@ function lighthouseScene() {
     list.forEach((a, k) => {
       /* كل سفينة في ممر خاص بها حتى لا تتزاحم، وبعدها عن المنارة مختلف */
       const x = -24 + (lanes[k] + .5) * (48 / n) + K3.rnd(-1, 1);
-      const z = K3.rnd(LH.far, LH.far + 18);
+      const z = K3.rnd(LH.far, LH.far + 14);
       const g = makeShip(a); g.position.set(x, 0, z);
       scene.add(g);
       ships.push({ a, g, x, z, lane: x, ph: Math.random() * 6, sp: K3.rnd(.85, 1.15), state: 'come', t: 0, dir: 1 });
@@ -271,7 +275,7 @@ function lighthouseScene() {
     B.flash = Math.max(0, B.flash - dt * 2.4); B.cool = Math.max(0, B.cool - dt);
     if (beam) {
       beam.rotation.y = -B.yaw; beam.rotation.x = -.11;
-      beam.material.opacity = (K3.theme().dark ? .2 : .13) + B.flash * .35;
+      beam.material.opacity = (K3.theme().dark ? .32 : .2) + B.flash * .45;
       beam.scale.set(1 + B.flash * .25, 1 + B.flash * .25, 1);
       beamGlow.scale.setScalar(3 + B.flash * 3 + Math.sin(t * 5) * .2);
       lamp.material.color.set(B.flash > .1 ? '#FFFFFF' : '#FFF3C4');
