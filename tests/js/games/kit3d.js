@@ -116,7 +116,7 @@ const K3 = (() => {
     };
   })();
 
-  function create({ fov = 50, maxH = 480, ratio = .6, fogNear = 30, fogFar = 90 } = {}) {
+  function create({ fov = 50, maxH = 480, ratio = .6, fogNear = 30, fogFar = 90, fsPad = 130 } = {}) {
     const wrap = el('div', 'k3-wrap run-wrap keep');
     const cv = el('canvas', 'k3-canvas run-canvas');
     const start = el('div', 'run-start', '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>');
@@ -152,7 +152,7 @@ const K3 = (() => {
     S.size = () => {
       S.W = wrap.clientWidth || 600;
       const fs = document.body.classList.contains('is-fs');
-      S.H = Math.round(fs ? window.innerHeight - 130 : Math.min(maxH, Math.max(320, S.W * ratio)));
+      S.H = Math.round(fs ? window.innerHeight - fsPad : Math.min(maxH, Math.max(320, S.W * ratio)));
       renderer.setSize(S.W, S.H, false);
       cv.style.height = S.H + 'px';
       camera.aspect = S.W / S.H;

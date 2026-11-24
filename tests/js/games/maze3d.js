@@ -8,7 +8,7 @@ let MZ3 = null;
 const MZ = { cell: 2.5, wallH: 1.3, wallT: .34, R: .5 };
 
 function maze3dScene() {
-  const S = K3.create({ fov: 50, fogNear: 22, fogFar: 60, ratio: .62 });
+  const S = K3.create({ fov: 50, fogNear: 22, fogFar: 70, ratio: .62, fsPad: 24 });
   const { scene, camera } = S;
   const world = new THREE.Group();
   scene.add(world);
@@ -57,9 +57,9 @@ function maze3dScene() {
   }
   const bits = o => [1, 2, 4, 8].filter(b => o & b).length;
   function makeMaze(n) {
-    const cols = n > 4 ? 15 : 13, rows = n > 4 ? 13 : 11;
+    const cols = n > 10 ? 21 : n > 7 ? 19 : n > 4 ? 15 : 13, rows = n > 10 ? 17 : n > 7 ? 15 : n > 4 ? 13 : 11;
     const sc = Math.floor(cols / 2), sr = rows - 1;
-    for (let tries = 0; tries < 40; tries++) {
+    for (let tries = 0; tries < 60; tries++) {
       const open = carve(cols, rows, sc, sr);
       /* المسافة من البداية لكل خانة */
       const dist = [...Array(rows)].map(() => Array(cols).fill(-1));
@@ -70,7 +70,7 @@ function maze3dScene() {
         for (const [dc, dr, b] of Object.values(DIRS)) if (open[r][c] & b && dist[r + dr][c + dc] < 0) { dist[r + dr][c + dc] = dist[r][c] + 1; q.push([c + dc, r + dr]); }
       }
       const ends = [];
-      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (bits(open[r][c]) === 1 && dist[r][c] > 5) ends.push({ c, r, d: dist[r][c] });
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (bits(open[r][c]) === 1 && dist[r][c] > (tries > 30 ? 2 : 5)) ends.push({ c, r, d: dist[r][c] });
       if (ends.length < n) continue;
       /* أبواب متباعدة: نختار الأبعد ثم الأبعد عن المختارة */
       const pick = [ends.sort((a, b) => b.d - a.d)[Math.floor(Math.random() * Math.min(3, ends.length))]];
@@ -125,11 +125,12 @@ function maze3dScene() {
     /* عشب وحصى وأزهار حول المتاهة، وحصى قليل في الممرات */
     K3.scatter(world, th, { x0: -W / 2 - 14, x1: W / 2 + 14, z0: -H / 2 - 14, z1: H / 2 + 10, count: 520, avoid: (x, z) => Math.abs(x) < W / 2 + .7 && Math.abs(z) < H / 2 + .7 });
     /* زينة حول المتاهة */
-    for (let i = 0; i < 22; i++) {
-      const a = Math.PI * K3.rnd(.92, 2.08), rr = Math.max(W, H) * .5 + K3.rnd(2.5, 9);
+    for (let i = 0, n = 0; i < 400 && n < 26; i++) {
+      const x = K3.rnd(-W / 2 - 11, W / 2 + 11), z = K3.rnd(-H / 2 - 11, H / 2 + 6);
+      if (Math.abs(x) < W / 2 + 2.6 && Math.abs(z) < H / 2 + 2.6) continue;
       const p = K3.prop(th, K3.rnd(1, 1.6));
-      p.position.set(Math.cos(a) * rr, 0, Math.sin(a) * rr);
-      world.add(p);
+      p.position.set(x, 0, z);
+      world.add(p); n++;
     }
     /* الأبواب */
     M.doors.forEach(d => {
@@ -216,7 +217,7 @@ function maze3dScene() {
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
-    const answers = mixAnswers(q, 6);
+    const answers = mixAnswers(q, 16);
     M = makeMaze(answers.length);
     M.doors.forEach((d, k) => { d.a = answers[k]; d.state = ''; });
     const p = at(M.sc, M.sr);
@@ -341,7 +342,10 @@ Play.register({
       MZ3.size();
     }
     MZ3.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(MZ3.paint.el, MZ3.wrap);
+    MZ3.paint.el.classList.add('k3-qover');
+    Play.board.classList.add('k3-full');
+    MZ3.wrap.querySelectorAll('.k3-qover').forEach(e => e.remove());
+    MZ3.wrap.appendChild(MZ3.paint.el);
     K3.fonts.then(() => MZ3.setQuestion(q));
   },
 });
