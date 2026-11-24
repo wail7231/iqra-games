@@ -163,7 +163,7 @@ const K3 = (() => {
     S.applyTheme = () => {
       const th = theme();
       S.themeId = Play.cfg.theme;
-      if (scene.background) scene.background.dispose();
+      if (scene.background && scene.background.dispose) scene.background.dispose();
       scene.background = skyTexture(th);
       scene.fog = new THREE.Fog(th.sky[1], fogNear, fogFar);
       hemi.intensity = th.dark ? .5 : .62;
