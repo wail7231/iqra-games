@@ -14,7 +14,7 @@ function subScene() {
   const sea = new THREE.Group();
   scene.add(sea);
   const joy = K3.joystick(S);
-  let sub = null, bubbles = [], shots = [], bits = [], weeds = [], rays = [], floaters = [], mode = 'sea', caustic = null;
+  let sub = null, bubbles = [], shots = [], bits = [], weeds = [], rays = [], floaters = [], mode = 'sea', caustic = null, hazards = [], stun = 0;
   const P = S.P = { x: 0, y: 4, z: 10, vx: 0, vy: 0, vz: 0, yaw: Math.PI };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   const ink = el('div', 'k3-ink');
@@ -79,7 +79,7 @@ function subScene() {
     if (sub) scene.remove(sub);
     sub = makeSub(th);
     scene.add(sub);
-    if (S.q) spawnBubbles(bubbles.map(b => ({ a: b.a, x: b.x, y: b.y, z: b.z, state: b.state })));
+    if (S.q) { spawnBubbles(bubbles.map(b => ({ a: b.a, x: b.x, y: b.y, z: b.z, state: b.state }))); spawnHazards(); }
   };
 
   /* ---------- الغواصة (أو المركبة) ---------- */
@@ -129,10 +129,61 @@ function subScene() {
     });
   }
   S.bubbles = () => bubbles;
+  function hazard(kind) {
+    const th = K3.theme(), g = new THREE.Group();
+    if (kind === 'mine') {
+      const body = new THREE.Mesh(new THREE.SphereGeometry(.7, 18, 14), K3.mat(mode === 'space' ? '#5A4A8A' : '#3A3F4A', { flatShading: true })); g.add(body);
+      for (let i = 0; i < 14; i++) {
+        const v = new THREE.Vector3().setFromSphericalCoords(1, Math.acos(1 - 2 * (i + .5) / 14), i * 2.4);
+        const sp = new THREE.Mesh(new THREE.CylinderGeometry(.06, .1, .4, 6), K3.mat('#5A5A66')); sp.position.copy(v.clone().multiplyScalar(.78)); sp.lookAt(v.clone().multiplyScalar(3)); sp.rotateX(Math.PI / 2); g.add(sp);
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(.07, 6, 4), K3.glow(i % 2 ? '#FF5A4A' : '#FFB04A')); cap.position.copy(v.clone().multiplyScalar(.98)); g.add(cap);
+      }
+      const band = new THREE.Mesh(new THREE.TorusGeometry(.71, .05, 6, 24), K3.mat(th.gold)); band.rotation.x = Math.PI / 2; g.add(band);
+      if (mode !== 'space') { const chain = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, 1, 5), K3.mat('#5A5A66')); chain.geometry.translate(0, -.5, 0); chain.position.y = -.7; g.add(chain); g.userData.chain = chain; }
+    } else {
+      const wood = K3.mat(mode === 'space' ? '#8E6CF0' : '#A0703A', { flatShading: true });
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.5, .5, 1.2, 14), wood); barrel.rotation.z = Math.PI / 2; g.add(barrel);
+      for (const x of [-.4, 0, .4]) { const hoop = new THREE.Mesh(new THREE.TorusGeometry(.51, .04, 6, 18), K3.mat('#5A5A66')); hoop.rotation.y = Math.PI / 2; hoop.position.x = x; g.add(hoop); }
+      const mark = new THREE.Mesh(new THREE.CircleGeometry(.2, 12), K3.mat(th.accent)); mark.position.set(0, 0, .51); g.add(mark);
+    }
+    return g;
+  }
+  function spawnHazards() {
+    hazards.forEach(h => sea.remove(h.g)); hazards = [];
+    for (let i = 0; i < 9; i++) {
+      const kind = i % 3 === 2 ? 'barrel' : 'mine';
+      let x, y, z;
+      for (let t = 0; t < 40; t++) { x = K3.rnd(-SB.half + 1, SB.half - 1); y = K3.rnd(2, SB.top - .5); z = K3.rnd(-SB.half + 1, SB.half - 3); if (Math.hypot(x - P.x, z - P.z) > 6 && bubbles.every(b => Math.hypot(b.x - x, b.y - y, b.z - z) > 3.2)) break; }
+      const g = hazard(kind); g.position.set(x, y, z); sea.add(g);
+      hazards.push({ kind, g, x, y, z, ph: Math.random() * 6, dead: 0 });
+    }
+  }
+  S.hazards = () => hazards;
+  function blast(h, byShot) {
+    const pos = h.g.position.clone();
+    h.dead = 6; sea.remove(h.g);
+    FX.play(h.kind === 'mine' ? 'boom' : 'pop');
+    const n = h.kind === 'mine' ? 22 : 12;
+    for (let i = 0; i < n; i++) {
+      const m = i % 3 ? new THREE.Mesh(new THREE.SphereGeometry(K3.rnd(.12, .3), 8, 6), K3.glow(i % 2 ? '#FFB04A' : '#FFF3C4', { transparent: true })) : K3.starMesh(.14, K3.theme().gold, .05);
+      m.position.copy(pos); scene.add(m);
+      const a = Math.random() * 6.28, e = K3.rnd(-1, 1.2);
+      bits.push({ m, v: new THREE.Vector3(Math.cos(a) * Math.cos(e), Math.sin(e), Math.sin(a) * Math.cos(e)).multiplyScalar(K3.rnd(3, 7)), life: 1 });
+    }
+    const ring = new THREE.Mesh(new THREE.SphereGeometry(.6, 16, 12), new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: .5, depthWrite: false }));
+    ring.position.copy(pos); scene.add(ring); bits.push({ m: ring, v: new THREE.Vector3(), life: 1, wave: true });
+    if (!byShot) {
+      /* لمسة اللغم تدفع الغواصة للخلف وتوقفها لحظة (بلا خسارة قلب) */
+      const d = new THREE.Vector3(P.x - pos.x, 0, P.z - pos.z).normalize();
+      P.vx = d.x * 9; P.vz = d.z * 9; stun = .8; shake = .5;
+    }
+  }
+  let shake = 0;
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
     spawnBubbles();
+    spawnHazards();
   };
 
   /* ---------- الإطلاق ---------- */
@@ -141,9 +192,14 @@ function subScene() {
     if (!S.started || Play.finished || S.t - lastShot < .25) return;
     lastShot = S.t;
     const dir = new THREE.Vector3(Math.sin(P.yaw), 0, Math.cos(P.yaw));
+    const from = new THREE.Vector3(P.x, P.y, P.z);
+    const ahead = [...bubbles.filter(b => !b.state).map(b => b.g.position), ...hazards.filter(h => !h.dead).map(h => h.g.position)]
+      .map(p => { const v = p.clone().sub(from), flat = Math.hypot(v.x, v.z); return { v, flat, ang: Math.acos(Math.max(-1, Math.min(1, (v.x * dir.x + v.z * dir.z) / (flat || 1)))) }; })
+      .filter(o => o.flat < 18 && o.ang < .4).sort((a, b) => a.ang * 10 + a.flat - (b.ang * 10 + b.flat))[0];
+    if (ahead) { dir.copy(ahead.v).normalize(); }
     const m = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 8), K3.glow('#FFFFFF'));
     const h = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: K3.theme().gold, transparent: true, opacity: .9, depthWrite: false })); h.scale.set(1.2, 1.2, 1); m.add(h);
-    m.position.set(P.x + dir.x * 1.9, P.y, P.z + dir.z * 1.9);
+    m.position.set(P.x + dir.x * 1.9, P.y + dir.y * 1.9, P.z + dir.z * 1.9);
     scene.add(m);
     shots.push({ m, dir, life: 1.3 });
     FX.play('shoot');
@@ -188,8 +244,16 @@ function subScene() {
     const live = S.started && !Play.finished, k = S.keys;
     const inp = live ? joy.read() : { x: 0, z: 0 };
     /* الحركة بالنسبة للكاميرا (الكاميرا خلف الغواصة دائمًا تقريبًا) */
+    if (stun > 0) { inp.x = 0; inp.z = 0; }
     const tx = inp.x * 5.5, tz = inp.z * 5.5;
-    const ty = live ? ((k.KeyE || k.PageUp || vert.up ? 1 : 0) - (k.KeyQ || k.PageDown || vert.down ? 1 : 0)) * 4 : 0;
+    let ty = live ? ((k.KeyE || k.PageUp || vert.up ? 1 : 0) - (k.KeyQ || k.PageDown || vert.down ? 1 : 0)) * 4 : 0;
+    if (live && !ty) {
+      const fwd = new THREE.Vector3(Math.sin(P.yaw), 0, Math.cos(P.yaw));
+      const near = bubbles.filter(b => !b.state).map(b => { const dx = b.g.position.x - P.x, dz = b.g.position.z - P.z, d = Math.hypot(dx, dz); return { b, d, front: (dx * fwd.x + dz * fwd.z) / (d || 1) }; })
+        .sort((a, b) => (a.d - a.front * 4) - (b.d - b.front * 4))[0];
+      if (near && near.d < 14) ty = Math.max(-2.6, Math.min(2.6, (near.b.g.position.y - P.y) * 1.2));
+    }
+    if (stun > 0) { stun -= dt; inp.x = inp.z = 0; }
     P.vx += (tx - P.vx) * Math.min(1, dt * 3); P.vz += (tz - P.vz) * Math.min(1, dt * 3); P.vy += (ty - P.vy) * Math.min(1, dt * 3);
     P.x = Math.max(-SB.half, Math.min(SB.half, P.x + P.vx * dt));
     P.z = Math.max(-SB.half, Math.min(SB.half, P.z + P.vz * dt));
@@ -215,15 +279,25 @@ function subScene() {
       if (live && !S.answered && !Play.roundDone && g.position.distanceTo(sub.position) < 2.1) popBubble(b);
     });
     if (S.q && live && !S.answered && !Play.roundDone && !bubbles.some(b => !b.state && b.a.ok)) spawnBubbles(mixAnswers(S.q, 6, S.collected).map(a => ({ a })));
+    hazards.forEach(h => {
+      if (h.dead > 0) { h.dead -= dt; if (h.dead <= 0) { h.g = hazard(h.kind); h.x = K3.rnd(-SB.half + 1, SB.half - 1); h.z = K3.rnd(-SB.half + 1, SB.half - 3); h.g.position.set(h.x, h.y, h.z); sea.add(h.g); } return; }
+      h.g.position.y = h.y + Math.sin(S.t * .9 + h.ph) * .35;
+      if (h.kind === 'barrel') { h.g.position.x = h.x + Math.sin(S.t * .35 + h.ph) * 1.8; h.g.rotation.y += dt * .3; h.g.rotation.x = Math.sin(S.t + h.ph) * .2; }
+      else { h.g.rotation.y += dt * .4; if (h.g.userData.chain) h.g.userData.chain.scale.y = h.g.position.y - .7; }
+      if (live && h.g.position.distanceTo(sub.position) < (h.kind === 'mine' ? 1.9 : 1.6)) blast(h, false);
+    });
+    if (shake > 0) shake = Math.max(0, shake - dt);
     /* كرات الضوء */
     shots.forEach(s => {
       s.life -= dt; s.m.position.addScaledVector(s.dir, 16 * dt);
       const b = bubbles.find(b => !b.state && b.g.position.distanceTo(s.m.position) < 1.3);
       if (b && !S.answered && !Play.roundDone) { popBubble(b); s.life = 0; }
+      const hz = s.life > 0 && hazards.find(h => !h.dead && h.g.position.distanceTo(s.m.position) < 1.1);
+      if (hz) { blast(hz, true); s.life = 0; }
       if (s.life <= 0) scene.remove(s.m);
     });
     shots = shots.filter(s => s.life > 0);
-    bits.forEach(b => { b.life -= dt * (b.ink ? .8 : 1.1); b.v.multiplyScalar(1 - dt * 1.5); b.v.y += (b.ink ? 0 : .6) * dt; b.m.position.addScaledVector(b.v, dt); if (b.ink) { b.m.scale.setScalar(1 + (1 - b.life) * 2); b.m.material.opacity = Math.max(0, b.life * .75); } else b.m.scale.setScalar(Math.max(.01, b.life)); if (b.life <= 0) scene.remove(b.m); });
+    bits.forEach(b => { if (b.wave) { b.life -= dt * 2.2; b.m.scale.setScalar(1 + (1 - b.life) * 5); b.m.material.opacity = Math.max(0, b.life * .5); if (b.life <= 0) scene.remove(b.m); return; } b.life -= dt * (b.ink ? .8 : 1.1); b.v.multiplyScalar(1 - dt * 1.5); b.v.y += (b.ink ? 0 : .6) * dt; b.m.position.addScaledVector(b.v, dt); if (b.ink) { b.m.scale.setScalar(1 + (1 - b.life) * 2); b.m.material.opacity = Math.max(0, b.life * .75); } else b.m.scale.setScalar(Math.max(.01, b.life)); if (b.life <= 0) scene.remove(b.m); });
     bits = bits.filter(b => b.life > 0);
     weeds.forEach(w => { w.m.rotation.z = Math.sin(S.t * 1.4 + w.ph) * .25; w.m.rotation.x = Math.cos(S.t * 1.1 + w.ph) * .15; });
     if (caustic) caustic.material.map.offset.set(Math.sin(S.t * .2) * .3, S.t * .02);
@@ -233,6 +307,7 @@ function subScene() {
     camera.position.x += (cx - camera.position.x) * Math.min(1, dt * 3);
     camera.position.y += (cy - camera.position.y) * Math.min(1, dt * 3);
     camera.position.z += (cz - camera.position.z) * Math.min(1, dt * 3);
+    if (shake > 0) camera.position.x += Math.sin(S.t * 70) * shake * .25;
     camera.lookAt(P.x, P.y, P.z - 4);
   };
   camera.position.set(0, 7, 18);
