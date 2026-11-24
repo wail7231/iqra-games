@@ -40,7 +40,7 @@ function shootScene() {
     const berm = new THREE.Mesh(new THREE.CylinderGeometry(14, 16, 5, 32, 1, false, 0, Math.PI), K3.mat(th.ground2, { flatShading: true }));
     berm.rotation.y = Math.PI / 2; berm.position.set(0, 1.5, -24); berm.scale.z = .35; range.add(berm);
     for (let x = -12; x <= 12; x += 1.2) {
-      const post = g.userData.post = new THREE.Mesh(new THREE.BoxGeometry(.18, 2.4, .18), K3.mat('#8A5A30')); post.position.set(x, 1.2, -19); range.add(post);
+      const post = new THREE.Mesh(new THREE.BoxGeometry(.18, 2.4, .18), K3.mat('#8A5A30')); post.position.set(x, 1.2, -19); range.add(post);
     }
     for (const y of [.7, 1.8]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(25, .16, .12), K3.mat('#A0703A')); rail.position.set(0, y, -19); range.add(rail); }
     /* حبل رايات ملوّنة فوق الميدان */
@@ -97,7 +97,7 @@ function shootScene() {
     const rim = new THREE.Mesh(new THREE.TorusGeometry(1.02, .06, 8, 40), K3.mat(th.gold)); face.add(rim);
     face.position.y = 2.1;
     g.add(face);
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(.07, .09, 1.2, 8), K3.mat('#6B4A2E')); post.position.y = .6; g.add(post);
+    const post = g.userData.post = new THREE.Mesh(new THREE.CylinderGeometry(.07, .09, 1.2, 8), K3.mat('#6B4A2E')); post.position.y = .6; g.add(post);
     const foot = new THREE.Mesh(new THREE.CylinderGeometry(.5, .6, .14, 16), K3.mat('#5A5A66')); foot.position.y = .07; g.add(foot);
     const label = K3.plate(a.t, 2.4, .7, { px: 70 }); label.position.set(0, .82, .02); g.add(label);
     const back = new THREE.Mesh(new THREE.PlaneGeometry(2.5, label.geometry.parameters.height + .1), K3.mat(th.wall2)); back.position.set(0, .82, -.01); g.add(back);
