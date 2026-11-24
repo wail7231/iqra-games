@@ -41,10 +41,9 @@ function balloonScene() {
     ground.rotation.x = -Math.PI / 2; ground.position.z = -14; S.env.add(ground);
     /* رقع حقول بألوان قريبة من القالب، بخطوط حراثة */
     const fieldCols = [th.ground2, th.path, K3.col(th.ground).lerp(K3.col('#FFFFFF'), .22).getStyle(), K3.col(th.ground2).lerp(K3.col('#000000'), .08).getStyle()];
-    const rowsTex = (() => { const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, 64, 64); g.fillStyle = 'rgba(0,0,0,.12)'; for (let y = 0; y < 64; y += 8) g.fillRect(0, y, 64, 3); const t = K3.texture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3); return t; })();
     for (let i = 0; i < 30; i++) {
       const w = K3.rnd(6, 13), d = K3.rnd(6, 13);
-      const f = new THREE.Mesh(new THREE.PlaneGeometry(w, d), K3.mat(fieldCols[i % fieldCols.length], { map: rowsTex }));
+      const f = new THREE.Mesh(new THREE.PlaneGeometry(w, d), K3.mat(fieldCols[i % fieldCols.length]));
       f.rotation.x = -Math.PI / 2; f.rotation.z = (Math.floor(Math.random() * 4)) * Math.PI / 2 + K3.rnd(-.05, .05);
       f.position.set(K3.rnd(-60, 60), .02 + i * .001, K3.rnd(-70, 30));
       S.env.add(f);
@@ -195,9 +194,12 @@ function balloonScene() {
     return c;
   }
   S.predict = predict;
+  let lastDrop = -1;
   S.drop = () => {
     if (!S.started) { S.begin(); return; }
-    if (Play.finished || S.answered || Play.roundDone || crates.some(c => !c.landed)) return;
+    /* يُسقط الطالب صناديق متى شاء، مع فاصل قصير جدًا حتى لا تخرج لمستان صندوقين معًا */
+    if (Play.finished || S.t - lastDrop < .3) return;
+    lastDrop = S.t;
     const g = makeCrate(K3.theme());
     const c = { g, x: P.x, y: BL.y - .2, z: P.z, vx: P.vx, vy: 0, vz: P.vz, t: 0, landed: false, life: 2.5 };
     g.position.set(c.x, c.y, c.z); scene.add(g); crates.push(c);
@@ -253,7 +255,7 @@ function balloonScene() {
     /* دائرة الهبوط المتوقّع */
     const pr = predict();
     const over = pads.find(p => !p.state && Math.hypot(p.x - pr.x, p.z - pr.z) < BL.padR + .35);
-    marker.visible = live && !S.answered && !crates.some(c => !c.landed);
+    marker.visible = live && !S.answered;
     marker.position.set(pr.x, .4, pr.z);
     marker.rotation.y += dt * .8;
     marker.scale.setScalar(over ? 1.25 + Math.sin(t * 8) * .08 : 1);
