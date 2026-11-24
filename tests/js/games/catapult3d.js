@@ -16,8 +16,8 @@ function catapultScene() {
   let towers = [], blocks = [], stone = null, cat = null, dots = [], dust = [];
   const A = { yaw: 0, power: 0, pulling: false, sx: 0, sy: 0, yaw0: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
-  camera.position.set(0, 6.2, 16.5);
-  camera.lookAt(0, 2, -6);
+  camera.position.set(0, 5.4, 14.2);
+  camera.lookAt(0, 2.2, -8);
 
   S.onTheme = th => {
     K3.clear(field);
@@ -82,9 +82,9 @@ function catapultScene() {
       }
       const top = .9 * levels;
       const flag = new THREE.Group();
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 2.3, 8), K3.mat('#5A4632')); pole.position.y = 1.15; flag.add(pole);
-      const sign = K3.plate(it.a.t, 2.4, .8, { px: 70 }); sign.position.set(0, 1.8, .05); flag.add(sign);
-      const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.mat(th.gold)); ball.position.y = 2.35; flag.add(ball);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 2.6, 8), K3.mat("#5A4632")); pole.position.y = 1.3; flag.add(pole);
+      const sign = K3.plate(it.a.t, 3.1, 1, { px: 76 }); sign.position.set(0, 1.85, .05); flag.add(sign);
+      const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.mat(th.gold)); ball.position.y = 2.65; flag.add(ball);
       flag.position.set(x, top, z);
       field.add(flag);
       towers.push({ a: it.a, x, z, top, blocks: tb, flag, sign, state: it.state || '', fly: 0 });
