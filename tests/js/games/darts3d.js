@@ -6,14 +6,15 @@
 'use strict';
 
 let BOW = null;
-const BW = { eye: 1.7, speed: 42, g: 5, rMin: 13, rMax: 19 };
+/* سرعة السهم والجاذبية حقيقيتان تقريبًا: كلما بعُد الهدف نزل السهم أكثر، فيرفع اللاعب تصويبه قليلًا */
+const BW = { eye: 1.7, speed: 33, g: 9.8, rMin: 12, rMax: 19, heights: [0, 2.6, 5.2, 8, 1.3, 6.5] };
 
 function bowScene() {
   const S = K3.create({ fov: 62, fogNear: 30, fogFar: 85, ratio: .6, maxH: 540 });
   const { scene, camera } = S;
   const yard = new THREE.Group();
   scene.add(yard);
-  let targets = [], flying = [], stuck = [], bits = [], bow = null, nocked = null, string = null;
+  let targets = [], flying = [], stuck = [], bits = [], bow = null, nocked = null, string = null, stands = [];
   const look = { yaw: 0, pitch: -.02 };
   const draw = { k: 0, state: 'ready', t: 0 };
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
@@ -111,7 +112,7 @@ function bowScene() {
     K3.horizon(S, th, { radius: 70 });
     K3.weather(S, th, { w: 30, h: 12, d: 60, cz: 0 });
     makeBow(th);
-    if (S.q && targets.length) layout(targets.map(t => ({ a: t.a, state: t.state, ang: t.ang, r: t.r })));
+    if (S.q && targets.length) layout(targets.map(t => ({ a: t.a, state: t.state, ang: t.ang, r: t.r, h: t.h })));
   };
 
   /* ---------- الأهداف القشّية ---------- */
@@ -155,9 +156,35 @@ function bowScene() {
     g.userData = { face, label, glowRing };
     return g;
   }
+  function stand(h, th) {
+    const g = new THREE.Group(); g.userData.h = h;
+    if (h < 2) {
+      for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const p = new THREE.Mesh(new THREE.BoxGeometry(.18, h, .18), K3.mat('#7A5230')); p.position.set(x * 1.1, h / 2, z * .9); g.add(p); }
+      for (const z of [-.9, .9]) { const br = new THREE.Mesh(new THREE.BoxGeometry(2.4, .1, .1), K3.mat('#8A5A30')); br.position.set(0, h * .5, z); br.rotation.z = .4; g.add(br); }
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(2.6, .16, 2.2), K3.mat('#A0703A')); deck.position.y = h; g.add(deck);
+      return g;
+    }
+    const stone = K3.mat(th.dark ? '#5A6A9A' : '#B9AE9C', { flatShading: true });
+    const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.85, h, 12), stone); tower.position.y = h / 2; g.add(tower);
+    for (let y = 1.2; y < h - .4; y += 1.3) { const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.62 + (h - y) * .02, 1.62 + (h - y) * .02, .12, 12), K3.mat(th.dark ? '#3A4A80' : '#8F8576', { flatShading: true })); ring.position.y = y; g.add(ring); }
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.7, .3, 12), K3.mat(th.wall2, { flatShading: true })); top.position.y = h; g.add(top);
+    for (let i = 0; i < 10; i++) { if (i === 0 || i === 5) continue; const a = i / 10 * Math.PI * 2; const c = new THREE.Mesh(new THREE.BoxGeometry(.42, .42, .3), stone); c.position.set(Math.cos(a) * 1.75, h + .36, Math.sin(a) * 1.75); c.rotation.y = -a; g.add(c); }
+    /* نوافذ ضيقة وسلّم خشبي على الجدار وراية صغيرة */
+    for (let y = 1.8; y < h - .8; y += 2.2) { const w = new THREE.Mesh(new THREE.PlaneGeometry(.22, .5), K3.mat('#2A1E14')); w.position.set(0, y, 1.72); g.add(w); }
+    const ladder = new THREE.Group();
+    for (const x of [-.25, .25]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(.06, h, .06), K3.mat('#7A5230')); rail.position.set(x, h / 2, 0); ladder.add(rail); }
+    for (let y = .3; y < h; y += .4) { const rung = new THREE.Mesh(new THREE.BoxGeometry(.5, .05, .05), K3.mat('#8A5A30')); rung.position.y = y; ladder.add(rung); }
+    ladder.position.set(1.85, 0, 0); ladder.rotation.y = Math.PI / 2; g.add(ladder);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, 1.6, 6), K3.mat('#5A4632')); pole.position.set(-1.5, h + .8, -.6); g.add(pole);
+    const flag = new THREE.Mesh(new THREE.PlaneGeometry(.7, .4), K3.mat(th.accent, { side: THREE.DoubleSide })); flag.position.set(-1.15, h + 1.4, -.6); g.add(flag);
+    S.fx.push((dt, t) => { flag.rotation.y = Math.sin(t * 3 + h) * .3; });
+    return g;
+  }
   function layout(keep) {
     const th = K3.theme();
     targets.forEach(t => yard.remove(t.g));
+    stands.forEach(m => yard.remove(m)); stands = [];
+    const hs = shuffle(BW.heights.slice());
     targets = [];
     const list = keep || mixAnswers(S.q, 6, []).map(a => ({ a }));
     const n = list.length, off = look.yaw + K3.rnd(-.5, .5);
@@ -166,11 +193,14 @@ function bowScene() {
       /* موزّعة على الدائرة كلها، والفراغ بين كل هدفين واسع */
       const ang = it.ang != null ? it.ang : off + k / n * Math.PI * 2 + K3.rnd(-.18, .18);
       const r = it.r || K3.rnd(BW.rMin, BW.rMax);
+      /* ارتفاعات مختلفة: هدف على الأرض، وآخر على سقالة، وآخر فوق برج عالٍ */
+      const h = it.h != null ? it.h : hs[k % hs.length];
       const g = makeTarget(it.a, th);
-      g.position.set(-Math.sin(ang) * r, 0, -Math.cos(ang) * r);
-      g.lookAt(0, 0, 0);
+      g.position.set(-Math.sin(ang) * r, h, -Math.cos(ang) * r);
+      g.lookAt(0, h, 0);
       yard.add(g);
-      const t = { a: it.a, g, ang, r, state: it.state || '', t: 0, rise: keep ? 1 : 0 };
+      if (h > 0) { const st = stand(h, th); st.position.set(g.position.x, 0, g.position.z); st.rotation.y = g.rotation.y; yard.add(st); stands.push(st); }
+      const t = { a: it.a, g, ang, r, h, state: it.state || '', t: 0, rise: keep ? 1 : 0 };
       if (t.state === 'good') K3.tint(g, '#4CAF50', .45);
       if (t.state === 'bad') K3.tint(g, '#C0392B', .5);
       targets.push(t);
@@ -198,7 +228,7 @@ function bowScene() {
     const m = arrowMesh(th);
     const p = new THREE.Vector3(.12, -.12, -.6); camera.localToWorld(p);
     m.position.copy(p);
-    const v = dir.multiplyScalar(BW.speed); v.y += .9;
+    const v = dir.multiplyScalar(BW.speed);
     m.lookAt(p.clone().add(v));
     scene.add(m);
     flying.push({ m, v, life: 3 });
@@ -246,7 +276,7 @@ function bowScene() {
       else if (phase === 'move' && e && last) {
         const dx = e.clientX - last.x, dy = e.clientY - last.y;
         moved += Math.abs(dx) + Math.abs(dy);
-        look.yaw += dx * .0055; look.pitch = Math.max(-.55, Math.min(.6, look.pitch + dy * .004));
+        look.yaw += dx * .0055; look.pitch = Math.max(-.55, Math.min(.85, look.pitch + dy * .004));
         last = { x: e.clientX, y: e.clientY };
       } else if (phase === 'up') last = null;
     },
@@ -261,7 +291,7 @@ function bowScene() {
     const k = S.keys, live = S.started && !Play.finished;
     if (live) {
       look.yaw += ((k.ArrowLeft || k.KeyA ? 1 : 0) - (k.ArrowRight || k.KeyD ? 1 : 0)) * dt * 1.9;
-      look.pitch = Math.max(-.55, Math.min(.6, look.pitch + ((k.ArrowUp || k.KeyW ? 1 : 0) - (k.ArrowDown || k.KeyS ? 1 : 0)) * dt * 1.1));
+      look.pitch = Math.max(-.55, Math.min(.85, look.pitch + ((k.ArrowUp || k.KeyW ? 1 : 0) - (k.ArrowDown || k.KeyS ? 1 : 0)) * dt * 1.1));
     } else look.yaw += dt * .06;
     camera.rotation.y = look.yaw; camera.rotation.x = look.pitch;
     /* شدّ الوتر ثم الإفلات ثم سهم جديد */
@@ -285,6 +315,7 @@ function bowScene() {
           const l = t.g.userData.face.worldToLocal(tmp.clone());
           if (l.z < .25 && l.z > -.3 && Math.hypot(l.x, l.y) < 1.1) { stick(f, t, tmp.clone()); hit(t, tmp.clone()); f.life = -1; break; }
         }
+        if (f.life > 0) for (const st of stands) { const dx = tmp.x - st.position.x, dz = tmp.z - st.position.z; if (Math.hypot(dx, dz) < 1.8 && tmp.y < st.userData.h) { stick(f, null); puff(tmp, '#B9AE9C', 6); FX.play('tick'); f.life = -1; break; } }
         if (f.life > 0 && tmp.y < .02) { tmp.y = .02; stick(f, null); puff(tmp, '#C9B48A', 6); FX.play('tick'); f.life = -1; }
       }
       if (f.life > 0) f.m.lookAt(tmp.copy(f.m.position).add(f.v));
@@ -296,7 +327,7 @@ function bowScene() {
     targets.forEach(t => {
       const g = t.g, u = g.userData;
       t.rise = Math.min(1, t.rise + dt * 1.6);
-      g.position.y = -4 * (1 - K3.ease(t.rise));
+      g.position.y = t.h - 4 * (1 - K3.ease(t.rise));
       if (t.state === 'bad') { t.t += dt; u.face.position.x = Math.sin(S.t * 50) * .07 * Math.max(0, 1 - t.t * 2); }
       if (t.state === 'good') { t.t += dt; u.face.rotation.z = Math.sin(t.t * 8) * .1 * Math.max(0, 1 - t.t); }
       u.glowRing.material.opacity = t.state ? 0 : .25 + Math.sin(S.t * 3 + t.ang) * .12;
