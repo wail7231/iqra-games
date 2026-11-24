@@ -16,7 +16,7 @@ const LH_WATER = {
 const lhWave = (x, z, t) => Math.sin(x * .22 + t * 1.1) * .2 + Math.cos(z * .27 + t * .85) * .17 + Math.sin((x + z) * .13 + t * .55) * .1;
 
 function lighthouseScene() {
-  const S = K3.create({ fov: 52, fogNear: 45, fogFar: 115, ratio: .6, maxH: 540 });
+  const S = K3.create({ fov: 52, fogNear: 62, fogFar: 140, ratio: .6, maxH: 540 });
   const { scene, camera } = S;
   let waterGeo = null, beam = null, beamGlow = null, lamp = null, ships = [], bits = [], wakes = [];
   const B = { yaw: .1, target: null, flash: 0, pending: null, cool: 0 };
