@@ -122,7 +122,8 @@ const K3 = (() => {
     const start = el('div', 'run-start', '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>');
     wrap.append(cv, start);
     const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    let pr = Math.min(1.75, window.devicePixelRatio || 1);
+    renderer.setPixelRatio(pr);
     /* ظلال حقيقية ناعمة من الشمس */
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -132,7 +133,10 @@ const K3 = (() => {
     const sun = new THREE.DirectionalLight(0xffffff, .58);
     sun.position.set(-8, 14, 10);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(1536, 1536);
+    /* الأجهزة الضعيفة (ذاكرة أو أنوية قليلة) تبدأ بجودة أخف */
+    const weak = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+    sun.shadow.mapSize.set(weak ? 1024 : 1536, weak ? 1024 : 1536);
+    if (weak) { pr = Math.min(pr, 1.25); renderer.setPixelRatio(pr); }
     Object.assign(sun.shadow.camera, { left: -24, right: 24, top: 24, bottom: -24, near: 1, far: 90 });
     sun.shadow.bias = -.0006;
     sun.shadow.normalBias = .03;
@@ -185,12 +189,24 @@ const K3 = (() => {
       const p = v.clone().project(camera), r = cv.getBoundingClientRect();
       return { x: r.left + (p.x + 1) / 2 * r.width, y: r.top + (1 - p.y) / 2 * r.height };
     };
-    const sunDir = new THREE.Vector3(), sunFocus = new THREE.Vector3();
+    const sunDir = new THREE.Vector3(), sunFocus = new THREE.Vector3(), perf = { n: 0, sum: 0 };
+    S.onScreen = true;
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => { S.onScreen = es[0].isIntersecting; }).observe(wrap);
     let last = performance.now();
     function frame(now) {
       if (!wrap.isConnected) { renderer.dispose(); return; }
-      const dt = Math.min(.04, (now - last) / 1000);
+      const raw = now - last, dt = Math.min(.04, raw / 1000);
       last = now;
+      /* اللعبة خارج الشاشة أو الصفحة مخفية: لا رسم (توفير للبطارية والمعالج) */
+      if (document.hidden || !S.onScreen) { requestAnimationFrame(frame); return; }
+      /* جودة تتكيف مع الجهاز: إن بطؤ الرسم نخفّض الدقة، ثم الظلال */
+      perf.n++; perf.sum += raw;
+      if (perf.n >= 90) {
+        const avg = perf.sum / perf.n;
+        perf.n = perf.sum = 0;
+        if (avg > 24 && pr > 1) { pr = Math.max(1, pr - .25); renderer.setPixelRatio(pr); S.size(); }
+        else if (avg > 28 && renderer.shadowMap.enabled) { renderer.shadowMap.enabled = false; sun.castShadow = false; scene.traverse(m => { if (m.material) [].concat(m.material).forEach(x => { x.needsUpdate = true; }); }); }
+      }
       S.t += dt;
       if (S.themeId !== Play.cfg.theme) S.applyTheme();
       if (S.onFrame) S.onFrame(dt);
