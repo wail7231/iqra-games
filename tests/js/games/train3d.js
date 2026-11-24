@@ -102,8 +102,10 @@ function trainScene() {
     const g = new THREE.Group();
     const hill = new THREE.Mesh(new THREE.BoxGeometry(14, 5.5, 3), K3.mat(th.ground2, { flatShading: true }));
     hill.position.y = 2.75; g.add(hill);
-    const top = new THREE.Mesh(new THREE.CylinderGeometry(7.6, 7.6, 3, 24, 1, false, 0, Math.PI), K3.mat(th.ground2, { flatShading: true }));
-    top.rotation.set(Math.PI / 2, 0, Math.PI / 2); top.position.y = 5.5; top.scale.set(.45, 1, 1); g.add(top);
+    /* قمة التل: نصف أسطوانة مستلقية بعرض التل، فيبدو كتلّة مستديرة فوق الأنفاق */
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 14, 24, 1, false, 0, Math.PI), K3.mat(th.ground2, { flatShading: true }));
+    top.rotation.set(0, 0, Math.PI / 2); top.rotation.order = 'ZXY'; top.position.y = 5.5; g.add(top);
+    for (const sx of [-1, 1]) { const shoulder = new THREE.Mesh(new THREE.DodecahedronGeometry(2.6, 0), K3.mat(th.ground2, { flatShading: true })); shoulder.position.set(sx * 7.6, 2.2, 0); shoulder.scale.set(1, 1.1, .7); g.add(shoulder); }
     K3.scatter(g, th, { x0: -6.5, x1: 6.5, z0: -1, z1: 1, y: 5.6, count: 60 });
     const portals = [];
     [0, 1, 2].forEach(l => {
@@ -215,9 +217,9 @@ function trainScene() {
     if (live && Math.random() < dt * (6 + v * .6)) {
       const m = new THREE.Mesh(new THREE.SphereGeometry(.28, 8, 6), new THREE.MeshBasicMaterial({ color: '#EDEDED', transparent: true, opacity: .75 }));
       m.position.set(loco.position.x, 2.8, -1.3); scene.add(m);
-      smoke.push({ m, life: 1, v: new THREE.Vector3(K3.rnd(-.3, .3), 1.6, v * .9) });
+      smoke.push({ m, life: 1, v: new THREE.Vector3(K3.rnd(-.3, .3), 2.4, v * .5) });
     }
-    smoke.forEach(s => { s.life -= dt * .7; s.m.position.addScaledVector(s.v, dt); s.m.scale.setScalar(1 + (1 - s.life) * 2.4); s.m.material.opacity = Math.max(0, s.life * .7); if (s.life <= 0) scene.remove(s.m); });
+    smoke.forEach(s => { s.life -= dt * 1.1; s.m.position.addScaledVector(s.v, dt); s.m.scale.setScalar(.7 + (1 - s.life) * 1.5); s.m.material.opacity = Math.max(0, s.life * .45); if (s.life <= 0) scene.remove(s.m); });
     smoke = smoke.filter(s => s.life > 0);
     bits.forEach(b => { b.life -= dt * 1.2; b.v.y -= 10 * dt; b.m.position.addScaledVector(b.v, dt); b.m.scale.setScalar(Math.max(.01, b.life)); if (b.life <= 0) scene.remove(b.m); });
     bits = bits.filter(b => b.life > 0);

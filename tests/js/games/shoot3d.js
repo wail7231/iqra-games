@@ -40,7 +40,7 @@ function shootScene() {
     const berm = new THREE.Mesh(new THREE.CylinderGeometry(14, 16, 5, 32, 1, false, 0, Math.PI), K3.mat(th.ground2, { flatShading: true }));
     berm.rotation.y = Math.PI / 2; berm.position.set(0, 1.5, -24); berm.scale.z = .35; range.add(berm);
     for (let x = -12; x <= 12; x += 1.2) {
-      const post = new THREE.Mesh(new THREE.BoxGeometry(.18, 2.4, .18), K3.mat('#8A5A30')); post.position.set(x, 1.2, -19); range.add(post);
+      const post = g.userData.post = new THREE.Mesh(new THREE.BoxGeometry(.18, 2.4, .18), K3.mat('#8A5A30')); post.position.set(x, 1.2, -19); range.add(post);
     }
     for (const y of [.7, 1.8]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(25, .16, .12), K3.mat('#A0703A')); rail.position.set(0, y, -19); range.add(rail); }
     /* حبل رايات ملوّنة فوق الميدان */
@@ -101,7 +101,7 @@ function shootScene() {
     const foot = new THREE.Mesh(new THREE.CylinderGeometry(.5, .6, .14, 16), K3.mat('#5A5A66')); foot.position.y = .07; g.add(foot);
     const label = K3.plate(a.t, 2.4, .7, { px: 70 }); label.position.set(0, .82, .02); g.add(label);
     const back = new THREE.Mesh(new THREE.PlaneGeometry(2.5, label.geometry.parameters.height + .1), K3.mat(th.wall2)); back.position.set(0, .82, -.01); g.add(back);
-    g.userData = { face, label };
+    g.userData.face = face; g.userData.label = label;
     return g;
   }
   function layoutTargets(keep) {
@@ -118,7 +118,7 @@ function shootScene() {
       const z = row ? -13 : -7;
       const g = makeTarget(it.a, th);
       g.position.set(x, 0, z);
-      if (row) { g.userData.face.position.y = 3.3; g.children.find(c => c.geometry && c.geometry.type === 'CylinderGeometry' && c.position.y === .6).scale.y = 2.6; g.children.find(c => c.geometry && c.geometry.type === 'CylinderGeometry' && c.position.y === .6).position.y = 1.5; }
+      if (row) { g.userData.face.position.y = 3.3; g.userData.post.scale.y = 2.6; g.userData.post.position.y = 1.56; }
       range.add(g);
       const motion = ['still', 'slide', 'pop', 'spin'][Math.floor(Math.random() * 4)];
       targets.push({ a: it.a, g, x, z, motion, ph: Math.random() * 6, amp: K3.rnd(.8, 1.4), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
