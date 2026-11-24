@@ -16,7 +16,10 @@ function whackScene() {
   scene.add(field);
   S.holes = [];
   const sparks = [];
-  let mallet = null, swingT = -1, aim = new THREE.Vector3(0, 1.45, 2), aimShown = false;
+  let mallet = null, swingT = -1, aim = new THREE.Vector3(0, 1.45, 2), aimShown = false, stuckH = null;
+  /* مدى الالتصاق والضرب: الدائرة تلتصق بالأنبوب القريب وتبقى عليه قليلًا قبل أن تفلت */
+  const SNAP_IN = 2.1, SNAP_OUT = 2.6, HIT_R = 2.3;
+  const live = h => h.up >= 0 && h.pop && !h.state && h.t > .2;
 
   camera.position.set(0, 13.2, 12);
   camera.lookAt(0, 0, -1);
@@ -181,13 +184,16 @@ function whackScene() {
   S.cv.addEventListener('pointerdown', e => {
     e.preventDefault();
     if (!S.started) return;
-    const p = K3.groundPoint(S, e, .9);
+    const p = K3.groundPoint(S, e, 1.3);
     if (!p) return;
     aim.set(p.x, 1.7, p.z); aimShown = true; swingT = 0;
-    /* الشكل المضروب: أقربها إلى نقطة الضغطة (مع ارتفاعه) */
-    const cand = S.holes.filter(h => h.up >= 0 && h.pop && !h.state && h.t > .25)
-      .map(h => ({ h, d: Math.hypot(h.x - p.x, h.z - p.z) }))
-      .filter(o => o.d < 1.7).sort((a, b) => a.d - b.d)[0];
+    /* الشكل المضروب: ما لمسته الضغطة مباشرة (الشكل أو لافتته)، وإلا الأنبوب الملتصق به، وإلا الأقرب ضمن مدى واسع */
+    const ups = S.holes.filter(live);
+    const ray = K3.pick(S, e, ups.map(h => h.pop));
+    let cand = null;
+    if (ray) { const h = ups.find(h => { let o = ray.object; while (o && o !== h.pop) o = o.parent; return o === h.pop; }); if (h) cand = { h }; }
+    if (!cand && stuckH && live(stuckH) && Math.hypot(stuckH.x - p.x, stuckH.z - p.z) < SNAP_OUT) cand = { h: stuckH };
+    if (!cand) cand = ups.map(h => ({ h, d: Math.hypot(h.x - p.x, h.z - p.z) })).filter(o => o.d < HIT_R).sort((a, b) => a.d - b.d)[0];
     if (cand) aim.set(cand.h.x, 1.7, cand.h.z);
     if (cand && S.onHit) setTimeout(() => S.onHit(cand.h), HIT_MS);
     else FX.play('tick');
@@ -215,7 +221,8 @@ function whackScene() {
     if (mallet) {
       mallet.visible = aimShown && S.started;
       /* اليد إلى يمين الهدف بطول المقبض، فيقع وجه الرأس على أعلى الشكل تمامًا عند الضربة */
-      const want = new THREE.Vector3(aim.x + HANDLE, aim.y + HEAD_LEN / 2 + .25, aim.z + .15);
+      const ax = stuckH && swingT < 0 ? aim.x + (stuckH.x - aim.x) * .35 : aim.x, az = stuckH && swingT < 0 ? aim.z + (stuckH.z - aim.z) * .35 : aim.z;
+      const want = new THREE.Vector3(ax + HANDLE, aim.y + HEAD_LEN / 2 + .25, az + .15);
       mallet.position.lerp(want, Math.min(1, dt * (swingT >= 0 ? 30 : 14)));
       const { arm, headG, shadow: msh } = mallet.userData;
       if (swingT >= 0) {
@@ -239,7 +246,10 @@ function whackScene() {
       /* دائرة الهدف: تلتصق بأقرب أنبوب ظاهر شكله، وإلا تبقى تحت المطرقة */
       const tg = mallet.userData.target, near = S.holes.map(h => ({ h, d: Math.hypot(h.x - aim.x, h.z - aim.z) })).sort((a, b) => a.d - b.d)[0];
       tg.visible = mallet.visible;
-      const snap = near && near.d < 1.9;
+      if (stuckH && Math.hypot(stuckH.x - aim.x, stuckH.z - aim.z) > SNAP_OUT) stuckH = null;
+      if (!stuckH && near && near.d < SNAP_IN) stuckH = near.h;
+      const snap = !!stuckH;
+      if (snap) near.h = stuckH;
       tg.position.lerp(new THREE.Vector3(snap ? near.h.x : aim.x, .82, snap ? near.h.z : aim.z), Math.min(1, dt * 16));
       tg.rotation.z += dt * 1.2;
       tg.scale.setScalar((snap && near.h.pop && !near.h.state ? 1.08 : .95) + Math.sin(S.t * 6) * .04);
