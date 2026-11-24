@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwuow2ss55y",
+  "type": "sub3d",
+  "name": "اركان الايمان",
+  "desc": "",
+  "count": 1,
+  "updated": 1795564452445
+ },
+ {
   "id": "gmwlddd69pti",
   "type": "maze3d",
   "name": "أركان الايمان",
