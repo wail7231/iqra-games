@@ -95,10 +95,12 @@ function catapultScene() {
       const target = new THREE.Mesh(new THREE.RingGeometry(1.75, 1.95, 32), K3.glow(th.gold, { transparent: true, opacity: .5 })); target.rotation.x = -Math.PI / 2; target.position.set(x, .04, z); field.add(target);
       decor.push(plinth, target);
       const flag = new THREE.Group();
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 2.6, 8), K3.mat("#5A4632")); pole.position.y = 1.3; flag.add(pole);
-      const sign = K3.plate(it.a.t, 3.1, 1, { px: 76 }); sign.position.set(0, 1.85, .05); flag.add(sign);
-      const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.mat(th.gold)); ball.position.y = 2.65; flag.add(ball);
-      const pen = new THREE.Mesh(new THREE.ConeGeometry(.22, .7, 3), K3.mat(th.accent, { flatShading: true })); pen.rotation.z = -Math.PI / 2; pen.position.set(.38, 2.45, 0); flag.add(pen);
+      /* العمود خلف اللافتة، والراية في أعلاه فوق اللافتة، فلا يغطي شيء الكتابة */
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 3.7, 8), K3.mat("#5A4632")); pole.position.set(0, 1.85, -.18); flag.add(pole);
+      const sign = K3.plate(it.a.t, 3.1, 1, { px: 76 }); sign.position.set(0, 1.55, .2); sign.renderOrder = 3; flag.add(sign);
+      const board = new THREE.Mesh(new THREE.BoxGeometry(3.25, sign.geometry.parameters.height + .16, .08), K3.mat("#8A5A30")); board.position.set(0, 1.55, .1); flag.add(board);
+      const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.mat(th.gold)); ball.position.set(0, 3.75, -.18); flag.add(ball);
+      const pen = new THREE.Mesh(new THREE.ConeGeometry(.24, .8, 3), K3.mat(th.accent, { flatShading: true })); pen.rotation.z = -Math.PI / 2; pen.position.set(.42, 3.45, -.18); flag.add(pen);
       flag.position.set(x, top, z);
       field.add(flag);
       towers.push({ a: it.a, x, z, top, blocks: tb, flag, sign, state: it.state || '', fly: 0 });
