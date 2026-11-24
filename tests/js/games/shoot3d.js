@@ -1,5 +1,6 @@
 /* ميدان الرماية (ثلاثي الأبعاد، منظور الشخص الأول) — أهداف دائرية ملوّنة في ميدان، وعلى كل هدف إجابة.
-   بعضها ينزلق يمينًا ويسارًا على سكة، وبعضها يطلع وينزل، وبعضها يدور ببطء.
+   كل الأهداف تطلع وتنزل من صناديقها بإيقاعات مختلفة، ولافتة الإجابة ثابتة على واجهة الصندوق.
+   البندقية تلتفت نحو علامة التصويب، ومع كل طلقة ومضة من فوهتها ودخان خفيف.
    الفأرة (أو الإصبع) تحرّك علامة التصويب، والنقرة (أو رفع الإصبع) تطلق كرة ضوء.
    الهدف الصحيح ينقلب ويتطاير نجومًا (نقطة إن كان أول اختيار)، والخاطئ يحمرّ ويهتز ويُنقص قلبًا.
    كل سؤال يأتي بترتيب أهداف جديد. الشكل يتبع قالب الشكل. */
@@ -12,7 +13,8 @@ function shootScene() {
   const { scene, camera } = S;
   const range = new THREE.Group();
   scene.add(range);
-  let targets = [], shots = [], bits = [], gun = null, recoil = 0;
+  let targets = [], shots = [], bits = [], gun = null, recoil = 0, muzzle = null, flashT = 0;
+  const aim = { yaw: 0, pitch: 0, ty: 0, tp: 0 };
   const aimPt = new THREE.Vector3(0, 2, -10);
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   camera.position.set(0, 2.1, 8.5);
@@ -73,6 +75,17 @@ function shootScene() {
     const glass = new THREE.Mesh(new THREE.BoxGeometry(.16, .12, .4), K3.glow(th.gold)); glass.position.set(0, .2, -.1); gun.add(glass);
     const stock = new THREE.Mesh(new THREE.BoxGeometry(.26, .26, .5), K3.mat('#8A5A30')); stock.position.set(0, -.08, .8); gun.add(stock);
     const sight = new THREE.Mesh(new THREE.BoxGeometry(.04, .1, .04), K3.mat('#2A2A30')); sight.position.set(0, .22, -1.3); gun.add(sight);
+    /* ومضة الفوهة: نجمة ضوء ومخروط لهب وضوء نقطي، كلها مخفية حتى الإطلاق */
+    muzzle = new THREE.Group(); muzzle.position.set(0, .06, -1.5); gun.add(muzzle);
+    const fc = document.createElement('canvas'); fc.width = fc.height = 128; const fg = fc.getContext('2d');
+    const rg = fg.createRadialGradient(64, 64, 4, 64, 64, 60); rg.addColorStop(0, 'rgba(255,255,240,1)'); rg.addColorStop(.35, 'rgba(255,214,110,.9)'); rg.addColorStop(1, 'rgba(255,140,40,0)');
+    fg.fillStyle = rg; fg.beginPath(); for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = i % 2 ? 22 : 62; fg.lineTo(64 + Math.cos(a) * r, 64 + Math.sin(a) * r); } fg.fill();
+    const star = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.texture(fc), transparent: true, depthWrite: false, depthTest: false })); star.scale.set(.9, .9, 1); muzzle.add(star);
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(.16, .7, 10, 1, true), new THREE.MeshBasicMaterial({ color: '#FFE29A', transparent: true, opacity: .8, depthWrite: false, side: THREE.DoubleSide })); cone.rotation.x = -Math.PI / 2; cone.position.z = -.35; muzzle.add(cone);
+    const ml = new THREE.PointLight('#FFD27A', 0, 6); muzzle.add(ml);
+    muzzle.userData = { star, cone, ml };
+    muzzle.visible = false;
+    gun.rotation.order = 'YXZ';
     gun.scale.setScalar(.6);
     gun.position.set(.62, -.5, -1.6);
     camera.add(gun);
@@ -95,12 +108,17 @@ function shootScene() {
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .14, 40), [K3.mat('#8A5A30'), K3.mat('#FFFFFF', { map: targetTex(th) }), K3.mat('#8A5A30')]);
     disc.rotation.x = Math.PI / 2; face.add(disc);
     const rim = new THREE.Mesh(new THREE.TorusGeometry(1.02, .06, 8, 40), K3.mat(th.gold)); face.add(rim);
-    face.position.y = 2.1;
+    /* الهدف مثبّت على عمود يخرج من صندوق خشبي، فيطلع وينزل منه */
+    const stick = new THREE.Mesh(new THREE.CylinderGeometry(.07, .07, 2.4, 8), K3.mat('#6B4A2E')); stick.position.set(0, -1.25, -.1); face.add(stick);
+    const bolt = new THREE.Mesh(new THREE.SphereGeometry(.09, 10, 8), K3.mat('#9AA0AA')); bolt.position.set(0, 0, -.12); face.add(bolt);
+    face.position.y = 2.3;
     g.add(face);
-    const post = g.userData.post = new THREE.Mesh(new THREE.CylinderGeometry(.07, .09, 1.2, 8), K3.mat('#6B4A2E')); post.position.y = .6; g.add(post);
-    const foot = new THREE.Mesh(new THREE.CylinderGeometry(.5, .6, .14, 16), K3.mat('#5A5A66')); foot.position.y = .07; g.add(foot);
-    const label = K3.plate(a.t, 2.4, .7, { px: 70 }); label.position.set(0, .82, .02); g.add(label);
-    const back = new THREE.Mesh(new THREE.PlaneGeometry(2.5, label.geometry.parameters.height + .1), K3.mat(th.wall2)); back.position.set(0, .82, -.01); g.add(back);
+    /* صندوق القاعدة: خشب بأشرطة معدنية، ولافتة الإجابة على واجهته الأمامية (أمام العمود دائمًا) */
+    const box = new THREE.Mesh(new THREE.BoxGeometry(2.7, 1.1, .7), K3.mat('#A0703A')); box.position.set(0, .55, 0); g.add(box);
+    for (const y of [.12, .98]) { const band = new THREE.Mesh(new THREE.BoxGeometry(2.74, .08, .74), K3.mat('#5A5A66')); band.position.set(0, y, 0); g.add(band); }
+    for (const sx of [-1, 1]) { const corner = new THREE.Mesh(new THREE.BoxGeometry(.1, 1.12, .74), K3.mat('#7A5230')); corner.position.set(sx * 1.32, .55, 0); g.add(corner); }
+    const slot = new THREE.Mesh(new THREE.BoxGeometry(.5, .06, .3), K3.mat('#2A1E14')); slot.position.set(0, 1.11, -.05); g.add(slot);
+    const label = K3.plate(a.t, 2.4, .7, { px: 70 }); label.position.set(0, .56, .37); label.renderOrder = 3; g.add(label);
     g.userData.face = face; g.userData.label = label;
     return g;
   }
@@ -118,10 +136,9 @@ function shootScene() {
       const z = row ? -13 : -7;
       const g = makeTarget(it.a, th);
       g.position.set(x, 0, z);
-      if (row) { g.userData.face.position.y = 3.3; g.userData.post.scale.y = 2.6; g.userData.post.position.y = 1.56; }
       range.add(g);
-      const motion = ['still', 'slide', 'pop', 'spin'][Math.floor(Math.random() * 4)];
-      targets.push({ a: it.a, g, x, z, motion, ph: Math.random() * 6, amp: K3.rnd(.8, 1.4), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
+      /* كل الأهداف تطلع وتنزل، بسرعات ومراحل مختلفة حتى لا تتحرك معًا */
+      targets.push({ a: it.a, g, x, z, base: row ? 3 : 2.3, ph: k * 1.9 + Math.random(), sp: K3.rnd(.9, 1.5), amp: K3.rnd(.7, 1.05), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
     });
   }
   S.targets = () => targets;
@@ -138,7 +155,16 @@ function shootScene() {
     const nx = (e.clientX - r.left) / r.width * 2 - 1, ny = -(e.clientY - r.top) / r.height * 2 + 1;
     cross.style.left = (e.clientX - r.left) + 'px'; cross.style.top = (e.clientY - r.top) + 'px';
     cross.classList.add('on');
+    aimGun(nx, ny);
     return { nx, ny };
+  }
+  /* البندقية تلتفت نحو نقطة التصويب (الاتجاه محسوب داخل فضاء الكاميرا) */
+  const GUN_AT = new THREE.Vector3(.62, -.5, -1.6);
+  function aimGun(nx, ny) {
+    const t = Math.tan(camera.fov * Math.PI / 360);
+    const p = new THREE.Vector3(nx * t * camera.aspect, ny * t, -1).multiplyScalar(16).sub(GUN_AT);
+    aim.ty = Math.atan2(-p.x, -p.z);
+    aim.tp = Math.atan2(p.y, Math.hypot(p.x, p.z));
   }
   S.fireAt = (nx, ny) => {
     if (!S.started) { S.begin(); return; }
@@ -146,7 +172,12 @@ function shootScene() {
     const hits = ray.intersectObjects(targets.filter(t => !t.state || t.state === 'good').map(t => t.g), true);
     const hit = hits[0];
     const end = hit ? hit.point.clone() : ray.ray.at(30, new THREE.Vector3());
-    const start = new THREE.Vector3(.85, -.5, -3); camera.localToWorld(start);
+    aimGun(nx, ny); aim.yaw = aim.ty; aim.pitch = aim.tp; gun.rotation.y = aim.yaw; gun.rotation.x = aim.pitch;
+    camera.updateMatrixWorld(true);
+    const start = new THREE.Vector3(); muzzle.getWorldPosition(start);
+    /* ومضة الفوهة ودخان خفيف */
+    flashT = .09; muzzle.visible = true; muzzle.userData.star.material.rotation = Math.random() * 6;
+    for (let i = 0; i < 4; i++) { const sm = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: '#E8E8E8', transparent: true, opacity: .5, depthWrite: false })); sm.position.copy(start); sm.scale.setScalar(.25); scene.add(sm); bits.push({ m: sm, smoke: true, v: new THREE.Vector3(K3.rnd(-.3, .3), K3.rnd(.5, 1), K3.rnd(-.6, -.1)), life: 1 }); }
     const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.glow('#FFFFFF'));
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: K3.theme().gold, transparent: true, opacity: .9, depthWrite: false })); halo.scale.set(.9, .9, 1); ball.add(halo);
     ball.position.copy(start); scene.add(ball);
@@ -204,9 +235,7 @@ function shootScene() {
       if (t.state === 'good') { t.t += dt; f.rotation.x = -Math.min(1, t.t * 2.5) * Math.PI / 2; }
       else if (t.state === 'bad') { t.t += dt; g.position.x = t.x + Math.sin(S.t * 60) * .08 * Math.max(0, 1 - t.t * 2); }
       else if (S.started) {
-        if (t.motion === 'slide') g.position.x = t.x + Math.sin(S.t * .9 + t.ph) * t.amp;
-        if (t.motion === 'pop') y += (Math.sin(S.t * 1.2 + t.ph) * .5 - .5) * 1.3;
-        if (t.motion === 'spin') f.rotation.y = Math.sin(S.t * .8 + t.ph) * .8;
+        f.position.y = t.base + (Math.sin(S.t * t.sp + t.ph) * .5 + .5) * t.amp;
       }
       g.position.y = y;
     });
@@ -219,14 +248,24 @@ function shootScene() {
     shots = shots.filter(s => !s.done);
     bits.forEach(b => {
       b.life -= dt * 1.3;
-      if (b.flash) { b.m.scale.setScalar((1 - b.life) * 5 + .5); b.m.material.opacity = Math.max(0, b.life); }
+      if (b.smoke) { b.life += dt * .9; b.m.position.addScaledVector(b.v, dt); b.m.scale.setScalar(.25 + (1 - b.life) * .9); b.m.material.opacity = Math.max(0, b.life * .45); }
+      else if (b.flash) { b.m.scale.setScalar((1 - b.life) * 5 + .5); b.m.material.opacity = Math.max(0, b.life); }
       else { b.v.y -= 12 * dt; b.m.position.addScaledVector(b.v, dt); b.m.rotation.z += b.spin * dt; b.m.scale.setScalar(Math.max(.01, b.life)); }
       if (b.life <= 0) scene.remove(b.m);
     });
     bits = bits.filter(b => b.life > 0);
     /* ارتداد البندقية وميلها نحو التصويب */
     recoil = Math.max(0, recoil - dt * 6);
-    if (gun) { gun.position.z = -1.6 + recoil * .18; gun.rotation.x = recoil * .25; }
+    if (gun) {
+      aim.yaw += (aim.ty - aim.yaw) * Math.min(1, dt * 14); aim.pitch += (aim.tp - aim.pitch) * Math.min(1, dt * 14);
+      gun.rotation.y = aim.yaw; gun.rotation.x = aim.pitch + recoil * .22;
+      gun.position.z = -1.6 + recoil * .18;
+    }
+    if (muzzle) {
+      flashT -= dt; muzzle.visible = flashT > 0;
+      const k = Math.max(0, flashT / .09);
+      muzzle.userData.star.scale.setScalar(.5 + k * .7); muzzle.userData.cone.scale.set(1, .5 + k, 1); muzzle.userData.ml.intensity = k * 2.2;
+    }
   };
   S.size();
   return S;
