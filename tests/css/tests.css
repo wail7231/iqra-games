@@ -1870,7 +1870,7 @@ a { color: inherit; text-decoration: none; }
 .maze-tp canvas { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; }
 
 /* الألعاب المجسّمة: خريطة المتاهة الصغيرة وعصا التحكم باللمس */
-.k3-map { position: absolute; top: 10px; left: 10px; z-index: 2; pointer-events: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, .18); }
+.k3-map { position: absolute; top: 10px; right: 10px; z-index: 2; pointer-events: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, .18); }
 .k3-joy { position: absolute; z-index: 3; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .85); background: rgba(0, 0, 0, .12); pointer-events: none; opacity: 0; transition: opacity .15s ease; }
 .k3-joy.on { opacity: 1; }
 .k3-joy i { position: absolute; left: 50%; top: 50%; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; background: rgba(255, 255, 255, .9); box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
