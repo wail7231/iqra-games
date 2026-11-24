@@ -36,6 +36,11 @@ const GAME_TYPES = {
   boat3d:    { name: 'القارب الحر', three: true, editor: 'editor.html', player: 'game.html', desc: 'قُد القارب بحرية في البحيرة واجمع العوّامات التي تحمل الإجابات الصحيحة.' },
   ski3d:     { name: 'التزلّج على المنحدر', three: true, editor: 'editor.html', player: 'game.html', desc: 'انزلق على المنحدر بين الأعلام، ومرّ من بوابة الإجابة الصحيحة.' },
   castle3d:  { name: 'القلعة الدوّارة', three: true, editor: 'editor.html', player: 'game.html', desc: 'دُر حول البرج واقفز إلى درجة الإجابة الصحيحة لتصعد طابقًا.' },
+  shoot3d:   { name: 'ميدان الرماية', three: true, editor: 'editor.html', player: 'game.html', desc: 'صوّب على الأهداف المتحركة في الميدان، وأصب هدف الإجابة الصحيحة.' },
+  darts3d:   { name: 'رمي السهام', three: true, editor: 'editor.html', player: 'game.html', desc: 'لوح دوّار مقسّم إلى قطاعات، ارمِ السهم في قطاع الإجابة الصحيحة.' },
+  catapult3d:{ name: 'المنجنيق والقلعة', three: true, editor: 'editor.html', player: 'game.html', desc: 'وجّه المنجنيق واضبط قوته، واهدم برج الإجابة الصحيحة.' },
+  train3d:   { name: 'قطار الإجابات', three: true, editor: 'editor.html', player: 'game.html', desc: 'بدّل سكة القطار ليدخل نفق الإجابة الصحيحة.' },
+  sub3d:     { name: 'صيد الفقاعات', three: true, editor: 'editor.html', player: 'game.html', desc: 'غُص بالغواصة بين المرجان وافقع فقاعة الإجابة الصحيحة.' },
   runner:  { name: 'الكرة القافزة', three: true, editor: 'editor.html', player: 'game.html', desc: 'اقفز بالكرة على المنصة التي تحمل الإجابة الصحيحة.' },
 };
 const ICON_MAZE = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v8h4M16 8v12M8 16h4v4M12 8h4"/></svg>';
