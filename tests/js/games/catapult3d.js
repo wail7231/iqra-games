@@ -100,7 +100,7 @@ function catapultScene() {
       const sign = K3.plate(it.a.t, 3.1, 1, { px: 76 }); sign.position.set(0, 1.55, .2); sign.renderOrder = 3; flag.add(sign);
       const board = new THREE.Mesh(new THREE.BoxGeometry(3.25, sign.geometry.parameters.height + .16, .08), K3.mat("#8A5A30")); board.position.set(0, 1.55, .1); flag.add(board);
       const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.mat(th.gold)); ball.position.set(0, 3.75, -.18); flag.add(ball);
-      const pen = new THREE.Mesh(new THREE.ConeGeometry(.24, .8, 3), K3.mat(th.accent, { flatShading: true })); pen.rotation.z = -Math.PI / 2; pen.position.set(.42, 3.45, -.18); flag.add(pen);
+      const pen = new THREE.Mesh(new THREE.ConeGeometry(.24, .8, 3), K3.mat(th.accent, { flatShading: true })); pen.rotation.z = -Math.PI / 2; pen.position.set(.42, 3.45, -.18); flag.add(pen); flag.userData.pen = pen;
       flag.position.set(x, top, z);
       field.add(flag);
       towers.push({ a: it.a, x, z, top, blocks: tb, flag, sign, state: it.state || '', fly: 0 });
@@ -235,7 +235,7 @@ function catapultScene() {
     towers.forEach(t => {
       if (t.fly) { t.fly += dt; t.flag.position.y = t.top + t.fly * 4; t.flag.rotation.y += dt * 5; t.flag.scale.setScalar(Math.max(.01, 1 - Math.max(0, t.fly - 1) * 1.5)); }
       if (t.shake > 0) { t.shake -= dt; const o = Math.sin(S.t * 60) * .06 * t.shake; t.blocks.forEach(b => { b.m.position.x = b.rest.x + o; }); }
-      if (!t.fly) t.flag.children[1].rotation.y = Math.sin(S.t * 2 + t.x) * .15;
+      if (!t.fly) t.flag.userData.pen.rotation.x = Math.sin(S.t * 3 + t.x) * .35;
     });
     dust.forEach(d => { d.life -= dt * 1.2; d.m.position.addScaledVector(d.v, dt); d.m.scale.setScalar(1 + (1 - d.life) * 1.5); d.m.material.opacity = Math.max(0, d.life * .7); if (d.life <= 0) scene.remove(d.m); });
     dust = dust.filter(d => d.life > 0);
