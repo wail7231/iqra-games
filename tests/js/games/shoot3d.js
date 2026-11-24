@@ -71,7 +71,10 @@ function shootScene() {
     const ring = new THREE.Mesh(new THREE.TorusGeometry(.11, .035, 6, 16), K3.glow(th.gold)); ring.position.set(0, .06, -1.38); gun.add(ring);
     const grip = new THREE.Mesh(new THREE.BoxGeometry(.22, .5, .3), K3.mat('#8A5A30')); grip.position.set(0, -.32, .25); grip.rotation.x = .3; gun.add(grip);
     const glass = new THREE.Mesh(new THREE.BoxGeometry(.16, .12, .4), K3.glow(th.gold)); glass.position.set(0, .2, -.1); gun.add(glass);
-    gun.position.set(.85, -.7, -1.6);
+    const stock = new THREE.Mesh(new THREE.BoxGeometry(.26, .26, .5), K3.mat('#8A5A30')); stock.position.set(0, -.08, .8); gun.add(stock);
+    const sight = new THREE.Mesh(new THREE.BoxGeometry(.04, .1, .04), K3.mat('#2A2A30')); sight.position.set(0, .22, -1.3); gun.add(sight);
+    gun.scale.setScalar(.6);
+    gun.position.set(.62, -.5, -1.6);
     camera.add(gun);
     scene.add(camera);
     if (S.q && targets.length) { const keep = targets.map(t => ({ a: t.a, state: t.state })); layoutTargets(keep); }
@@ -106,13 +109,16 @@ function shootScene() {
     targets.forEach(t => range.remove(t.g));
     targets = [];
     const list = keep || mixAnswers(S.q, 6, []).map(a => ({ a }));
-    const n = list.length, front = Math.ceil(n / 2);
+    /* حتى أربعة أهداف في صف واحد؛ وما زاد يقف في صف خلفي أعلى قليلًا وبين فراغات الأمامي فلا يختفي خلفه */
+    const n = list.length, front = n <= 4 ? n : Math.ceil(n / 2);
     list.forEach((it, k) => {
       const row = k < front ? 0 : 1, inRow = row ? n - front : front, idx = row ? k - front : k;
-      const x = (idx - (inRow - 1) / 2) * (row ? 4.4 : 3.8) + K3.rnd(-.4, .4);
-      const z = row ? -14 : -7;
+      const gap = n <= 4 ? 4.3 : 4.6;
+      const x = (idx - (inRow - 1) / 2) * gap + (row ? (inRow === front ? gap / 2 : 0) : 0) + K3.rnd(-.25, .25);
+      const z = row ? -13 : -7;
       const g = makeTarget(it.a, th);
       g.position.set(x, 0, z);
+      if (row) { g.userData.face.position.y = 3.3; g.children.find(c => c.geometry && c.geometry.type === 'CylinderGeometry' && c.position.y === .6).scale.y = 2.6; g.children.find(c => c.geometry && c.geometry.type === 'CylinderGeometry' && c.position.y === .6).position.y = 1.5; }
       range.add(g);
       const motion = ['still', 'slide', 'pop', 'spin'][Math.floor(Math.random() * 4)];
       targets.push({ a: it.a, g, x, z, motion, ph: Math.random() * 6, amp: K3.rnd(.8, 1.4), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
@@ -220,7 +226,7 @@ function shootScene() {
     bits = bits.filter(b => b.life > 0);
     /* ارتداد البندقية وميلها نحو التصويب */
     recoil = Math.max(0, recoil - dt * 6);
-    if (gun) { gun.position.z = -1.6 + recoil * .25; gun.rotation.x = recoil * .25; }
+    if (gun) { gun.position.z = -1.6 + recoil * .18; gun.rotation.x = recoil * .25; }
   };
   S.size();
   return S;
