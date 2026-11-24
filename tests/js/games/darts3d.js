@@ -43,7 +43,7 @@ function bowScene() {
   }
 
   /* ---------- القوس في يد اللاعب (أسفل يمين النظر) ---------- */
-  const TIP = { y: .52, z: -.42 };
+  const TIP = { y: .57, z: -.41 };
   function makeBow(th) {
     if (bow) camera.remove(bow);
     bow = new THREE.Group();
@@ -97,7 +97,7 @@ function bowScene() {
       const a = i / 14 * Math.PI * 2 + .2, r = K3.rnd(8, 11);
       const bale = new THREE.Mesh(new THREE.CylinderGeometry(.55, .55, 1.1, 14), K3.mat('#E2C46A', { flatShading: true }));
       bale.rotation.z = Math.PI / 2; bale.rotation.y = a; bale.position.set(Math.cos(a) * r, .55, Math.sin(a) * r); yard.add(bale);
-      for (const s of [-.3, .3]) { const tie = new THREE.Mesh(new THREE.TorusGeometry(.56, .02, 4, 16), K3.mat('#8A5A30')); tie.rotation.y = a + Math.PI / 2; tie.position.set(bale.position.x + Math.cos(a + Math.PI / 2) * s * 0, .55, bale.position.z); tie.position.x += Math.cos(a) * 0; tie.translateZ(s); yard.add(tie); }
+      for (const s of [-.3, .3]) { const tie = new THREE.Mesh(new THREE.TorusGeometry(.56, .025, 4, 18), K3.mat('#8A5A30')); tie.rotation.x = Math.PI / 2; tie.position.y = s; bale.add(tie); }
     }
     const cols = [th.accent, th.gold, '#FFFFFF', th.wall2];
     for (let i = 0; i < 10; i++) {
@@ -207,15 +207,9 @@ function bowScene() {
   }
   function stick(f, target, pos) {
     const m = f.m;
-    if (target) {
-      /* يغرز في وجه الهدف ويبقى معه */
-      const local = target.g.userData.face.worldToLocal(pos.clone());
-      local.z = Math.min(local.z, .2);
-      target.g.userData.face.add(m);
-      m.position.copy(local).add(new THREE.Vector3(0, 0, .05));
-      const back = target.g.userData.face.worldToLocal(pos.clone().sub(f.v.clone().normalize()));
-      m.lookAt(target.g.userData.face.localToWorld(local.clone().multiplyScalar(2).sub(back)));
-    }
+    /* يغرز قليلًا في القش (أو التراب) ويبقى معه ويهتز لحظة */
+    m.position.addScaledVector(f.v.clone().normalize(), .18);
+    if (target) target.g.userData.face.attach(m);
     stuck.push({ m, wob: 1, base: m.rotation.clone() });
   }
   function puff(pos, col, n = 8) {
@@ -256,7 +250,7 @@ function bowScene() {
         last = { x: e.clientX, y: e.clientY };
       } else if (phase === 'up') last = null;
     },
-    tap() { if (moved < 10) S.shoot(); },
+    tap(e) { if (!e || moved < 10) S.shoot(); },
   });
   const fire = el('button', 'k3-btn k3-fire', '<svg viewBox="0 0 24 24"><path d="M4 20L20 4M20 4h-6M20 4v6M4 20l3-1-2-2z"/></svg>');
   fire.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); S.shoot(); });

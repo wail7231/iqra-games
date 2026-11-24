@@ -1972,3 +1972,13 @@ a { color: inherit; text-decoration: none; }
 .k3-ink { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 50%, rgba(20, 14, 34, .75), rgba(20, 14, 34, .35) 60%, transparent 85%); }
 .k3-ink.on { animation: k3ink 1.1s ease-out; }
 @keyframes k3ink { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+/* القوس والسهم: شعيرة ثابتة في الوسط، ومؤشرا أهداف خارج النظر على الطرفين */
+.k3-cross.bow { left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; }
+.k3-hint { position: absolute; top: 50%; z-index: 3; width: 46px; height: 46px; margin-top: -23px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, .8); color: var(--b-accent, #AB3920); box-shadow: 0 3px 10px rgba(0, 0, 0, .25); pointer-events: none; opacity: 0; transition: opacity .25s; }
+.k3-hint svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.k3-hint.l { left: 12px; } .k3-hint.r { right: 12px; }
+.k3-hint.on { opacity: 1; animation: k3hint 1s ease-in-out infinite; }
+.k3-hint.l.on { animation-name: k3hintL; }
+@keyframes k3hint { 50% { transform: translateX(5px); } }
+@keyframes k3hintL { 50% { transform: translateX(-5px); } }

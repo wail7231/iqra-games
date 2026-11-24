@@ -37,7 +37,7 @@ const GAME_TYPES = {
   ski3d:     { name: 'التزلّج على المنحدر', three: true, editor: 'editor.html', player: 'game.html', desc: 'انزلق على المنحدر بين الأعلام، ومرّ من بوابة الإجابة الصحيحة.' },
   castle3d:  { name: 'القلعة الدوّارة', three: true, editor: 'editor.html', player: 'game.html', desc: 'دُر حول البرج واقفز إلى درجة الإجابة الصحيحة لتصعد طابقًا.' },
   shoot3d:   { name: 'ميدان الرماية', three: true, editor: 'editor.html', player: 'game.html', desc: 'صوّب على الأهداف المتحركة في الميدان، وأصب هدف الإجابة الصحيحة.' },
-  darts3d:   { name: 'رمي السهام', three: true, editor: 'editor.html', player: 'game.html', desc: 'لوح دوّار مقسّم إلى قطاعات، ارمِ السهم في قطاع الإجابة الصحيحة.' },
+  darts3d:   { name: 'القوس والسهم', three: true, editor: 'editor.html', player: 'game.html', desc: 'قف وسط الساحة، ودُر بنظرك حولك، وأطلق السهم على هدف الإجابة الصحيحة.' },
   catapult3d:{ name: 'المنجنيق والقلعة', three: true, editor: 'editor.html', player: 'game.html', desc: 'وجّه المنجنيق واضبط قوته، واهدم برج الإجابة الصحيحة.' },
   train3d:   { name: 'قطار الإجابات', three: true, editor: 'editor.html', player: 'game.html', desc: 'بدّل سكة القطار ليدخل نفق الإجابة الصحيحة.' },
   sub3d:     { name: 'صيد الفقاعات', three: true, editor: 'editor.html', player: 'game.html', desc: 'غُص بالغواصة بين المرجان وافقع فقاعة الإجابة الصحيحة.' },
