@@ -1989,4 +1989,3 @@ a { color: inherit; text-decoration: none; }
 .round-head.k3-qover .round-q { font-size: clamp(16px, 1.8vw, 22px) !important; line-height: 1.5; margin: 0; }
 .round-head.k3-qover .round-sub { font-size: 13px; margin: 0; }
 .is-fs #board.k3-full { padding: 8px !important; justify-content: center; --fs-zoom: 1 !important; overflow: hidden !important; }
-.is-fs #board.k3-full > :not(.k3-wrap):not(.round-head) { display: none; }
