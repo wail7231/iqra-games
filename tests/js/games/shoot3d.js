@@ -74,6 +74,11 @@ function shootScene() {
     const grip = new THREE.Mesh(new THREE.BoxGeometry(.22, .5, .3), K3.mat('#8A5A30')); grip.position.set(0, -.32, .25); grip.rotation.x = .3; gun.add(grip);
     const glass = new THREE.Mesh(new THREE.BoxGeometry(.16, .12, .4), K3.glow(th.gold)); glass.position.set(0, .2, -.1); gun.add(glass);
     const stock = new THREE.Mesh(new THREE.BoxGeometry(.26, .26, .5), K3.mat('#8A5A30')); stock.position.set(0, -.08, .8); gun.add(stock);
+    /* تفاصيل: منظار، وحلقات تبريد على السبطانة، وزناد وواقيه */
+    const scope = new THREE.Mesh(new THREE.CylinderGeometry(.07, .07, .55, 14), K3.mat('#2A2A30')); scope.rotation.x = Math.PI / 2; scope.position.set(0, .3, -.15); gun.add(scope);
+    for (const z of [-.42, .12]) { const lens = new THREE.Mesh(new THREE.CircleGeometry(.06, 14), K3.glow('#9CD5F2')); lens.position.set(0, .3, z); lens.rotation.y = z < 0 ? Math.PI : 0; gun.add(lens); }
+    for (let i = 0; i < 4; i++) { const fin = new THREE.Mesh(new THREE.TorusGeometry(.105, .025, 6, 14), K3.mat('#3A3F4A')); fin.position.set(0, .06, -.65 - i * .14); gun.add(fin); }
+    const guard = new THREE.Mesh(new THREE.TorusGeometry(.12, .025, 6, 14, Math.PI), K3.mat('#3A3F4A')); guard.rotation.set(0, Math.PI / 2, Math.PI); guard.position.set(0, -.18, .05); gun.add(guard);
     const sight = new THREE.Mesh(new THREE.BoxGeometry(.04, .1, .04), K3.mat('#2A2A30')); sight.position.set(0, .22, -1.3); gun.add(sight);
     /* ومضة الفوهة: نجمة ضوء ومخروط لهب وضوء نقطي، كلها مخفية حتى الإطلاق */
     muzzle = new THREE.Group(); muzzle.position.set(0, .06, -1.5); gun.add(muzzle);
@@ -176,7 +181,7 @@ function shootScene() {
     camera.updateMatrixWorld(true);
     const start = new THREE.Vector3(); muzzle.getWorldPosition(start);
     /* ومضة الفوهة ودخان خفيف */
-    flashT = .09; muzzle.visible = true; muzzle.userData.star.material.rotation = Math.random() * 6;
+    flashT = .13; muzzle.visible = true; muzzle.userData.star.material.rotation = Math.random() * 6;
     for (let i = 0; i < 4; i++) { const sm = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: '#E8E8E8', transparent: true, opacity: .5, depthWrite: false })); sm.position.copy(start); sm.scale.setScalar(.25); scene.add(sm); bits.push({ m: sm, smoke: true, v: new THREE.Vector3(K3.rnd(-.3, .3), K3.rnd(.5, 1), K3.rnd(-.6, -.1)), life: 1 }); }
     const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.glow('#FFFFFF'));
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: K3.theme().gold, transparent: true, opacity: .9, depthWrite: false })); halo.scale.set(.9, .9, 1); ball.add(halo);
@@ -263,8 +268,8 @@ function shootScene() {
     }
     if (muzzle) {
       flashT -= dt; muzzle.visible = flashT > 0;
-      const k = Math.max(0, flashT / .09);
-      muzzle.userData.star.scale.setScalar(.5 + k * .7); muzzle.userData.cone.scale.set(1, .5 + k, 1); muzzle.userData.ml.intensity = k * 2.2;
+      const k = Math.max(0, flashT / .13);
+      muzzle.userData.star.scale.setScalar(.8 + k * 1.4); muzzle.userData.cone.scale.set(1, .5 + k, 1); muzzle.userData.ml.intensity = k * 2.2;
     }
   };
   S.size();
