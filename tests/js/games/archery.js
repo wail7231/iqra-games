@@ -37,14 +37,14 @@ Play.register({
 
     /* لكل هدف عمود وممر خاص به في الجهة اليسرى: صف واحد حتى ٣ أهداف وصفّان لأكثر،
        ويتحرك الهدف داخل ممره فقط، وعرض شريطه لا يتجاوز عموده — فلا تتداخل الأهداف أبدًا */
-    const answers = fitAnswers(mixAnswers(q, 6), 6);
+    const answers = mixAnswers(q);
     /* «يجب جمعها كلها»: تُصاب كل الأهداف الصحيحة قبل انتهاء السؤال */
     const need = needAll(q) ? answers.filter(a => a.ok).length : 1;
     let got = 0;
     const paintNeed = needHead(q.q, need);
     Play.board.appendChild(wrap);
     qOver(wrap, paintNeed.el);
-    const rows = answers.length <= 3 ? 1 : 2, cols = Math.ceil(answers.length / rows);
+    const n = answers.length, rows = n <= 3 ? 1 : n <= 8 ? 2 : n <= 15 ? 3 : 4, cols = Math.ceil(n / rows);
     const targets = answers.map((a, i) => ({
       ...a, col: i % cols, row: Math.floor(i / cols), phase: Math.random() * 6.28,
       x: 0, y: 0, base: 0, amp: 0, maxLabel: 120, alive: true, hit: 0, broken: 0, stuck: [],
