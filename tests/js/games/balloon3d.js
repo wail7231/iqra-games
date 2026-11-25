@@ -259,7 +259,7 @@ function balloonScene() {
     marker.position.set(pr.x, .4, pr.z);
     marker.rotation.y += dt * .8;
     marker.scale.setScalar(over ? 1.25 + Math.sin(t * 8) * .08 : 1);
-    marker.children.forEach(m => m.material.color.set(over ? K3.theme().gold : '#FFFFFF'));
+    marker.children.forEach(m => m.material.color.set(over ? K3.theme().gold : K3.aimColor()));
     /* الصناديق */
     crates.forEach(c => {
       if (!c.landed) {

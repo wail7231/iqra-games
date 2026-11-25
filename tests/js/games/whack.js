@@ -87,7 +87,7 @@ function whackScene() {
     /* دائرة الهدف: حلقة متقطعة تنبض حيث ستنزل المطرقة */
     const target = new THREE.Group();
     for (let i = 0; i < 12; i++) {
-      const seg = new THREE.Mesh(new THREE.RingGeometry(1.08, 1.24, 8, 1, i / 12 * Math.PI * 2, Math.PI / 9), new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: .85, side: THREE.DoubleSide, depthWrite: false }));
+      const seg = new THREE.Mesh(new THREE.RingGeometry(1.08, 1.24, 8, 1, i / 12 * Math.PI * 2, Math.PI / 9), new THREE.MeshBasicMaterial({ color: K3.aimColor(th), transparent: true, opacity: .85, side: THREE.DoubleSide, depthWrite: false }));
       target.add(seg);
     }
     const dot = new THREE.Mesh(new THREE.CircleGeometry(.12, 16), new THREE.MeshBasicMaterial({ color: th.gold, transparent: true, opacity: .9, depthWrite: false }));

@@ -36,7 +36,7 @@ function catapultScene() {
     scene.add(cat);
     for (const d of dots) scene.remove(d);
     dots = [];
-    for (let i = 0; i < 16; i++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.09, 8, 6), K3.glow('#FFFFFF', { transparent: true, opacity: .85 })); d.visible = false; scene.add(d); dots.push(d); }
+    for (let i = 0; i < 16; i++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.11, 8, 6), K3.glow(K3.aimColor(th), { transparent: true, opacity: .85 })); d.visible = false; scene.add(d); dots.push(d); }
     if (S.q) buildTowers(towers.map(t => ({ a: t.a, state: t.state })));
   };
 

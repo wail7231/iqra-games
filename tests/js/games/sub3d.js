@@ -197,7 +197,7 @@ function subScene() {
       .map(p => { const v = p.clone().sub(from), flat = Math.hypot(v.x, v.z); return { v, flat, ang: Math.acos(Math.max(-1, Math.min(1, (v.x * dir.x + v.z * dir.z) / (flat || 1)))) }; })
       .filter(o => o.flat < 18 && o.ang < .4).sort((a, b) => a.ang * 10 + a.flat - (b.ang * 10 + b.flat))[0];
     if (ahead) { dir.copy(ahead.v).normalize(); }
-    const m = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 8), K3.glow('#FFFFFF'));
+    const m = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 8), K3.glow(K3.aimColor()));
     const h = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: K3.theme().gold, transparent: true, opacity: .9, depthWrite: false })); h.scale.set(1.2, 1.2, 1); m.add(h);
     m.position.set(P.x + dir.x * 1.9, P.y + dir.y * 1.9, P.z + dir.z * 1.9);
     scene.add(m);

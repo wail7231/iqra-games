@@ -378,7 +378,7 @@ function arenaScene() {
     if (!S.started || Play.finished || S.t - lastShot < .16) return;
     lastShot = S.t;
     const th = K3.theme(), g = new THREE.Group();
-    const core = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), K3.glow('#FFFFFF')); g.add(core);
+    const core = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), K3.glow(K3.aimColor())); g.add(core);
     const glowS = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: th.gold, transparent: true, opacity: .9, depthWrite: false })); glowS.scale.set(1.3, 1.3, 1); g.add(glowS);
     const dir = new THREE.Vector3(Math.sin(P.yaw), 0, Math.cos(P.yaw));
     g.position.set(P.x + dir.x * .8, P.y + 1.05, P.z + dir.z * .8);

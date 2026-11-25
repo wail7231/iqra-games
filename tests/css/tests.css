@@ -2008,3 +2008,11 @@ a { color: inherit; text-decoration: none; }
 /* النبتة مع خيارات كثيرة: عمودان فلا تطول القائمة خارج الشاشة */
 .plant-answers.two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 560px) { .plant-answers.two-col { grid-template-columns: 1fr; } }
+
+/* مؤشرات التصويب بلون يناسب القالب (يُضبط من اللعبة): واضحة فوق الخلفيات البيضاء والداكنة معًا */
+.k3-cross { border-color: var(--aim, #fff); box-shadow: 0 0 0 2px var(--aim-edge, rgba(0, 0, 0, .35)), inset 0 0 0 2px var(--aim-edge, rgba(0, 0, 0, .25)); }
+.k3-cross i, .k3-cross b { background: var(--aim, #fff); box-shadow: 0 0 0 1px var(--aim-edge, rgba(0, 0, 0, .4)); }
+.k3-cross.dart, .k3-cross.dart i, .k3-cross.dart b { border-color: var(--aim, rgba(255, 236, 160, .95)); }
+.k3-cross.dart i, .k3-cross.dart b { background: var(--aim, rgba(255, 236, 160, .95)); }
+.k3-joy { border-color: var(--aim, rgba(255, 255, 255, .85)); }
+.k3-joy i { background: var(--aim, rgba(255, 255, 255, .9)); }

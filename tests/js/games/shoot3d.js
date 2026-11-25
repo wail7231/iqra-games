@@ -194,7 +194,7 @@ function shootScene() {
     /* ومضة الفوهة ودخان خفيف */
     flashT = .13; muzzle.visible = true; muzzle.userData.star.material.rotation = Math.random() * 6;
     for (let i = 0; i < 4; i++) { const sm = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: '#E8E8E8', transparent: true, opacity: .5, depthWrite: false })); sm.position.copy(start); sm.scale.setScalar(.25); scene.add(sm); bits.push({ m: sm, smoke: true, v: new THREE.Vector3(K3.rnd(-.3, .3), K3.rnd(.5, 1), K3.rnd(-.6, -.1)), life: 1 }); }
-    const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.glow('#FFFFFF'));
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.glow(K3.aimColor()));
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: K3.dotTex(), color: K3.theme().gold, transparent: true, opacity: .9, depthWrite: false })); halo.scale.set(.9, .9, 1); ball.add(halo);
     ball.position.copy(start); scene.add(ball);
     const tgt = hit ? targets.find(t => { let o = hit.object; while (o && o !== t.g) o = o.parent; return o === t.g; }) : null;

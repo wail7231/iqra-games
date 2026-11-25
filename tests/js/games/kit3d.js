@@ -174,6 +174,10 @@ const K3 = (() => {
       fill.intensity = th.dark ? .32 : .2;
       clear(S.env);
       S.fx.length = 0;
+      /* لون المؤشرات في واجهة اللعبة (شعيرة التصويب، وعصا اللمس) */
+      const aim = aimColor(th);
+      S.wrap.style.setProperty('--aim', aim);
+      S.wrap.style.setProperty('--aim-edge', aim === '#FFFFFF' ? 'rgba(0,0,0,.4)' : 'rgba(255,255,255,.85)');
       if (S.onTheme) S.onTheme(th);
     };
     /* بداية اللعب بلمسة أو زر */
@@ -924,6 +928,11 @@ const K3 = (() => {
     }
     trees.count = tn; g.add(trees);
   }
+  function aimColor(th = theme()) {
+    const lum = h => { const c = col(h); return .2126 * c.r + .7152 * c.g + .0722 * c.b; };
+    const bright = th.sketch || lum(th.ground) > .68 || (lum(th.sky[1]) > .82 && lum(th.ground) > .5);
+    return bright ? (th.sketch ? '#2B4C7E' : th.wall2 || th.accent) : '#FFFFFF';
+  }
   function cloud(s = 1, c = '#FFFFFF', opacity = 1) {
     const g = new THREE.Group();
     const m = mat(c, { transparent: opacity < 1, opacity, emissive: col(c).multiplyScalar(.25) });
@@ -1047,7 +1056,7 @@ const K3 = (() => {
   const ease = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
 
   return {
-    THEMES, theme, mat, glow, col, rnd, ease, fonts, sign, plate, recolorSign, textCanvas, texture, create, clear, controls, joystick, pick, groundPoint,
+    THEMES, theme, aimColor, mat, glow, col, rnd, ease, fonts, sign, plate, recolorSign, textCanvas, texture, create, clear, controls, joystick, pick, groundPoint,
     player, blob, starMesh, scatter, tuftPatch, rocks, bush, tree, pine, palm, prop, cloud, planet, horizon, weather, groundTexture, burstAt, tint, dotTex,
   };
 })();
