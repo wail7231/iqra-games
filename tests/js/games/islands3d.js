@@ -26,7 +26,7 @@ function islandsScene() {
     /* غيوم تحت الجزر */
     for (let i = 0; i < 24; i++) {
       const c = K3.cloud(K3.rnd(.8, 1.6), th.dark ? '#3A4A80' : '#FFFFFF', th.dark ? .55 : .92);
-      c.position.set(K3.rnd(-20, 20), K3.rnd(-7, -3.5), K3.rnd(-26, 6));
+      c.position.set(K3.rnd(-20, 20), K3.rnd(-7, -3.5), K3.rnd(-48, 6));
       c.userData.drift = K3.rnd(.2, .6);
       S.env.add(c);
     }
