@@ -309,13 +309,16 @@ Play.register({
       if (hits) FX.burst(WH.wrap, { count: 30 });
       Play.finish(hits, { delay: 1600, max: Math.max(hits, shown, 1) });
     };
+    const okQ = [], badQ = [];
     const spawn = () => {
       const free = WH.holes.filter(h => !h.pop);
       if (free.length) {
         const h = free[Math.random() * free.length | 0];
+        /* كل الإجابات تظهر بالتناوب: طابور مخلوط لكل نوع، يُعاد خلطه حين ينتهي */
         const ok = Math.random() < .5 || !q.wrong.length;
-        const pool = ok ? corrects : q.wrong;
-        WH.raise(h, pool[Math.random() * pool.length | 0], ok);
+        const qu = ok ? okQ : badQ;
+        if (!qu.length) qu.push(...shuffle(ok ? corrects : q.wrong));
+        WH.raise(h, qu.shift(), ok);
         if (ok) shown++;
         const mine = h.pop;
         later(() => { if (h.pop === mine && !h.state) WH.lower(h); }, stay);
