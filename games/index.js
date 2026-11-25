@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwwjl2h9483",
+  "type": "arena3d",
+  "name": "الاظهار",
+  "desc": "",
+  "count": 1,
+  "updated": 1795636504531
+ },
+ {
   "id": "gmwwjdjwjx6t",
   "type": "sub3d",
   "name": "احكام الميم الساكنة",
