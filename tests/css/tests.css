@@ -1994,3 +1994,9 @@ a { color: inherit; text-decoration: none; }
 .k3-wind { position: absolute; z-index: 3; top: 12px; right: 12px; width: 54px; height: 54px; padding: 7px; border-radius: 50%; background: rgba(255, 255, 255, .85); box-shadow: 0 3px 10px rgba(0, 0, 0, .2); pointer-events: none; opacity: 0; transition: opacity .3s; }
 .k3-wind.on { opacity: 1; }
 .k3-wind svg { width: 100%; height: 100%; fill: var(--b-accent, #AB3920); }
+/* شريط الوقت داخل شريط السؤال الصغير (اصطد الصحيح) */
+.round-head.k3-qover .round-timebar { width: min(260px, 60vw); margin: 6px auto 2px; }
+/* ملء الشاشة في الألعاب الثنائية: سؤال أصغر وهوامش أقل، فتأخذ اللعبة نفسها معظم الشاشة */
+.is-fs #board > .round-head:not(.k3-qover) { margin: 0 auto 6px; padding: 6px 18px; gap: 0; }
+.is-fs #board > .round-head:not(.k3-qover) .round-q { font-size: clamp(18px, 1.7vw, 24px) !important; line-height: 1.5; }
+.is-fs #board > .round-head:not(.k3-qover) .round-sub { font-size: 13px; }
