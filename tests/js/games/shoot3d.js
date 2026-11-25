@@ -45,18 +45,6 @@ function shootScene() {
       const post = new THREE.Mesh(new THREE.BoxGeometry(.18, 2.4, .18), K3.mat('#8A5A30')); post.position.set(x, 1.2, -31); range.add(post);
     }
     for (const y of [.7, 1.8]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(31, .16, .12), K3.mat('#A0703A')); rail.position.set(0, y, -31); range.add(rail); }
-    /* حبل رايات ملوّنة فوق الميدان */
-    const cols = [th.accent, th.gold, '#FFFFFF', th.wall2];
-    for (const z of [-3, -12]) {
-      for (let i = 0; i < 22; i++) {
-        const x = -11 + i * 1.05, y = 6.2 - Math.sin(i / 21 * Math.PI) * 1.2;
-        const f = new THREE.Mesh(new THREE.ConeGeometry(.26, .55, 3), K3.mat(cols[i % 4], { side: THREE.DoubleSide }));
-        f.rotation.x = Math.PI; f.position.set(x, y - .3, z); range.add(f);
-      }
-      const rope = new THREE.Mesh(new THREE.TorusGeometry(11.5, .03, 4, 40, Math.PI), K3.mat('#5A4632'));
-      rope.position.set(0, 6.2 - 11.5 * .1, z); rope.scale.y = .1; rope.rotation.z = Math.PI; range.add(rope);
-      for (const sx of [-1, 1]) { const pole = new THREE.Mesh(new THREE.CylinderGeometry(.1, .12, 6.4, 8), K3.mat(th.wall2)); pole.position.set(sx * 11.6, 3.2, z); range.add(pole); }
-    }
     /* طاولة الرامي في المقدمة: خشب وأكياس رمل وصناديق ذخيرة */
     const desk = new THREE.Mesh(new THREE.BoxGeometry(8, .9, 1.2), K3.mat('#A0703A')); desk.position.set(0, .45, 5.4); range.add(desk);
     const top = new THREE.Mesh(new THREE.BoxGeometry(8.2, .12, 1.4), K3.mat('#8A5A30')); top.position.set(0, .95, 5.4); range.add(top);
