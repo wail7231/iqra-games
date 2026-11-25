@@ -113,7 +113,7 @@ function catapultScene() {
       if (ext) { const ep = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, ext, 8), K3.mat("#5A4632")); ep.position.set(0, -ext / 2 + .02, -.18); flag.add(ep); }
       flag.position.set(x, top + ext, z);
       field.add(flag);
-      towers.push({ a: it.a, x, z, top, blocks: tb, flag, sign, state: it.state || '', fly: 0 });
+      towers.push({ a: it.a, x, z, top, ext, blocks: tb, flag, sign, state: it.state || '', fly: 0 });
     });
   }
   S.towers = () => towers;
@@ -243,7 +243,7 @@ function catapultScene() {
       if (b.m.position.y < .45) { b.m.position.y = .45; b.v.y = Math.abs(b.v.y) * .25; b.v.x *= .7; b.v.z *= .7; b.spin.multiplyScalar(.6); if (Math.abs(b.v.y) < .5) b.v.y = 0; }
     });
     towers.forEach(t => {
-      if (t.fly) { t.fly += dt; t.flag.position.y = t.top + t.fly * 4; t.flag.rotation.y += dt * 5; t.flag.scale.setScalar(Math.max(.01, 1 - Math.max(0, t.fly - 1) * 1.5)); }
+      if (t.fly) { t.fly += dt; t.flag.position.y = t.top + (t.ext || 0) + t.fly * 4; t.flag.rotation.y += dt * 5; t.flag.scale.setScalar(Math.max(.01, 1 - Math.max(0, t.fly - 1) * 1.5)); }
       if (t.shake > 0) { t.shake -= dt; const o = Math.sin(S.t * 60) * .06 * t.shake; t.blocks.forEach(b => { b.m.position.x = b.rest.x + o; }); }
       if (!t.fly) t.flag.userData.pen.rotation.x = Math.sin(S.t * 3 + t.x) * .35;
     });
