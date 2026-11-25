@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmww5n8a0ztu",
+  "type": "arena3d",
+  "name": "اركان الاسلام",
+  "desc": "",
+  "count": 1,
+  "updated": 1795613083301
+ },
+ {
   "id": "gmwuow2ss55y",
   "type": "sub3d",
   "name": "اركان الايمان",
