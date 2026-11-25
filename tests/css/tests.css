@@ -2004,3 +2004,7 @@ a { color: inherit; text-decoration: none; }
 /* عنوان السؤال لا يُكبَّر مع المحتوى في ملء الشاشة، والمسافة السفلية أقل */
 .is-fs #board > .round-head:not(.k3-qover) { zoom: 1 !important; width: auto; }
 .is-fs #board:not(.k3-full) { padding-bottom: 24px; }
+
+/* النبتة مع خيارات كثيرة: عمودان فلا تطول القائمة خارج الشاشة */
+.plant-answers.two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 560px) { .plant-answers.two-col { grid-template-columns: 1fr; } }

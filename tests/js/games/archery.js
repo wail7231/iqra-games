@@ -53,7 +53,7 @@ Play.register({
       const left = W * .05, area = W * .6;
       const colW = area / cols;
       R = Math.max(18, Math.min(R, colW * .28));
-      const top = 16, bandH = (H - 64 - top) / rows;
+      const top = 78, bandH = (H - 64 - top) / rows;
       const block = R * 3.7;
       targets.forEach(t => {
         t.x = left + colW * (t.col + .5);

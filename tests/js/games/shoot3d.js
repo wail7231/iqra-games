@@ -13,7 +13,7 @@ function shootScene() {
   const { scene, camera } = S;
   const range = new THREE.Group();
   scene.add(range);
-  let targets = [], shots = [], bits = [], gun = null, recoil = 0, muzzle = null, flashT = 0;
+  let stands = [], targets = [], shots = [], bits = [], gun = null, recoil = 0, muzzle = null, flashT = 0;
   const aim = { yaw: 0, pitch: 0, ty: 0, tp: 0 };
   const aimPt = new THREE.Vector3(0, 2, -10);
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
@@ -130,6 +130,7 @@ function shootScene() {
   function layoutTargets(keep) {
     const th = K3.theme();
     targets.forEach(t => range.remove(t.g));
+    stands.forEach(s => range.remove(s)); stands = [];
     targets = [];
     const list = keep || mixAnswers(S.q).map(a => ({ a }));
     /* كل الإجابات أهداف: حتى خمسة في الصف، وكل صف خلفي أعلى قليلًا وبين فراغات الذي أمامه */
@@ -137,13 +138,21 @@ function shootScene() {
     list.forEach((it, k) => {
       const row = Math.floor(k / per), inRow = Math.min(per, n - row * per), idx = k % per;
       const gap = inRow <= 4 ? 4.3 : 4;
-      const x = (idx - (inRow - 1) / 2) * gap + (row % 2 ? gap / 2 : 0) + K3.rnd(-.2, .2);
+      const x = (idx - (inRow - 1) / 2) * gap + (row % 2 ? gap / 2 : 0) + K3.rnd(-.15, .15);
       const z = -7 - row * 5.5;
       const g = makeTarget(it.a, th);
-      g.position.set(x, 0, z);
+      const lift = row * 1.25;
+      g.position.set(x, lift, z);
       range.add(g);
+      if (lift) {
+        const stand = new THREE.Group();
+        const deck = new THREE.Mesh(new THREE.BoxGeometry(3, .16, 1.3), K3.mat('#8A5A30')); deck.position.y = lift - .08; stand.add(deck);
+        for (const sx of [-1.3, 1.3]) for (const sz of [-.5, .5]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(.14, lift, .14), K3.mat('#6B4A2E')); leg.position.set(sx, lift / 2, sz); stand.add(leg); }
+        const brace = new THREE.Mesh(new THREE.BoxGeometry(2.8, .1, .1), K3.mat('#7A5230')); brace.position.set(0, lift * .45, .52); brace.rotation.z = Math.atan2(lift * .8, 2.6); stand.add(brace);
+        stand.position.set(x, 0, z); range.add(stand); stands.push(stand);
+      }
       /* كل الأهداف تطلع وتنزل، بسرعات ومراحل مختلفة حتى لا تتحرك معًا */
-      targets.push({ a: it.a, g, x, z, base: 2.3 + row * .75, ph: k * 1.9 + Math.random(), sp: K3.rnd(.9, 1.5), amp: K3.rnd(.7, 1.05), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
+      targets.push({ a: it.a, g, x, z, lift, base: 2.3 + row * .75, ph: k * 1.9 + Math.random(), sp: K3.rnd(.9, 1.5), amp: K3.rnd(.7, 1.05), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
     });
   }
   S.targets = () => targets;
@@ -242,7 +251,7 @@ function shootScene() {
       else if (S.started) {
         f.position.y = t.base + (Math.sin(S.t * t.sp + t.ph) * .5 + .5) * t.amp;
       }
-      g.position.y = y;
+      g.position.y = y + (t.lift || 0);
     });
     /* الطلقات: كرة ضوء تطير إلى نقطة الإصابة */
     shots.forEach(s => {

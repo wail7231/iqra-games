@@ -53,6 +53,7 @@ Play.register({
     Play.board.appendChild(wrap);
 
     const opts = mixAnswers(q);
+    if (opts.length > 6) grid.classList.add('two-col');
     const buttons = opts.map((o, k) => {
       const b = el('button', 'quiz-opt', `<span class="qo-num">${toAr(k + 1)}</span><span class="qo-txt"></span><span class="qo-mark"></span>`);
       b.style.setProperty('--c', CHIP_COLORS[k % CHIP_COLORS.length]);

@@ -58,9 +58,9 @@ function pondScene() {
     /* كل الإجابات تظهر: صف واحد حتى ست أوراق، وصفّان أو ثلاثة لأكثر، وكل ورقة في خانتها فلا تتداخل */
     const answers = mixAnswers(q);
     const n = answers.length, rowsN = n <= 6 ? 1 : n <= 12 ? 2 : 3, per = Math.ceil(n / rowsN);
-    const RF = { 1: [.37], 2: [.2, .43], 3: [.14, .3, .46] }[rowsN];
+    const RF = { 1: [.4], 2: [.26, .48], 3: [.22, .37, .52] }[rowsN];
     const slot = S.W / per;
-    const maxR = Math.min(slot * .47, 104, S.H * (rowsN === 1 ? .2 : rowsN === 2 ? .11 : .075));
+    const maxR = Math.min(slot * .47, 104, S.H * (rowsN === 1 ? .19 : rowsN === 2 ? .1 : .07));
     ctx.font = font(fontPx(maxR));
     S.row = answers.map((a, i) => {
       const row = Math.floor(i / per), col = i % per, inRow = row < rowsN - 1 ? per : n - per * (rowsN - 1);
