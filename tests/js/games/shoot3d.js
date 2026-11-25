@@ -80,7 +80,7 @@ function shootScene() {
     muzzle.visible = false;
     gun.rotation.order = 'YXZ';
     gun.scale.setScalar(.6);
-    gun.position.set(.62, -.5, -1.6);
+    gun.position.set(.66, -.68, -1.6);
     camera.add(gun);
     scene.add(camera);
     if (S.q && targets.length) { const keep = targets.map(t => ({ a: t.a, state: t.state })); layoutTargets(keep); }
@@ -163,7 +163,7 @@ function shootScene() {
     return { nx, ny };
   }
   /* البندقية تلتفت نحو نقطة التصويب (الاتجاه محسوب داخل فضاء الكاميرا) */
-  const GUN_AT = new THREE.Vector3(.62, -.5, -1.6);
+  const GUN_AT = new THREE.Vector3(.66, -.68, -1.6);
   function aimGun(nx, ny) {
     const t = Math.tan(camera.fov * Math.PI / 360);
     const p = new THREE.Vector3(nx * t * camera.aspect, ny * t, -1).multiplyScalar(16).sub(GUN_AT);
