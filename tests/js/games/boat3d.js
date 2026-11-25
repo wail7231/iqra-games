@@ -166,7 +166,7 @@ function boatScene() {
     const th = K3.theme();
     buoys.forEach(b => field.remove(b.g));
     buoys = [];
-    const list = keep || mixAnswers(S.q, 6).map(a => ({ a }));
+    const list = keep || mixAnswers(S.q).map(a => ({ a }));
     list.forEach(it => {
       if (it.state === 'gone') return;
       let x = it.x, z = it.z;
@@ -303,7 +303,7 @@ function boatScene() {
     });
     if (S.q && !S.answered && !Play.roundDone && !buoys.some(b => !b.state && b.a.ok)) {
       const keep = buoys.filter(b => b.state === 'good').map(b => b.a.t);
-      spawn(mixAnswers(S.q, 6, [...S.collected, ...keep]).map(a => ({ a })));
+      spawn(mixAnswers(S.q, Infinity, [...S.collected, ...keep]).map(a => ({ a })));
     }
     /* كاميرا مطاردة خلف القارب */
     const cx = P.x - Math.sin(P.a) * 8.5, cz = P.z - Math.cos(P.a) * 8.5;
