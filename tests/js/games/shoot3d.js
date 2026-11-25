@@ -40,11 +40,11 @@ function shootScene() {
     for (const z of [-4, -10, -16]) { const line = new THREE.Mesh(new THREE.PlaneGeometry(18, .12), K3.glow('#FFFFFF', { transparent: true, opacity: .6 })); line.rotation.x = -Math.PI / 2; line.position.set(0, .02, z); range.add(line); }
     /* سياج خشبي خلفي وتلال ترابية تصدّ الطلقات */
     const berm = new THREE.Mesh(new THREE.CylinderGeometry(14, 16, 5, 32, 1, false, 0, Math.PI), K3.mat(th.ground2, { flatShading: true }));
-    berm.rotation.y = Math.PI / 2; berm.position.set(0, 1.5, -24); berm.scale.z = .35; range.add(berm);
+    berm.rotation.y = Math.PI / 2; berm.position.set(0, 1.5, -36); berm.scale.z = .35; range.add(berm);
     for (let x = -12; x <= 12; x += 1.2) {
-      const post = new THREE.Mesh(new THREE.BoxGeometry(.18, 2.4, .18), K3.mat('#8A5A30')); post.position.set(x, 1.2, -19); range.add(post);
+      const post = new THREE.Mesh(new THREE.BoxGeometry(.18, 2.4, .18), K3.mat('#8A5A30')); post.position.set(x, 1.2, -31); range.add(post);
     }
-    for (const y of [.7, 1.8]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(25, .16, .12), K3.mat('#A0703A')); rail.position.set(0, y, -19); range.add(rail); }
+    for (const y of [.7, 1.8]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(25, .16, .12), K3.mat('#A0703A')); rail.position.set(0, y, -31); range.add(rail); }
     /* حبل رايات ملوّنة فوق الميدان */
     const cols = [th.accent, th.gold, '#FFFFFF', th.wall2];
     for (const z of [-3, -12]) {
@@ -61,7 +61,7 @@ function shootScene() {
     const desk = new THREE.Mesh(new THREE.BoxGeometry(8, .9, 1.2), K3.mat('#A0703A')); desk.position.set(0, .45, 5.4); range.add(desk);
     const top = new THREE.Mesh(new THREE.BoxGeometry(8.2, .12, 1.4), K3.mat('#8A5A30')); top.position.set(0, .95, 5.4); range.add(top);
     for (let i = 0; i < 6; i++) { const bag = new THREE.Mesh(new THREE.SphereGeometry(.45, 10, 8), K3.mat('#C9B48A', { flatShading: true })); bag.scale.set(1.4, .55, .8); bag.position.set(-3.6 + i * 1.45, 1.15, 5.3); range.add(bag); }
-    K3.scatter(range, th, { x0: -30, x1: 30, z0: -34, z1: 4, count: 500, avoid: (x, z) => Math.abs(x) < 9.5 && z > -18 && z < 6 });
+    K3.scatter(range, th, { x0: -30, x1: 30, z0: -34, z1: 4, count: 500, avoid: (x, z) => Math.abs(x) < 14 && z > -32 && z < 6 });
     for (let i = 0; i < 18; i++) { const a = Math.PI * (1.05 + i / 17 * .9), r = K3.rnd(18, 28); const p = K3.prop(th, K3.rnd(1.5, 2.5)); p.position.set(Math.cos(a) * r, 0, Math.sin(a) * r - 6); range.add(p); }
     K3.horizon(S, th, { radius: 75 });
     K3.weather(S, th, { w: 20, h: 12, d: 30, cz: -8 });
@@ -132,7 +132,6 @@ function shootScene() {
     targets.forEach(t => range.remove(t.g));
     targets = [];
     const list = keep || mixAnswers(S.q).map(a => ({ a }));
-    /* حتى أربعة أهداف في صف واحد؛ وما زاد يقف في صف خلفي أعلى قليلًا وبين فراغات الأمامي فلا يختفي خلفه */
     /* كل الإجابات أهداف: حتى خمسة في الصف، وكل صف خلفي أعلى قليلًا وبين فراغات الذي أمامه */
     const n = list.length, rowsN = Math.max(1, Math.ceil(n / 5)), per = Math.ceil(n / rowsN);
     list.forEach((it, k) => {
