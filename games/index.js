@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwwjdjwjx6t",
+  "type": "sub3d",
+  "name": "احكام الميم الساكنة",
+  "desc": "",
+  "count": 1,
+  "updated": 1795636186819
+ },
+ {
   "id": "gmww5n8a0ztu",
   "type": "arena3d",
   "name": "اركان الاسلام",
