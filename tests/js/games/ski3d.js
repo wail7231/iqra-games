@@ -91,13 +91,15 @@ function skiScene() {
   }
   function spawnRow(z = -60) {
     const th = K3.theme();
-    /* طابور يمرّ على كل الإجابات بالتناوب (ثلاث في كل صف)، فتظهر كلها مهما كثرت */
+    /* بوابة واحدة لكل صف (كالممر الجاري): طابور مخلوط يمرّ على كل الإجابات بالتناوب ويتكرر، فتظهر كلها مهما كثرت */
     if (!S.queue || S.queue.q !== S.q || !S.queue.list.length) S.queue = { q: S.q, list: shuffle(mixAnswers(S.q, Infinity, S.collected)) };
     S.queue.list = S.queue.list.filter(a => !S.collected.includes(a.t));
     if (!S.queue.list.length) S.queue.list = shuffle(mixAnswers(S.q, Infinity, S.collected));
-    const answers = S.queue.list.splice(0, 3);
-    /* مواضع متباعدة عبر عرض المنحدر */
-    const slots = shuffle([-6, -2, 2, 6]).slice(0, answers.length).sort((a, b) => a - b);
+    const answers = S.queue.list.splice(0, 1);
+    /* موضع البوابة عشوائي عبر عرض المنحدر، وبعيد عن موضع البوابة السابقة */
+    const opts = [-6, -3, 0, 3, 6].filter(x => S.lastX == null || Math.abs(x - S.lastX) >= 3);
+    const slots = [opts[Math.floor(Math.random() * opts.length)]];
+    S.lastX = slots[0];
     const row = { kind: 'row', z, q: S.q, gates: [], done: false, g: new THREE.Group() };
     answers.forEach((a, k) => { const gt = gate(a, slots[k] + K3.rnd(-.4, .4), th); row.g.add(gt); row.gates.push(gt); });
     row.g.position.z = z;
@@ -162,14 +164,14 @@ function skiScene() {
     row.done = true;
     if (row.q !== S.q || S.answered || Play.roundDone) return;
     const gt = row.gates.find(g => Math.abs(g.position.x - P.x) < 1.65);
-    if (!gt) { spawnRow(); return; }
+    if (!gt) return;
     const a = gt.userData.a, wp = new THREE.Vector3(gt.position.x, 2.6, 0);
     row.g.localToWorld(wp);
     if (a.ok) {
       K3.tint(gt, '#4CAF50', .7);
       S.collected.push(a.t);
       if (S.paint) S.paint(S.collected.length);
-      if (S.collected.length < S.need) { K3.burstAt(S, wp, true, '✓'); FX.play('good'); spawnRow(); return; }
+      if (S.collected.length < S.need) { K3.burstAt(S, wp, true, '✓'); FX.play('good'); return; }
       S.answered = true;
       K3.burstAt(S, wp, true, S.missed ? '✓' : '+١');
       FX.play('ok');
@@ -180,7 +182,7 @@ function skiScene() {
       S.missed = true;
       K3.burstAt(S, wp, false);
       FX.play('bad');
-      if (!Play.mistake()) spawnRow();
+      Play.mistake();
     }
   }
 
@@ -232,7 +234,7 @@ function skiScene() {
       }
     });
     for (let i = items.length - 1; i >= 0; i--) { const it = items[i]; if (it.kind !== 'deco' && (it.dead || it.z > 14)) { slope.remove(it.g); items.splice(i, 1); } }
-    if (live && S.q && !S.answered && !Play.roundDone && !items.some(it => it.kind === 'row' && !it.done && !it.dead && it.q === S.q)) spawnRow(Math.min(-40, farthest - 22));
+    if (live && S.q && !S.answered && !Play.roundDone && items.filter(it => it.kind === 'row' && !it.done && !it.dead && it.q === S.q).length < 2) spawnRow(Math.min(-40, farthest - 22));
     camera.position.x += (P.x * .6 - camera.position.x) * Math.min(1, dt * 4);
     camera.position.y += (4.6 + P.y * .3 - camera.position.y) * Math.min(1, dt * 4);
     camera.lookAt(camera.position.x * .7, 1.2, -8);
