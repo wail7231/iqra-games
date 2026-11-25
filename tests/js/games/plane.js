@@ -56,7 +56,7 @@ function skyScene() {
   /* الغيوم تأتي واحدةً بعد أخرى متباعدة: بين كل غيمة والتي تليها مسافة واسعة،
      وكل غيمة في ارتفاع بعيد عن سابقتها (أعلى / وسط / أسفل)، فيقرأ الطالب كل إجابة ويفكّر قبل الاختيار */
   S.spawn = () => {
-    const answers = fitAnswers(mixAnswers(S.q, 5, S.collected), 5);
+    const answers = mixAnswers(S.q, Infinity, S.collected);
     const h = Math.max(64, Math.min(92, S.H * .19));
     const levels = [.24, .53, .8].map(f => Math.round(S.H * f));
     const gap = Math.max(300, S.W * .42);
