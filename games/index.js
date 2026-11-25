@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwuns7vc2v3",
+  "type": "shoot3d",
+  "name": "اخفاء",
+  "desc": "",
+  "count": 1,
+  "updated": 1795643615246
+ },
+ {
   "id": "gmwwjl2h9483",
   "type": "arena3d",
   "name": "الاظهار",
