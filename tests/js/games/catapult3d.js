@@ -25,7 +25,7 @@ function catapultScene() {
     ground.rotation.x = -Math.PI / 2; ground.position.z = -10; field.add(ground);
     /* ممر ترابي من المنجنيق نحو الأبراج، وسور حجري منخفض خلف الأبراج */
     const path = new THREE.Mesh(new THREE.PlaneGeometry(4, 22), K3.mat(th.path, { transparent: true, opacity: .7 })); path.rotation.x = -Math.PI / 2; path.position.set(0, .01, 0); field.add(path);
-    for (let x = -16; x <= 16; x += 2) { const st = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.1, .8), K3.mat(th.dark ? '#3A4A80' : '#9C8F80', { flatShading: true })); st.position.set(x, .55, -22); field.add(st); }
+    for (let x = -16; x <= 16; x += 2) { const st = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.1, .8), K3.mat(th.dark ? '#3A4A80' : '#9C8F80', { flatShading: true })); st.position.set(x, .55, -30); field.add(st); }
     K3.scatter(field, th, { x0: -30, x1: 30, z0: -35, z1: 16, count: 700, avoid: (x, z) => Math.abs(x) < 2.2 && z > -10 });
     for (let i = 0; i < 26; i++) { const a = Math.PI * (1 + i / 25), r = K3.rnd(24, 34); const p = K3.prop(th, K3.rnd(1.6, 2.6)); p.position.set(Math.cos(a) * r, 0, Math.sin(a) * r - 8); field.add(p); }
     for (let i = 0; i < 8; i++) { const p = K3.prop(th, K3.rnd(1, 1.6)); p.position.set((i % 2 ? 1 : -1) * K3.rnd(7, 14), 0, K3.rnd(-4, 12)); field.add(p); }
@@ -70,10 +70,12 @@ function catapultScene() {
     towers.forEach(t => { field.remove(t.flag); t.blocks.forEach(b => field.remove(b.m)); });
     decor.forEach(d => field.remove(d)); decor = [];
     blocks = []; towers = [];
-    const list = keep && keep.length ? keep : mixAnswers(S.q, 6, []).map(a => ({ a }));
+    const list = keep && keep.length ? keep : mixAnswers(S.q).map(a => ({ a }));
     const n = list.length;
     list.forEach((it, k) => {
-      const x = (k - (n - 1) / 2) * (n > 4 ? 4.2 : 5), z = -10 - (k % 2) * 4 + K3.rnd(-.6, .6);
+      /* كل الإجابات أبراجٌ: حتى ستة في الصف، والصفوف الخلفية بين فراغات الأمامية فلا يحجب برجٌ برجًا */
+      const per = Math.min(6, Math.ceil(n / Math.ceil(n / 6))), row = Math.floor(k / per), col = k % per, inRow = Math.min(per, n - row * per);
+      const x = (col - (inRow - 1) / 2) * (inRow > 4 ? 4.4 : 5) + (row % 2 ? 2.2 : 0), z = -10 - row * 5 - (n <= 4 ? (k % 2) * 3 : 0) + K3.rnd(-.4, .4);
       const levels = 3 + Math.floor(Math.random() * 2), tb = [];
       const cols = [th.wall, th.wall2, th.accent];
       for (let l = 0; l < levels; l++) for (let i = 0; i < (l === levels - 1 ? 1 : 2); i++) {
