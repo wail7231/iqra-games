@@ -16,6 +16,7 @@ function skiScene() {
   const items = [];                          // بوابات وصخور ومطبّات وزينة تتحرك نحو الكرة
   let ground, groundTex, ball, shadow, trail = [];
   const P = S.P = { x: 0, y: 0, vy: 0, vx: 0, tuck: 0, stumble: 0 };
+  S.items = () => items;
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   const speed = () => (8 + Play.cfg.speed * 1.4) * (P.tuck > 0 ? 1.35 : 1) * (P.stumble > 0 ? .45 : 1);
 
