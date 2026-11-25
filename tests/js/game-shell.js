@@ -483,3 +483,38 @@ FX.bindToggle($('#soundBtn'));
 /* ملء الشاشة يشمل اللعبة وشاشة النتيجة معًا، فتبقى أزرار «العب مرة أخرى» وغيرها قابلة للضغط */
 FX.bindFullscreen($('#fsBtn'), $('#playArea').parentElement);
 init();
+
+/* ملء الشاشة للألعاب ذات البطاقات: تكبير تلقائي يملأ ارتفاع الشاشة دون أن يتجاوز عرضها،
+   ويبقى عنوان السؤال صغيرًا. يُعاد الحساب عند كل سؤال جديد وعند تغيّر حجم الشاشة. */
+(() => {
+  const B = Play.board;
+  let raf = 0;
+  const box = () => {
+    let top = Infinity, bottom = -Infinity;
+    for (const c of B.children) {
+      const cs = getComputedStyle(c);
+      if (cs.display === 'none' || cs.position === 'absolute' || cs.position === 'fixed') continue;
+      const r = c.getBoundingClientRect();
+      if (!r.height) continue;
+      top = Math.min(top, r.top); bottom = Math.max(bottom, r.bottom);
+    }
+    return bottom > top ? bottom - top : 0;
+  };
+  function fit() {
+    raf = 0;
+    if (!document.body.classList.contains('is-fs') || B.classList.contains('k3-full')) { B.style.removeProperty('--fs-zoom'); return; }
+    const cs = getComputedStyle(B), avail = B.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    B.style.setProperty('--fs-zoom', '1');
+    const h1 = box();
+    if (!h1 || avail <= 0) return;
+    let z = Math.max(1, Math.min(2.4, avail / h1 * .94));
+    B.style.setProperty('--fs-zoom', z.toFixed(3));
+    /* النص قد يلتف بعد التكبير فيطول: نصحّح مرتين */
+    for (let i = 0; i < 2; i++) { const h = box(); if (h > avail) { z = Math.max(1, z * avail / h * .97); B.style.setProperty('--fs-zoom', z.toFixed(3)); } }
+  }
+  const later = () => { if (!raf) raf = requestAnimationFrame(() => requestAnimationFrame(fit)); };
+  new MutationObserver(later).observe(B, { childList: true });
+  window.addEventListener('resize', later);
+  document.addEventListener('fullscreenchange', later);
+  if (document.fonts) document.fonts.ready.then(later);
+})();
