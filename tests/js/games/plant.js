@@ -52,7 +52,7 @@ Play.register({
     wrap.append(scene, grid);
     Play.board.appendChild(wrap);
 
-    const opts = mixAnswers(q, 6);
+    const opts = mixAnswers(q);
     const buttons = opts.map((o, k) => {
       const b = el('button', 'quiz-opt', `<span class="qo-num">${toAr(k + 1)}</span><span class="qo-txt"></span><span class="qo-mark"></span>`);
       b.style.setProperty('--c', CHIP_COLORS[k % CHIP_COLORS.length]);
