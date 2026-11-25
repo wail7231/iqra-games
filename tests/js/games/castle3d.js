@@ -8,6 +8,9 @@ let CASTLE = null;
 const CT = { R: 3, walk: 3.75, H: 2.6 };    // نصف قطر البرج، ومسار اللاعب، وارتفاع الطابق
 
 function castleScene() {
+  /* البرج يتسع بقدر أكبر عدد إجابات في اللعبة، فتظهر كل الإجابات على درجات متباعدة حوله */
+  const maxN = Math.max(4, ...Play.items.map(it => answersOf(it).length + (it.wrong || []).length));
+  CT.R = Math.max(3, maxN * 3 / (Math.PI * 2) - .75); CT.walk = CT.R + .75;
   const S = K3.create({ fov: 52, fogNear: 30, fogFar: 90, ratio: .66, maxH: 520 });
   const { scene, camera } = S;
   const joy = K3.joystick(S);
@@ -110,7 +113,7 @@ function castleScene() {
   function placeLedges(keep) {
     const th = K3.theme();
     ledges.forEach(l => tower && tower.remove(l.g));
-    const list = keep && S.answers ? S.answers : mixAnswers(S.q, 4, S.collected);
+    const list = keep && S.answers ? S.answers : mixAnswers(S.q, Infinity, S.collected);
     S.answers = list;
     const off = Math.random() * Math.PI * 2, y = (level + 1) * CT.H - .9;
     ledges = list.map((a, k) => {
@@ -121,7 +124,8 @@ function castleScene() {
       const trim = new THREE.Mesh(new THREE.BoxGeometry(1.76, .08, 1.56), K3.mat(th.wall2)); trim.position.y = -.17; g.add(trim);
       const brace = new THREE.Mesh(new THREE.BoxGeometry(.2, .7, 1.1), K3.mat(th.wall2)); brace.position.set(0, -.45, -.15); brace.rotation.x = .5; g.add(brace);
       const sign = K3.sign(a.t, { h: .85, px: 64 });
-      if (sign.scale.x > 3.2) sign.scale.set(3.2, 3.2 / sign.userData.ratio, 1);
+      const capS = Math.min(3.2, CT.walk * Math.PI * 2 / list.length * .95);
+      if (sign.scale.x > capS) sign.scale.set(capS, capS / sign.userData.ratio, 1);
       sign.position.set(0, 1.25, .3);
       g.add(sign);
       g.position.set(Math.cos(ang) * CT.walk, y, Math.sin(ang) * CT.walk);

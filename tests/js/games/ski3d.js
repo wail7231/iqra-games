@@ -91,7 +91,11 @@ function skiScene() {
   }
   function spawnRow(z = -60) {
     const th = K3.theme();
-    const answers = mixAnswers(S.q, 3, S.collected).slice(0, 3);
+    /* طابور يمرّ على كل الإجابات بالتناوب (ثلاث في كل صف)، فتظهر كلها مهما كثرت */
+    if (!S.queue || S.queue.q !== S.q || !S.queue.list.length) S.queue = { q: S.q, list: shuffle(mixAnswers(S.q, Infinity, S.collected)) };
+    S.queue.list = S.queue.list.filter(a => !S.collected.includes(a.t));
+    if (!S.queue.list.length) S.queue.list = shuffle(mixAnswers(S.q, Infinity, S.collected));
+    const answers = S.queue.list.splice(0, 3);
     /* مواضع متباعدة عبر عرض المنحدر */
     const slots = shuffle([-6, -2, 2, 6]).slice(0, answers.length).sort((a, b) => a - b);
     const row = { kind: 'row', z, q: S.q, gates: [], done: false, g: new THREE.Group() };
