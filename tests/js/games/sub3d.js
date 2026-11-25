@@ -119,7 +119,7 @@ function subScene() {
   function spawnBubbles(keep) {
     bubbles.forEach(b => sea.remove(b.g));
     bubbles = [];
-    const list = keep && keep.length ? keep : mixAnswers(S.q, 6, []).map(a => ({ a }));
+    const list = keep && keep.length ? keep : mixAnswers(S.q).map(a => ({ a }));
     list.forEach(it => {
       if (it.state === 'gone') return;
       let { x, y, z } = it;
@@ -278,7 +278,7 @@ function subScene() {
       /* لمس الفقاعة بالغواصة يفقعها أيضًا */
       if (live && !S.answered && !Play.roundDone && g.position.distanceTo(sub.position) < 2.1) popBubble(b);
     });
-    if (S.q && live && !S.answered && !Play.roundDone && !bubbles.some(b => !b.state && b.a.ok)) spawnBubbles(mixAnswers(S.q, 6, S.collected).map(a => ({ a })));
+    if (S.q && live && !S.answered && !Play.roundDone && !bubbles.some(b => !b.state && b.a.ok)) spawnBubbles(mixAnswers(S.q, Infinity, S.collected).map(a => ({ a })));
     hazards.forEach(h => {
       if (h.dead > 0) { h.dead -= dt; if (h.dead <= 0) { h.g = hazard(h.kind); h.x = K3.rnd(-SB.half + 1, SB.half - 1); h.z = K3.rnd(-SB.half + 1, SB.half - 3); h.g.position.set(h.x, h.y, h.z); sea.add(h.g); } return; }
       h.g.position.y = h.y + Math.sin(S.t * .9 + h.ph) * .35;

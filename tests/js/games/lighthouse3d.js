@@ -159,7 +159,8 @@ function lighthouseScene() {
     const bowLamp = new THREE.Mesh(new THREE.SphereGeometry(.1, 8, 6), K3.glow('#FFE08A')); bowLamp.position.set(0, .8, -2.35); body.add(bowLamp);
     /* لافتة الإجابة فوق الصاري (تواجه الكاميرا دائمًا)، وحلقة على الماء حين يقع الضوء على السفينة */
     const sign = K3.sign(a.t, { h: 1.7, px: 80 });
-    if (sign.scale.x > 6.4) sign.scale.set(6.4, 6.4 / sign.userData.ratio, 1);
+    const capW = ships.length > 7 || (S.q && answersOf(S.q).length + (S.q.wrong || []).length > 7) ? 5 : 6.4;
+    if (sign.scale.x > capW) sign.scale.set(capW, capW / sign.userData.ratio, 1);
     sign.position.set(0, 6.1, 0); g.add(sign);
     const ring = new THREE.Mesh(new THREE.RingGeometry(2.6, 3.1, 40), K3.glow('#FFF3C4', { transparent: true, opacity: 0, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .25; g.add(ring);
     g.userData = { body, sign, ring, flag, sail };
@@ -168,11 +169,12 @@ function lighthouseScene() {
   function spawnShips() {
     ships.forEach(s => scene.remove(s.g));
     ships = [];
-    const list = mixAnswers(S.q, 6, []);
+    const list = mixAnswers(S.q);
     const n = list.length, lanes = shuffle([...Array(n)].map((_, k) => k));
     list.forEach((a, k) => {
       /* كل سفينة في ممر خاص بها حتى لا تتزاحم، وبعدها عن المنارة مختلف */
-      const x = -24 + (lanes[k] + .5) * (48 / n) + K3.rnd(-1, 1);
+      const span = Math.max(48, n * 6.6);
+      const x = -span / 2 + (lanes[k] + .5) * (span / n) + K3.rnd(-.6, .6);
       const z = K3.rnd(LH.far, LH.far + 14);
       const g = makeShip(a); g.position.set(x, 0, z);
       scene.add(g);
@@ -288,7 +290,7 @@ function lighthouseScene() {
       if (s.state === 'come' || s.state === 'back') {
         if (live) {
           const sp = speed() * s.sp * (s.state === 'back' ? 1.6 : 1);
-          const tx = s.state === 'come' ? s.lane * .55 : s.lane, tz = s.state === 'come' ? LH.near : LH.far;
+          const tx = s.state === 'come' ? s.lane * .85 : s.lane, tz = s.state === 'come' ? LH.near : LH.far;
           const dx = tx - s.x, dz = tz - s.z, d = Math.hypot(dx, dz) || 1;
           vx = dx / d * sp; vz = dz / d * sp;
           if (s.state === 'come' && s.z > LH.near - 1) s.state = 'back';

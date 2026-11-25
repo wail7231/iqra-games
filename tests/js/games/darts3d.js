@@ -186,7 +186,7 @@ function bowScene() {
     stands.forEach(m => yard.remove(m)); stands = [];
     const hs = shuffle(BW.heights.slice());
     targets = [];
-    const list = keep || mixAnswers(S.q, 6, []).map(a => ({ a }));
+    const list = keep || mixAnswers(S.q).map(a => ({ a }));
     const n = list.length, off = look.yaw + K3.rnd(-.5, .5);
     list.forEach((it, k) => {
       if (it.state === 'gone') return;

@@ -57,7 +57,7 @@ function maze3dScene() {
   }
   const bits = o => [1, 2, 4, 8].filter(b => o & b).length;
   function makeMaze(n) {
-    const cols = n > 10 ? 21 : n > 7 ? 19 : n > 4 ? 15 : 13, rows = n > 10 ? 17 : n > 7 ? 15 : n > 4 ? 13 : 11;
+    const cols = n > 22 ? 29 : n > 16 ? 25 : n > 10 ? 21 : n > 7 ? 19 : n > 4 ? 15 : 13, rows = n > 22 ? 23 : n > 16 ? 21 : n > 10 ? 17 : n > 7 ? 15 : n > 4 ? 13 : 11;
     const sc = Math.floor(cols / 2), sr = rows - 1;
     for (let tries = 0; tries < 60; tries++) {
       const open = carve(cols, rows, sc, sr);
@@ -217,7 +217,7 @@ function maze3dScene() {
   S.setQuestion = q => {
     S.q = q; S.collected = []; S.missed = false; S.answered = false;
     S.need = needAll(q) ? answersOf(q).length : 1;
-    const answers = mixAnswers(q, 16);
+    const answers = mixAnswers(q);
     M = makeMaze(answers.length);
     M.doors.forEach((d, k) => { d.a = answers[k]; d.state = ''; });
     const p = at(M.sc, M.sr);

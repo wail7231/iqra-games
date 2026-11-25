@@ -7,7 +7,7 @@
 'use strict';
 
 let BALLOON = null;
-const BL = { y: 11, area: 30, padR: 2.7, chuteVy: 2.6, freeT: .35 };
+const BL = { y: 11, area: 36, padR: 2.7, chuteVy: 2.6, freeT: .35 };
 
 function balloonScene() {
   const S = K3.create({ fov: 55, fogNear: 50, fogFar: 120, ratio: .62, maxH: 540 });
@@ -19,9 +19,9 @@ function balloonScene() {
   S.q = null; S.collected = []; S.need = 1; S.missed = false; S.answered = false;
   /* مواضع المنصات محددة سلفًا ومتباعدة، فلا تقع قرية أو شجرة فوق منصة مهما تغيّر السؤال */
   const SPOTS = [];
-  for (let t = 0; t < 600 && SPOTS.length < 14; t++) {
+  for (let t = 0; t < 3000 && SPOTS.length < 28; t++) {
     const x = K3.rnd(-BL.area + 3, BL.area - 3), z = K3.rnd(-BL.area - 12, 4);
-    if (SPOTS.every(p => Math.hypot(p.x - x, p.z - z) > 10.5) && Math.hypot(x - P.x, z - P.z) > 9) SPOTS.push({ x, z });
+    if (SPOTS.every(p => Math.hypot(p.x - x, p.z - z) > 9.6) && Math.hypot(x - P.x, z - P.z) > 9) SPOTS.push({ x, z });
   }
   const nearSpot = (x, z, r) => SPOTS.some(p => Math.hypot(p.x - x, p.z - z) < r);
   const windArrow = el('div', 'k3-wind', '<svg viewBox="0 0 40 40"><path d="M20 4l8 12h-5v18h-6V16h-5z"/></svg>');
@@ -143,7 +143,7 @@ function balloonScene() {
     const th = K3.theme();
     pads.forEach(p => scene.remove(p.g));
     pads = [];
-    const list = keep || mixAnswers(S.q, 12, []).map(a => ({ a }));
+    const list = keep || mixAnswers(S.q).map(a => ({ a }));
     const free = shuffle(SPOTS.slice());
     list.forEach((it, k) => {
       let { x, z } = it;
