@@ -75,7 +75,7 @@ function catapultScene() {
     {
       const rowsN = Math.ceil(n / Math.min(6, Math.ceil(n / Math.ceil(n / 6))));
       camera.position.set(0, 7 + (rowsN - 1) * 2.2, 15.6 + (rowsN - 1) * .8);
-      camera.lookAt(0, .2, -4 - (rowsN - 1) * 3);
+      camera.lookAt(0, .2 + (rowsN - 1) * 1.5, -4 - (rowsN - 1) * 3);
     }
     list.forEach((it, k) => {
       /* كل الإجابات أبراجٌ: حتى ستة في الصف، والصفوف الخلفية بين فراغات الأمامية فلا يحجب برجٌ برجًا */
@@ -109,7 +109,7 @@ function catapultScene() {
       const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.mat(th.gold)); ball.position.set(0, 3.75, -.18); flag.add(ball);
       const pen = new THREE.Mesh(new THREE.ConeGeometry(.24, .8, 3), K3.mat(th.accent, { flatShading: true })); pen.rotation.z = -Math.PI / 2; pen.position.set(.42, 3.45, -.18); flag.add(pen); flag.userData.pen = pen;
       /* أعلام الصفوف الخلفية على أعمدة أطول، فتظهر لافتاتها فوق لافتات الصف الأمامي */
-      const ext = row * 2.1;
+      const ext = row * 1.8;
       if (ext) { const ep = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, ext, 8), K3.mat("#5A4632")); ep.position.set(0, -ext / 2 + .02, -.18); flag.add(ep); }
       flag.position.set(x, top + ext, z);
       field.add(flag);
