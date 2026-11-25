@@ -134,14 +134,16 @@ function shootScene() {
     targets = [];
     const list = keep || mixAnswers(S.q).map(a => ({ a }));
     /* كل الإجابات أهداف: حتى خمسة في الصف، وكل صف خلفي أعلى قليلًا وبين فراغات الذي أمامه */
-    const n = list.length, rowsN = Math.max(1, Math.ceil(n / 5)), per = Math.ceil(n / rowsN);
+    const n = list.length, rowsN = Math.max(1, Math.ceil(n / 6)), per = Math.ceil(n / rowsN);
+    camera.position.set(0, 2.1 + (rowsN - 1) * 1.6, 8.5 + (rowsN - 1) * 2);
+    camera.lookAt(0, 1.9 + (rowsN - 1) * 2.4, -8 - (rowsN - 1) * 3);
     list.forEach((it, k) => {
       const row = Math.floor(k / per), inRow = Math.min(per, n - row * per), idx = k % per;
-      const gap = inRow <= 4 ? 4.3 : 4;
+      const gap = inRow <= 4 ? 4.3 : 3.7;
       const x = (idx - (inRow - 1) / 2) * gap + (row % 2 ? gap / 2 : 0) + K3.rnd(-.15, .15);
-      const z = -7 - row * 5.5;
+      const z = -7 - row * 4.5;
       const g = makeTarget(it.a, th);
-      const lift = row * 1.25;
+      const lift = row * 3.3;
       g.position.set(x, lift, z);
       range.add(g);
       if (lift) {
@@ -152,7 +154,7 @@ function shootScene() {
         stand.position.set(x, 0, z); range.add(stand); stands.push(stand);
       }
       /* كل الأهداف تطلع وتنزل، بسرعات ومراحل مختلفة حتى لا تتحرك معًا */
-      targets.push({ a: it.a, g, x, z, lift, base: 2.3 + row * .75, ph: k * 1.9 + Math.random(), sp: K3.rnd(.9, 1.5), amp: K3.rnd(.7, 1.05), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
+      targets.push({ a: it.a, g, x, z, lift, base: 2.3, ph: k * 1.9 + Math.random(), sp: K3.rnd(.9, 1.5), amp: K3.rnd(.7, 1.05), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
     });
   }
   S.targets = () => targets;

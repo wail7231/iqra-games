@@ -72,6 +72,11 @@ function catapultScene() {
     blocks = []; towers = [];
     const list = keep && keep.length ? keep : mixAnswers(S.q).map(a => ({ a }));
     const n = list.length;
+    {
+      const rowsN = Math.ceil(n / Math.min(4, Math.ceil(n / Math.ceil(n / 4))));
+      camera.position.set(0, 7 + (rowsN - 1) * 3, 15.6 + (rowsN - 1) * 1.2);
+      camera.lookAt(0, .2, -4 - (rowsN - 1) * 5);
+    }
     list.forEach((it, k) => {
       /* كل الإجابات أبراجٌ: حتى ستة في الصف، والصفوف الخلفية بين فراغات الأمامية فلا يحجب برجٌ برجًا */
       const per = Math.min(4, Math.ceil(n / Math.ceil(n / 4))), row = Math.floor(k / per), col = k % per, inRow = Math.min(per, n - row * per);
