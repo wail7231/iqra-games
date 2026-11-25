@@ -816,30 +816,11 @@ const K3 = (() => {
         moon.position.set(-26, 22, -70); g.add(moon);
         const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: '#F6E7A8', transparent: true, opacity: .45, depthWrite: false, fog: false }));
         halo.scale.set(16, 16, 1); halo.position.copy(moon.position); g.add(halo);
+        if (hills) mountainRanges(g, th, radius, y);
       }
     } else if (th.deco !== 'paper') {
-      const hillCol = { palms: '#2BB3C0', pines: '#DCE5F0', crystals: '#CFE8F6', coral: '#2E9CA8', autumn: '#D9A86C', trees: '#9CCB7E', domes: '#E9D3A8' }[th.deco] || th.ground2;
-      /* سلسلة بعيدة فاتحة خلف السلسلة القريبة */
-      const farCol = col(hillCol).lerp(col(th.sky[1]), .55);
-      for (let i = 0; i < (hills ? 18 : 0); i++) {
-        const a = Math.PI + (i / 17) * Math.PI + rnd(-.05, .05), h = rnd(10, 20), geo = new THREE.ConeGeometry(rnd(10, 16), h, 9, 3), p = geo.attributes.position;
-        for (let k = 0; k < p.count; k++) if (p.getY(k) < h / 2 - .1) p.setXYZ(k, p.getX(k) * rnd(.85, 1.15), p.getY(k) + rnd(-.6, .6), p.getZ(k) * rnd(.85, 1.15));
-        geo.computeVertexNormals();
-        const m = new THREE.Mesh(geo, mat(farCol, { flatShading: true, fog: false }));
-        m.position.set(Math.cos(a) * radius * 1.35, y + h / 2 - 1.5, Math.sin(a) * radius * 1.35);
-        g.add(m);
-        if (th.deco !== 'palms' && th.deco !== 'coral') { const cap = new THREE.Mesh(new THREE.ConeGeometry(h * .2 * 1.1, h * .22, 9), mat(th.deco === 'domes' || th.deco === 'autumn' ? '#F7EBD6' : '#FFFFFF', { flatShading: true, fog: false })); cap.position.set(m.position.x, y + h - 1.5 - h * .11, m.position.z); g.add(cap); }
-      }
-      for (let i = 0; i < (hills ? 14 : 0); i++) {
-        const a = Math.PI + (i / 13) * Math.PI, h = rnd(5, 12);
-        const hg = new THREE.ConeGeometry(rnd(7, 12), h, 8, 3), hp = hg.attributes.position;
-        for (let k = 0; k < hp.count; k++) if (hp.getY(k) < h / 2 - .1) hp.setXYZ(k, hp.getX(k) * rnd(.85, 1.12), hp.getY(k) + rnd(-.4, .4), hp.getZ(k) * rnd(.85, 1.12));
-        hg.computeVertexNormals();
-        const m = new THREE.Mesh(hg, mat(hillCol, { flatShading: true }));
-        m.position.set(Math.cos(a) * radius, y + h / 2 - 1, Math.sin(a) * radius);
-        g.add(m);
-        if (th.deco === 'pines' || th.deco === 'crystals') { const cap = new THREE.Mesh(new THREE.ConeGeometry(2.6, 2.6, 6), mat('#FFFFFF', { flatShading: true })); cap.position.set(m.position.x, y + h - 2.3, m.position.z); g.add(cap); }
-      }
+      /* الجبال: ثلاث سلاسل تحيط بالخريطة كلها — بعيدة باهتة بلون السماء، ووسطى بتفاصيلها، وتلال قريبة بأشجار صغيرة */
+      if (hills) mountainRanges(g, th, radius, y);
       if (th.deco === 'palms' || th.deco === 'trees' || th.deco === 'domes' || th.deco === 'autumn') {
         const sunM = new THREE.Mesh(new THREE.SphereGeometry(4, 24, 16), glow(th.deco === 'autumn' ? '#FFC45C' : '#FFE07A', { fog: false }));
         sunM.position.set(24, 26, -80); g.add(sunM);
@@ -857,6 +838,91 @@ const K3 = (() => {
     }
     S.env.add(g);
     return g;
+  }
+
+  /* ---------- جبل واحد: صخر بحواف متعرّجة، وألوان حسب الارتفاع والميل (عشب، صخر، ثلج) ---------- */
+  function mountainGeo(r, h, pal, o = {}) {
+    let geo = new THREE.ConeGeometry(r, h, 18, 12, true);
+    const p = geo.attributes.position, ph = [rnd(0, 6), rnd(0, 6), rnd(0, 6), rnd(0, 6)];
+    const peakX = rnd(-.12, .12) * r, peakZ = rnd(-.12, .12) * r;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), yv = p.getY(i), z = p.getZ(i), t = (yv + h / 2) / h, d = Math.hypot(x, z);
+      if (d < 1e-4) { p.setXYZ(i, peakX, yv, peakZ); continue; }
+      const a = Math.atan2(z, x);
+      /* تعرّجات: نتوءات كبيرة وحواف صغيرة، أقوى في الوسط، والقمة مائلة قليلًا */
+      const n = Math.sin(a * 3 + ph[0]) * .5 + Math.sin(a * 7 + ph[1]) * .28 + Math.sin(a * 13 + t * 6 + ph[2]) * .14 + Math.sin(t * 11 + a * 2 + ph[3]) * .1;
+      const k = 1 + n * .2 * (1 - t * .3);
+      p.setXYZ(i, x * k + peakX * t, yv + (t > .02 && t < .97 ? Math.sin(a * 5 + ph[2]) * h * .035 : 0), z * k + peakZ * t);
+    }
+    geo = geo.toNonIndexed();
+    geo.computeVertexNormals();
+    const pos = geo.attributes.position, nor = geo.attributes.normal, cols = new Float32Array(pos.count * 3), c = new THREE.Color();
+    const snowLine = o.snow == null ? .7 : o.snow;
+    for (let f = 0; f < pos.count; f += 3) {
+      const cy = (pos.getY(f) + pos.getY(f + 1) + pos.getY(f + 2)) / 3, t = (cy + h / 2) / h;
+      const ny = (nor.getY(f) + nor.getY(f + 1) + nor.getY(f + 2)) / 3, ca = Math.atan2(pos.getZ(f), pos.getX(f));
+      const jag = Math.sin(ca * 9 + h) * .06 + rnd(-.03, .03);
+      if (snowLine < 1 && t > snowLine + jag) c.copy(pal.snow).lerp(pal.rock, ny < .45 ? .35 : 0);
+      else if (t > .28 + jag) c.copy(pal.rock).lerp(pal.rock2, Math.max(0, .6 - ny));
+      else c.copy(pal.base).lerp(pal.rock, Math.max(0, t / .28 - .5));
+      c.offsetHSL(0, 0, rnd(-.035, .035));
+      if (pal.haze) c.lerp(pal.haze, pal.hazeK);
+      for (let v = 0; v < 3; v++) cols.set([c.r, c.g, c.b], (f + v) * 3);
+    }
+    geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+    return geo;
+  }
+  /* ألوان الجبال حسب القالب */
+  function mountainPalette(th) {
+    const id = th.deco;
+    const base = { palms: '#C9A96A', coral: '#3FA37A', pines: '#E9EEF5', crystals: '#DCEBF5', autumn: '#B5793E', trees: '#6DAA5C', domes: '#C9A56E', night: '#1E2B5A' }[id] || th.ground2;
+    const rock = { palms: '#B08A5A', coral: '#7C8F86', pines: '#7D8DA8', crystals: '#8FB4CF', autumn: '#8A6A4A', trees: '#8C8C8A', domes: '#A88A62', night: '#2C3A6E' }[id] || '#8C8C8A';
+    const rock2 = col(rock).multiplyScalar(.72);
+    const snow = { palms: '#F3E3C0', coral: '#E8F4F2', autumn: '#F7EBD6', night: '#9FB3D9', domes: '#F7EBD6' }[id] || '#FFFFFF';
+    const line = { palms: 1, coral: .85, pines: .42, crystals: .45, autumn: .78, trees: .7, domes: .82, night: .66 }[id];
+    return { base: col(base), rock: col(rock), rock2, snow: col(snow), line: line == null ? .7 : line };
+  }
+  function mountainRanges(g, th, radius, y) {
+    const pal = mountainPalette(th), sky = col(th.sky[1]);
+    const far = { ...pal, haze: sky, hazeK: th.dark ? .35 : .5 };
+    const mid = { ...pal, haze: sky, hazeK: th.dark ? .12 : .18 };
+    const matV = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, fog: false, side: THREE.DoubleSide });
+    const matM = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide });
+    /* السلسلة البعيدة: قمم عالية متلاصقة حول الأفق كله */
+    for (let i = 0; i < 30; i++) {
+      const a = i / 30 * Math.PI * 2 + rnd(-.06, .06), h = rnd(18, 34), r = rnd(13, 20);
+      const m = new THREE.Mesh(mountainGeo(r, h, far, { snow: pal.line - .05 }), matV);
+      m.position.set(Math.cos(a) * radius * 1.5, y + h / 2 - 2, Math.sin(a) * radius * 1.5); m.rotation.y = rnd(0, 6);
+      g.add(m);
+    }
+    /* السلسلة الوسطى: جبال بقمم مزدوجة أحيانًا */
+    for (let i = 0; i < 22; i++) {
+      const a = i / 22 * Math.PI * 2 + rnd(-.08, .08), h = rnd(11, 22), r = rnd(9, 14);
+      const cx = Math.cos(a) * radius * 1.15, cz = Math.sin(a) * radius * 1.15;
+      const m = new THREE.Mesh(mountainGeo(r, h, mid, { snow: pal.line }), matM);
+      m.position.set(cx, y + h / 2 - 1.5, cz); m.rotation.y = rnd(0, 6); g.add(m);
+      if (i % 3 === 0) { const h2 = h * rnd(.55, .75), m2 = new THREE.Mesh(mountainGeo(r * .7, h2, mid, { snow: pal.line + .05 }), matM); m2.position.set(cx + Math.cos(a + 1.57) * r * .8, y + h2 / 2 - 1.5, cz + Math.sin(a + 1.57) * r * .8); g.add(m2); }
+    }
+    /* تلال قريبة مستديرة بأشجار صغيرة على سفوحها */
+    const treeGeo = new THREE.ConeGeometry(.9, 2.6, 6), trunkCol = col(th.dark ? '#16324A' : th.deco === 'autumn' ? '#C2621B' : th.deco === 'pines' ? '#2F5D50' : '#3F7D3A');
+    const trees = new THREE.InstancedMesh(treeGeo, new THREE.MeshLambertMaterial({ color: trunkCol, flatShading: true }), 160);
+    let tn = 0;
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < 26; i++) {
+      const a = i / 26 * Math.PI * 2 + rnd(-.05, .05), h = rnd(4, 8), r = rnd(8, 12);
+      const cx = Math.cos(a) * radius * .98, cz = Math.sin(a) * radius * .98;
+      const hg = new THREE.SphereGeometry(r, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), hp = hg.attributes.position;
+      for (let k = 0; k < hp.count; k++) hp.setY(k, hp.getY(k) / r * h * (1 + Math.sin(hp.getX(k) * .7 + i) * .12));
+      hg.computeVertexNormals();
+      const hill = new THREE.Mesh(hg, mat(col(pal.base).lerp(sky, .08).getStyle(), { flatShading: true }));
+      hill.position.set(cx, y - .4, cz); g.add(hill);
+      if (th.deco !== 'palms' && th.deco !== 'coral') for (let k = 0; k < 6 && tn < 160; k++) {
+        const ta = rnd(0, 6.28), tr = rnd(.25, .8) * r, th2 = h * Math.sqrt(Math.max(0, 1 - (tr / r) ** 2));
+        dummy.position.set(cx + Math.cos(ta) * tr, y - .4 + th2 + 1.1, cz + Math.sin(ta) * tr);
+        dummy.scale.setScalar(rnd(.7, 1.3)); dummy.updateMatrix(); trees.setMatrixAt(tn++, dummy.matrix);
+      }
+    }
+    trees.count = tn; g.add(trees);
   }
   function cloud(s = 1, c = '#FFFFFF', opacity = 1) {
     const g = new THREE.Group();
