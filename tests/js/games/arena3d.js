@@ -220,19 +220,22 @@ function arenaScene() {
     const th = K3.theme();
     chests.forEach(c => world.remove(c.g));
     chests = [];
-    const list = keep || mixAnswers(S.q, 6, []).map(a => ({ a }));
+    const list = keep || mixAnswers(S.q).map(a => ({ a }));
     const plats = layout.filter(b => b.kind === 'plat');
     list.forEach((it, k) => {
       if (it.state === 'gone') return;
       let { x, z, y } = it;
       if (x == null) {
         /* نصفها تقريبًا فوق المنصّات (تحتاج قفزًا)، والباقي على الأرض متباعدة */
-        const onPlat = k % 2 === 1 && plats.length;
+        /* منصة لا صندوق عليها بعد (لا يجتمع صندوقان على منصة واحدة) */
+        const freePlats = plats.filter(b => chests.every(c => Math.hypot(c.x - b.x, c.z - b.z) > 2));
+        const onPlat = k % 2 === 1 && freePlats.length;
+        const gapC = list.length > 10 ? 4.2 : 5;
         for (let t = 0; t < 120; t++) {
-          if (onPlat) { const b = plats[Math.floor(Math.random() * plats.length)]; x = b.x; z = b.z; y = b.h + .09; }
+          if (onPlat) { const b = freePlats[Math.floor(Math.random() * freePlats.length)]; x = b.x; z = b.z; y = b.h + .09; }
           else { x = K3.rnd(-AR.half + 3, AR.half - 3); z = K3.rnd(-AR.half + 3, AR.half - 3); y = 0; }
           const clear = onPlat || (!(Math.abs(x) < 7 && z < -AR.half + 14) && Math.hypot(x, z) > 4) && !solids.some(b => Math.abs(b.x - x) < b.hw + 1.4 && Math.abs(b.z - z) < b.hd + 1.4);
-          if (clear && chests.every(c => Math.hypot(c.x - x, c.z - z) > 5) && Math.hypot(x - P.x, z - P.z) > 6) break;
+          if (clear && chests.every(c => Math.hypot(c.x - x, c.z - z) > gapC) && Math.hypot(x - P.x, z - P.z) > 6) break;
         }
       }
       const g = chestMesh(it.a, th);
@@ -609,7 +612,7 @@ function arenaScene() {
     /* إن انفجرت كل الصناديق الصحيحة المتبقية… (لا يحدث عادة) نعيد توزيعها */
     if (S.q && live && !S.answered && P.keys < S.need && !chests.some(c => !c.state && c.a.ok)) {
       const got = chests.filter(c => c.state === 'good').map(c => c.a.t);
-      spawnChests(mixAnswers(S.q, 6, got).map(a => ({ a })));
+      spawnChests(mixAnswers(S.q, Infinity, got).map(a => ({ a })));
     }
     smoke.forEach(s => { s.life -= dt * .8; s.m.position.addScaledVector(s.v, dt); s.m.scale.setScalar(1 + (1 - s.life) * 1.5); s.m.material.opacity = Math.max(0, s.life * .7); if (s.life <= 0) scene.remove(s.m); });
     smoke = smoke.filter(s => s.life > 0);
