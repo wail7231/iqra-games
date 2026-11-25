@@ -73,14 +73,14 @@ function catapultScene() {
     const list = keep && keep.length ? keep : mixAnswers(S.q).map(a => ({ a }));
     const n = list.length;
     {
-      const rowsN = Math.ceil(n / Math.min(4, Math.ceil(n / Math.ceil(n / 4))));
-      camera.position.set(0, 7 + (rowsN - 1) * 3, 15.6 + (rowsN - 1) * 1.2);
-      camera.lookAt(0, .2, -4 - (rowsN - 1) * 5);
+      const rowsN = Math.ceil(n / Math.min(6, Math.ceil(n / Math.ceil(n / 6))));
+      camera.position.set(0, 7 + (rowsN - 1) * 2.2, 15.6 + (rowsN - 1) * .8);
+      camera.lookAt(0, .2, -4 - (rowsN - 1) * 3);
     }
     list.forEach((it, k) => {
       /* كل الإجابات أبراجٌ: حتى ستة في الصف، والصفوف الخلفية بين فراغات الأمامية فلا يحجب برجٌ برجًا */
-      const per = Math.min(4, Math.ceil(n / Math.ceil(n / 4))), row = Math.floor(k / per), col = k % per, inRow = Math.min(per, n - row * per);
-      const x = (col - (inRow - 1) / 2) * (inRow > 4 ? 4.4 : 5) + (row % 2 ? 2.2 : 0), z = -10 - row * 6.5 - (n <= 4 ? (k % 2) * 3 : 0) + K3.rnd(-.4, .4);
+      const per = Math.min(6, Math.ceil(n / Math.ceil(n / 6))), row = Math.floor(k / per), col = k % per, inRow = Math.min(per, n - row * per);
+      const x = (col - (inRow - 1) / 2) * 5 + (row % 2 ? 2.5 : 0), z = -10 - row * 7.5 - (n <= 4 ? (k % 2) * 3 : 0) + K3.rnd(-.4, .4);
       const levels = 3 + Math.floor(Math.random() * 2), tb = [];
       const cols = [th.wall, th.wall2, th.accent];
       for (let l = 0; l < levels; l++) for (let i = 0; i < (l === levels - 1 ? 1 : 2); i++) {
