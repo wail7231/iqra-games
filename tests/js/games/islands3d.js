@@ -107,15 +107,17 @@ function islandsScene() {
       if (reach.size === answers.length) return grid;
     }
     const grid = [...Array(ISL.rows)].map(() => Array(ISL.cols).fill('plain'));
-    answers.forEach((a, k) => { grid[1 + Math.floor(k / 2)][k % 2 ? ISL.cols - 1 : 0] = k; });
+    answers.forEach((a, k) => { grid[2 + Math.floor(k / 3)][(k % 3) * 3] = k; });
     return grid;
   }
   function build(keep) {
     const th = K3.theme();
     if (old) { old.forEach(c => board.remove(c.g)); old = null; }
     if (cells.length) { old = cells; old.forEach(c => { c.sink = 0; }); }
-    const answers = keep && S.answers ? S.answers : mixAnswers(S.q, 6, S.collected);
+    const answers = keep && S.answers ? S.answers : mixAnswers(S.q, Infinity, S.collected);
     S.answers = answers;
+    /* الأرخبيل يطول بعدد الإجابات: ثلاث إجابات تقريبًا لكل صف إضافي */
+    ISL.rows = Math.max(6, 2 + Math.ceil(answers.length / 3));
     const grid = layout(answers);
     cells = [];
     for (let r = 0; r < ISL.rows; r++) for (let c = 0; c < ISL.cols; c++) {
