@@ -930,7 +930,7 @@ const K3 = (() => {
   }
   function aimColor(th = theme()) {
     const lum = h => { const c = col(h); return .2126 * c.r + .7152 * c.g + .0722 * c.b; };
-    const bright = th.sketch || lum(th.ground) > .68 || (lum(th.sky[1]) > .82 && lum(th.ground) > .5);
+    const bright = th.sketch || lum(th.ground) > .75;
     return bright ? (th.sketch ? '#2B4C7E' : th.wall2 || th.accent) : '#FFFFFF';
   }
   function cloud(s = 1, c = '#FFFFFF', opacity = 1) {
