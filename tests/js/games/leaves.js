@@ -36,7 +36,7 @@ function pondScene() {
     S.homeY = S.H - 78;
     S.rowY = S.H * .37;
     if (S.home) S.home.y = S.homeY;
-    S.row.forEach(l => { l.y = S.rowY; });
+    S.row.forEach(l => { l.y = S.H * l.rf; });
     if (S.token && !S.jump) { S.token.x = S.home.x; S.token.y = S.home.y; }
   };
   S.size = size;
@@ -55,16 +55,21 @@ function pondScene() {
     if (!S.token) S.token = { x: S.home.x, y: S.home.y };
     S.got = 0;
     S.need = needAll(q) ? answersOf(q).length : 1;
-    const answers = fitAnswers(mixAnswers(q, 6), 6);
-    const n = answers.length, slot = S.W / n;
-    const maxR = Math.min(slot * .47, 104, S.H * .2);
+    /* كل الإجابات تظهر: صف واحد حتى ست أوراق، وصفّان أو ثلاثة لأكثر، وكل ورقة في خانتها فلا تتداخل */
+    const answers = mixAnswers(q);
+    const n = answers.length, rowsN = n <= 6 ? 1 : n <= 12 ? 2 : 3, per = Math.ceil(n / rowsN);
+    const RF = { 1: [.37], 2: [.2, .43], 3: [.14, .3, .46] }[rowsN];
+    const slot = S.W / per;
+    const maxR = Math.min(slot * .47, 104, S.H * (rowsN === 1 ? .2 : rowsN === 2 ? .11 : .075));
     ctx.font = font(fontPx(maxR));
     S.row = answers.map((a, i) => {
+      const row = Math.floor(i / per), col = i % per, inRow = row < rowsN - 1 ? per : n - per * (rowsN - 1);
+      const w = S.W / inRow, cx = w * (col + .5), rf = RF[row];
       const r = Math.max(maxR * .86, Math.min(maxR, ctx.measureText(a.t).width / 2 + 30));
       return {
-        ...a, cx: slot * (i + .5), x: slot * (i + .5), y: S.rowY - 40, enter: 0, r,
-        phase: Math.random() * 6.28, amp: Math.max(0, slot * .5 - r - 6) * .8, sink: 0, rot: Math.random() * 6.28,
-        squash: 0, delay: i * .09,
+        ...a, cx, x: cx, y: S.H * rf - 40, rf, enter: 0, r,
+        phase: Math.random() * 6.28, amp: Math.max(0, w * .5 - r - 6) * .8, sink: 0, rot: Math.random() * 6.28,
+        squash: 0, delay: i * .07,
       };
     });
   };
@@ -257,7 +262,7 @@ function pondScene() {
     S.row.forEach(l => {
       if (l.delay > 0) { l.delay -= dt; return; }
       l.enter = Math.min(1, l.enter + dt * 2.4);
-      const baseY = S.scroll && S.scroll.leaf === l ? l.y : S.rowY - 40 * (1 - l.enter);
+      const baseY = S.scroll && S.scroll.leaf === l ? l.y : S.H * (l.rf || .37) - 40 * (1 - l.enter);
       if (!(S.scroll && S.scroll.leaf === l)) { l.y = baseY; l.x = l.cx + Math.sin(S.t * (.5 + sway() * .12) + l.phase) * l.amp * sway() / 10; }
       if (l.sink) l.sink = Math.min(1, l.sink + dt * 1.4);
     });
