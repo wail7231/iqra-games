@@ -116,7 +116,7 @@ const K3 = (() => {
     };
   })();
 
-  function create({ fov = 50, maxH = 480, ratio = .6, fogNear = 30, fogFar = 90, fsPad = 130 } = {}) {
+  function create({ fov = 50, maxH = 480, ratio = .6, fogNear = 30, fogFar = 90, fsPad = 40 } = {}) {
     const wrap = el('div', 'k3-wrap run-wrap keep');
     const cv = el('canvas', 'k3-canvas run-canvas');
     const start = el('div', 'run-start', '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>');

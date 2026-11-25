@@ -37,7 +37,7 @@ function skyScene() {
   const S = { wrap, q: null, clouds: [], running: false, missed: false, answered: false, y: 0, ty: 0, W: 0, H: 0, keys: {}, t: 0, hist: [] };
   const size = () => {
     S.W = wrap.clientWidth;
-    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 470;
+    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 40 : 470;
     S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(330, S.W * .54)));
     const dpr = window.devicePixelRatio || 1;
     cv.width = S.W * dpr;
@@ -446,7 +446,7 @@ Play.register({
       SKY.size();
     }
     SKY.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(SKY.paint.el, SKY.wrap);
+    qOver(SKY.wrap, SKY.paint.el);
     SKY.setQuestion(q);
   },
 });

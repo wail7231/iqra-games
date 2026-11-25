@@ -43,6 +43,7 @@ Play.register({
     let got = 0;
     const paintNeed = needHead(q.q, need);
     Play.board.appendChild(wrap);
+    qOver(wrap, paintNeed.el);
     const rows = answers.length <= 3 ? 1 : 2, cols = Math.ceil(answers.length / rows);
     const targets = answers.map((a, i) => ({
       ...a, col: i % cols, row: Math.floor(i / cols), phase: Math.random() * 6.28,
@@ -67,7 +68,7 @@ Play.register({
     const bow = { x: 0, y: 0 };
     const size = () => {
       W = wrap.clientWidth;
-      const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 480;
+      const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 40 : 480;
       H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(300, W * .56)));
       const dpr = window.devicePixelRatio || 1;
       cv.width = W * dpr;

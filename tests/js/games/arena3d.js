@@ -669,7 +669,7 @@ Play.register({
       ARENA.size();
     }
     ARENA.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(ARENA.paint.el, ARENA.wrap);
+    qOver(ARENA.wrap, ARENA.paint.el);
     K3.fonts.then(() => ARENA.setQuestion(q));
   },
 });

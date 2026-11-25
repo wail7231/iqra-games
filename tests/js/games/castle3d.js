@@ -235,7 +235,7 @@ Play.register({
       CASTLE.size();
     }
     CASTLE.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(CASTLE.paint.el, CASTLE.wrap);
+    qOver(CASTLE.wrap, CASTLE.paint.el);
     K3.fonts.then(() => CASTLE.setQuestion(q));
   },
 });

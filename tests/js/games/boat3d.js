@@ -332,7 +332,7 @@ Play.register({
       BOAT.size();
     }
     BOAT.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(BOAT.paint.el, BOAT.wrap);
+    qOver(BOAT.wrap, BOAT.paint.el);
     K3.fonts.then(() => BOAT.setQuestion(q));
   },
 });

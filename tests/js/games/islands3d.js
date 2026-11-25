@@ -252,7 +252,7 @@ Play.register({
       ISLE.size();
     }
     ISLE.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(ISLE.paint.el, ISLE.wrap);
+    qOver(ISLE.wrap, ISLE.paint.el);
     K3.fonts.then(() => ISLE.setQuestion(q));
   },
 });

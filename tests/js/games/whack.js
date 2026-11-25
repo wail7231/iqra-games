@@ -287,8 +287,8 @@ Play.register({
       Play.board.appendChild(WH.wrap);
       WH.size();
     }
-    Play.board.insertBefore(head, WH.wrap);
-    Play.board.insertBefore(bar, WH.wrap);
+    head.appendChild(bar);
+    qOver(WH.wrap, head);
     WH.start.classList.add('hidden');
     WH.started = true;
 

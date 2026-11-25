@@ -273,7 +273,7 @@ Play.register({
       LANE.size();
     }
     LANE.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(LANE.paint.el, LANE.wrap);
+    qOver(LANE.wrap, LANE.paint.el);
     K3.fonts.then(() => LANE.setQuestion(q));
   },
 });

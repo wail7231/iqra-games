@@ -288,7 +288,7 @@ Play.register({
       SHOOT.size();
     }
     SHOOT.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(SHOOT.paint.el, SHOOT.wrap);
+    qOver(SHOOT.wrap, SHOOT.paint.el);
     K3.fonts.then(() => SHOOT.setQuestion(q));
   },
 });

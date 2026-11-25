@@ -8,7 +8,7 @@ let MZ3 = null;
 const MZ = { cell: 2.5, wallH: 1.3, wallT: .34, R: .5 };
 
 function maze3dScene() {
-  const S = K3.create({ fov: 50, fogNear: 22, fogFar: 70, ratio: .62, fsPad: 40 });
+  const S = K3.create({ fov: 50, fogNear: 22, fogFar: 70, ratio: .62 });
   const { scene, camera } = S;
   const world = new THREE.Group();
   scene.add(world);
@@ -342,10 +342,8 @@ Play.register({
       MZ3.size();
     }
     MZ3.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    MZ3.paint.el.classList.add('k3-qover');
-    Play.board.classList.add('k3-full');
-    MZ3.wrap.querySelectorAll('.k3-qover').forEach(e => e.remove());
-    MZ3.wrap.appendChild(MZ3.paint.el);
+
+    qOver(MZ3.wrap, MZ3.paint.el);
     K3.fonts.then(() => MZ3.setQuestion(q));
   },
 });

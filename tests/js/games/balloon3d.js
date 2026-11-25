@@ -321,7 +321,7 @@ Play.register({
       BALLOON.size();
     }
     BALLOON.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(BALLOON.paint.el, BALLOON.wrap);
+    qOver(BALLOON.wrap, BALLOON.paint.el);
     K3.fonts.then(() => BALLOON.setQuestion(q));
   },
 });

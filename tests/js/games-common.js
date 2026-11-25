@@ -77,6 +77,13 @@ function fitAnswers(list, max) {
   return shuffle([...list.filter(a => a.ok).slice(0, max - 1), ...list.filter(a => !a.ok).slice(0, 1)]);
 }
 /* رأس السؤال مع عدّاد «✓ ١ من ٣» حين يجب جمع كل الإجابات الصحيحة؛ يعيد دالة تحديث العدّاد */
+/* يضع عنوان السؤال شريطًا صغيرًا فوق ساحة اللعبة (داخلها)، فتأخذ الساحة الشاشة كلها في ملء الشاشة */
+function qOver(wrap, head) {
+  wrap.querySelectorAll(':scope > .k3-qover').forEach(e => { if (e !== head) e.remove(); });
+  head.classList.add('k3-qover');
+  wrap.appendChild(head);
+  Play.board.classList.add('k3-full');
+}
 function needHead(text, need) {
   const h = Play.head(text, need > 1 ? ' ' : '');
   const sub = h.querySelector('.round-sub');

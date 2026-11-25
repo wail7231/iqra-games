@@ -361,7 +361,7 @@ Play.register({
       BOW.size();
     }
     BOW.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(BOW.paint.el, BOW.wrap);
+    qOver(BOW.wrap, BOW.paint.el);
     K3.fonts.then(() => BOW.setQuestion(q));
   },
 });

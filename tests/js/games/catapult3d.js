@@ -256,7 +256,7 @@ Play.register({
       CATA.size();
     }
     CATA.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(CATA.paint.el, CATA.wrap);
+    qOver(CATA.wrap, CATA.paint.el);
     K3.fonts.then(() => CATA.setQuestion(q));
   },
 });

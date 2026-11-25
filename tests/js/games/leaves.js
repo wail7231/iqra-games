@@ -26,7 +26,7 @@ function pondScene() {
   const S = { wrap, q: null, row: [], home: null, token: null, jump: null, scroll: null, W: 0, H: 0, t: 0, missed: false, splashes: [] };
   const size = () => {
     S.W = wrap.clientWidth;
-    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 130 : 540;
+    const cap = document.body.classList.contains('is-fs') ? window.innerHeight - 40 : 540;
     S.H = Math.round(document.body.classList.contains('is-fs') ? cap : Math.min(cap, Math.max(380, S.W * .64)));
     const dpr = window.devicePixelRatio || 1;
     cv.width = S.W * dpr;
@@ -330,7 +330,7 @@ Play.register({
       POND.size();
     }
     POND.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(POND.paint.el, POND.wrap);
+    qOver(POND.wrap, POND.paint.el);
     POND.setQuestion(q);
   },
 });

@@ -345,7 +345,7 @@ Play.register({
       LIGHT.size();
     }
     LIGHT.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(LIGHT.paint.el, LIGHT.wrap);
+    qOver(LIGHT.wrap, LIGHT.paint.el);
     K3.fonts.then(() => LIGHT.setQuestion(q));
   },
 });

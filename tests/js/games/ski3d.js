@@ -252,7 +252,7 @@ Play.register({
       SKI.size();
     }
     SKI.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(SKI.paint.el, SKI.wrap);
+    qOver(SKI.wrap, SKI.paint.el);
     K3.fonts.then(() => SKI.setQuestion(q));
   },
 });

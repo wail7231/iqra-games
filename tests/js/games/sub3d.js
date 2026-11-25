@@ -327,7 +327,7 @@ Play.register({
       SUB.size();
     }
     SUB.paint = needHead(q.q, needAll(q) ? answersOf(q).length : 1);
-    Play.board.insertBefore(SUB.paint.el, SUB.wrap);
+    qOver(SUB.wrap, SUB.paint.el);
     K3.fonts.then(() => SUB.setQuestion(q));
   },
 });
