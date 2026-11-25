@@ -131,19 +131,20 @@ function shootScene() {
     const th = K3.theme();
     targets.forEach(t => range.remove(t.g));
     targets = [];
-    const list = keep || mixAnswers(S.q, 6, []).map(a => ({ a }));
+    const list = keep || mixAnswers(S.q).map(a => ({ a }));
     /* حتى أربعة أهداف في صف واحد؛ وما زاد يقف في صف خلفي أعلى قليلًا وبين فراغات الأمامي فلا يختفي خلفه */
-    const n = list.length, front = n <= 4 ? n : Math.ceil(n / 2);
+    /* كل الإجابات أهداف: حتى خمسة في الصف، وكل صف خلفي أعلى قليلًا وبين فراغات الذي أمامه */
+    const n = list.length, rowsN = Math.max(1, Math.ceil(n / 5)), per = Math.ceil(n / rowsN);
     list.forEach((it, k) => {
-      const row = k < front ? 0 : 1, inRow = row ? n - front : front, idx = row ? k - front : k;
-      const gap = n <= 4 ? 4.3 : 4.6;
-      const x = (idx - (inRow - 1) / 2) * gap + (row ? (inRow === front ? gap / 2 : 0) : 0) + K3.rnd(-.25, .25);
-      const z = row ? -13 : -7;
+      const row = Math.floor(k / per), inRow = Math.min(per, n - row * per), idx = k % per;
+      const gap = inRow <= 4 ? 4.3 : 4;
+      const x = (idx - (inRow - 1) / 2) * gap + (row % 2 ? gap / 2 : 0) + K3.rnd(-.2, .2);
+      const z = -7 - row * 5.5;
       const g = makeTarget(it.a, th);
       g.position.set(x, 0, z);
       range.add(g);
       /* كل الأهداف تطلع وتنزل، بسرعات ومراحل مختلفة حتى لا تتحرك معًا */
-      targets.push({ a: it.a, g, x, z, base: row ? 3 : 2.3, ph: k * 1.9 + Math.random(), sp: K3.rnd(.9, 1.5), amp: K3.rnd(.7, 1.05), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
+      targets.push({ a: it.a, g, x, z, base: 2.3 + row * .75, ph: k * 1.9 + Math.random(), sp: K3.rnd(.9, 1.5), amp: K3.rnd(.7, 1.05), state: it.state || '', t: 0, rise: keep ? 1 : 0 });
     });
   }
   S.targets = () => targets;
