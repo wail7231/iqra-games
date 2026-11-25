@@ -108,7 +108,10 @@ function catapultScene() {
       const board = new THREE.Mesh(new THREE.BoxGeometry(3.25, sign.geometry.parameters.height + .16, .08), K3.mat("#8A5A30")); board.position.set(0, 1.55, .1); flag.add(board);
       const ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), K3.mat(th.gold)); ball.position.set(0, 3.75, -.18); flag.add(ball);
       const pen = new THREE.Mesh(new THREE.ConeGeometry(.24, .8, 3), K3.mat(th.accent, { flatShading: true })); pen.rotation.z = -Math.PI / 2; pen.position.set(.42, 3.45, -.18); flag.add(pen); flag.userData.pen = pen;
-      flag.position.set(x, top, z);
+      /* أعلام الصفوف الخلفية على أعمدة أطول، فتظهر لافتاتها فوق لافتات الصف الأمامي */
+      const ext = row * 2.1;
+      if (ext) { const ep = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, ext, 8), K3.mat("#5A4632")); ep.position.set(0, -ext / 2 + .02, -.18); flag.add(ep); }
+      flag.position.set(x, top + ext, z);
       field.add(flag);
       towers.push({ a: it.a, x, z, top, blocks: tb, flag, sign, state: it.state || '', fly: 0 });
     });
