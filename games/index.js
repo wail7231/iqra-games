@@ -1,6 +1,14 @@
 /* فهرس الألعاب التفاعلية — يُعاد بناؤه تلقائيًا عند كل حفظ */
 window.__GAMES_INDEX__ = [
  {
+  "id": "gmwlku9phll1",
+  "type": "castle3d",
+  "name": "قلقلة",
+  "desc": "",
+  "count": 3,
+  "updated": 1795726179534
+ },
+ {
   "id": "gmwuns7vc2v3",
   "type": "shoot3d",
   "name": "اخفاء",
