@@ -41,6 +41,9 @@ function shootScene() {
   S.cv.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && S.started && !Play.finished) lock(); });
   document.addEventListener('pointerlockchange', () => { if (!locked()) edge = edgeV = 0; });
   const showFor = () => Math.max(1, Math.min(6, +Play.cfg.show || 3));
+  const freq = () => Math.max(1, Math.min(10, +Play.cfg.freq || 5));
+  const maxUp = () => 1 + Math.round((freq() - 1) * 4 / 9);          // من هدف واحد إلى خمسة معًا
+  const gap = () => 2.2 - (freq() - 1) / 9 * 1.95;                    // من ٢٫٢ ثانية إلى ربع ثانية بين هدف وآخر
 
   /* ---------- قوام الجدران الطينية وأرضية الساحة ---------- */
   function adobeTex(base) {
@@ -152,7 +155,7 @@ function shootScene() {
       /* أماكن ظهور الأهداف: من أسفل نافذة، ومن حافة السطح، ومن خلف جانب البيت */
       u.wins.forEach(wv => slots.push({ house: hg, kind: 'up', x: wv.x, y: wv.y - .2, z: u.d / 2 + .35 }));
       slots.push({ house: hg, kind: 'down', x: dir * u.w * .1, y: u.h + .45, z: u.d / 2 + .55 });
-      slots.push({ house: hg, kind: 'side', x: dir * (u.w / 2), y: 1.9, z: u.d / 2 - .6, dir });
+      slots.push({ house: hg, kind: 'side', x: dir * (u.w / 2 + .25), y: 2.3, z: u.d / 2 + .8, dir });
       /* صندوق في الزقاق بين البيتين يطلع من خلفه هدف، وجدار منخفض يسدّ الزقاق */
       const a2 = a + Math.PI / n, cg = crate();
       cg.position.set(-Math.sin(a2) * (SH.R - 1.6), 0, -Math.cos(a2) * (SH.R - 1.6)); cg.rotation.y = a2; town.add(cg);
@@ -178,6 +181,8 @@ function shootScene() {
     K3.scatter(town, th, { x0: -45, x1: 45, z0: -45, z1: 45, count: 500, avoid: (x, z) => Math.hypot(x, z) < SH.R + 4 });
     K3.horizon(S, th, { radius: 75 });
     K3.weather(S, th, { w: 30, h: 14, d: 60, cz: 0 });
+    town.updateMatrixWorld(true);
+    slots.forEach(sl => { sl.world = sl.house.localToWorld(new THREE.Vector3(sl.x, sl.y, sl.z)); });
     makeGun(th);
   };
 
@@ -227,7 +232,7 @@ function shootScene() {
     const rim = new THREE.Mesh(new THREE.TorusGeometry(.73, .05, 8, 36), K3.mat(th.gold)); face.add(rim);
     const armM = K3.mat('#5A4632');
     if (kind === 'down') { const arm = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.1, 6), armM); arm.position.y = .9; face.add(arm); }
-    else if (kind === 'side') { const arm = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.4, 6), armM); arm.rotation.z = Math.PI / 2; arm.position.x = -slot.dir * 1.05; face.add(arm); }
+    else if (kind === 'side') { const arm = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.9, 6), armM); arm.position.y = -1.25; face.add(arm); const wheel = new THREE.Mesh(new THREE.TorusGeometry(.14, .04, 6, 12), K3.mat('#3A3F4A')); wheel.position.y = -2.2; face.add(wheel); }
     else { const arm = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.6, 6), armM); arm.position.y = -1.1; face.add(arm); }
     g.add(face);
     const sign = K3.sign(a.t, { h: .9, px: 76 });
@@ -243,7 +248,8 @@ function shootScene() {
     return queue.shift();
   }
   function spawn() {
-    const free = slots.filter(s => !s.busy && S.t - (s.freeAt || -9) > 1.2);
+    const busyPos = targets.map(t => t.slot.world).filter(Boolean);
+    const free = slots.filter(s => !s.busy && S.t - (s.freeAt || -9) > 1.2 && busyPos.every(p => !s.world || p.distanceTo(s.world) > 3.4));
     if (!free.length) return;
     const s = free[Math.floor(Math.random() * free.length)];
     const a = nextAnswer();
@@ -270,7 +276,7 @@ function shootScene() {
     f.visible = k > .02;
     if (t.kind === 'up') { f.position.y = (s.low ? -.9 : -1) + k * (s.low ? 2.3 : 2.1); f.scale.setScalar(.35 + k * .65); }
     else if (t.kind === 'down') { f.position.y = -1.1; f.rotation.x = -(1 - k) * Math.PI / 2; f.scale.setScalar(.3 + k * .7); }
-    else { f.position.x = s.dir * (-1.3 + k * 2.5); f.scale.setScalar(.4 + k * .6); }
+    else { f.position.x = s.dir * (1.6 - k * 1.6); f.scale.setScalar(.4 + k * .6); }
   }
 
   /* ---------- الإطلاق ---------- */
@@ -368,7 +374,7 @@ function shootScene() {
     } else look.yaw += dt * .07;
     camera.rotation.y = look.yaw; camera.rotation.x = look.pitch;
     /* جدولة الأهداف: حتى ثلاثة ظاهرة معًا، يظهر كل منها مدة الإعداد ثم يختفي ويعود غيره */
-    if (live && S.q && !S.answered && !Play.roundDone && S.t >= nextAt && targets.length < SH.maxUp) { spawn(); nextAt = S.t + K3.rnd(.5, 1.1); }
+    if (live && S.q && !S.answered && !Play.roundDone && S.t >= nextAt && targets.length < maxUp()) { spawn(); nextAt = S.t + gap() * K3.rnd(.8, 1.2); }
     targets.forEach(t => {
       t.t += dt;
       if (t.phase === 'in') { t.k = Math.min(1, t.t / .35); if (t.k >= 1) { t.phase = 'up'; t.t = 0; } }
@@ -408,6 +414,7 @@ function shootScene() {
 Play.register({
   settings: [
     { key: 'show', label: 'مدة ظهور الهدف (بالثواني)', kind: 'range', min: 1, max: 6, def: 3 },
+    { key: 'freq', label: 'تكرار ظهور الأهداف', kind: 'range', min: 1, max: 10, def: 5 },
     'lives', 'timer',
   ],
   label: q => q.q,
