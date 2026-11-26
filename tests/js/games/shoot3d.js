@@ -32,7 +32,14 @@ function shootScene() {
   const hintL = el('div', 'k3-hint l', '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>');
   const hintR = el('div', 'k3-hint r', '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>');
   S.wrap.append(hintL, hintR);
-  S.cv.style.cursor = 'crosshair';
+  /* مؤشر الفأرة مخفي فوق اللعبة: الشعيرة في الوسط هي وحدها مكان الإطلاق */
+  S.cv.style.cursor = 'none';
+  /* قفل المؤشر بعد أول نقرة (كألعاب المنظور الأول): الفأرة تدير النظر بلا حدود ولا يظهر سهمها، وEsc يحرّرها */
+  const locked = () => document.pointerLockElement === S.cv;
+  const lock = () => { try { if (!locked() && S.cv.requestPointerLock) { const p = S.cv.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } } catch (_) {} };
+  const unlock = () => { try { if (locked()) document.exitPointerLock(); } catch (_) {} };
+  S.cv.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && S.started && !Play.finished) lock(); });
+  document.addEventListener('pointerlockchange', () => { if (!locked()) edge = edgeV = 0; });
   const showFor = () => Math.max(1, Math.min(6, +Play.cfg.show || 3));
 
   /* ---------- قوام الجدران الطينية وأرضية الساحة ---------- */
@@ -327,7 +334,8 @@ function shootScene() {
     if (e.pointerType !== 'mouse' || !S.started) return;
     const r = S.cv.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
     if (e.movementX || e.movementY) turn(e.movementX, e.movementY);
-    /* قرب الحافة يمينًا أو يسارًا: دوران مستمر بسرعة تتناسب مع القرب */
+    if (locked()) { edge = edgeV = 0; return; }
+    /* قبل القفل: قرب الحافة يمينًا أو يسارًا دوران مستمر بسرعة تتناسب مع القرب */
     edge = fx < .1 ? (.1 - fx) / .1 : fx > .9 ? -(fx - .9) / .1 : 0;
     edgeV = fy < .1 ? (.1 - fy) / .1 : fy > .92 ? -(fy - .92) / .08 : 0;
   });
@@ -351,6 +359,7 @@ function shootScene() {
   const wp = new THREE.Vector3();
   S.onFrame = dt => {
     const k = S.keys, live = S.started && !Play.finished;
+    if (!live || !S.wrap.isConnected) unlock();
     if (live) {
       look.yaw += ((k.ArrowLeft || k.KeyA ? 1 : 0) - (k.ArrowRight || k.KeyD ? 1 : 0)) * dt * 1.9;
       look.pitch = Math.max(-.35, Math.min(.7, look.pitch + ((k.ArrowUp || k.KeyW ? 1 : 0) - (k.ArrowDown || k.KeyS ? 1 : 0)) * dt * 1.1));
