@@ -34,7 +34,7 @@ const Play = {
     const order = [...this.game.questions.keys()];
     this.items = (this.game.settings || {}).order === 'random' ? shuffle(order).map(i => this.game.questions[i]) : order.map(i => this.game.questions[i]);
     this.idx = 0; this.score = 0; this._shown = 0; this.maxOf = []; this.streak = 0; this.results = []; this.t0 = 0; this.finished = false;
-    this.max = this.items.reduce((s, it) => s + (this.def.points ? this.def.points(it) : 1), 0);
+    this.max = this.items.reduce((s, it) => s + this.planned(it), 0);
     this.lives = this.usesLives && this.cfg.lives > 0 ? this.cfg.lives : Infinity;
     $('#summary').classList.add('hidden');
     $('#playArea').classList.remove('hidden');
@@ -43,6 +43,7 @@ const Play = {
   },
   round() {
     this.roundDone = false;
+    this.roundWrong = 0;
     /* طبقة زينة القالب تبقى، ويُمسح ما سواها */
     [...this.board.children].forEach(c => { if (!c.classList.contains('fx-layer') && !c.classList.contains('keep')) c.remove(); });
     this.board.classList.toggle('quran-text', this.quran);
@@ -64,6 +65,8 @@ const Play = {
   finish(points, { delay = 1300, manual = false, max, nextLabel } = {}) {
     if (this.roundDone || this.finished) return;
     this.roundDone = true;
+    const multi = this.multi(this.item);
+    if (multi && max == null && points <= 1) points = points >= 1 ? multi : Math.max(0, multi - Math.max(1, this.roundWrong || 0));
     this.score += points;
     this.results[this.idx] = points;
     if (max != null) { this.max += max - this.planned(this.item); (this.maxOf = this.maxOf || [])[this.idx] = max; }
@@ -87,6 +90,7 @@ const Play = {
   },
   /* خطأ يكلّف قلبًا (في القوالب التي تستعمل القلوب) */
   mistake() {
+    this.countWrong();
     this.board.classList.remove('shake');
     void this.board.offsetWidth;
     this.board.classList.add('shake');
@@ -98,7 +102,20 @@ const Play = {
   },
   /* ابدأ المؤقت عند أول لمسة أو ضغطة في اللعبة */
   touch() { if (!this.t0 && !this.finished) this.t0 = performance.now(); },
-  planned(it) { return this.def.points ? this.def.points(it) : 1; },
+  planned(it) { return this.def.points ? this.def.points(it) : (this.multi(it) || 1); },
+  /* عدد الإجابات الصحيحة المطلوبة إن كان السؤال «اجمعها كلها» وفيه أكثر من صحيحة (وإلا 0) */
+  multi(it) {
+    if (this.def.points || !it || typeof needAll !== 'function' || !needAll(it)) return 0;
+    const n = answersOf(it).length;
+    return n > 1 ? n : 0;
+  },
+  /* اختيار خاطئ في السؤال الحالي (يُعدّ مرة واحدة وإن نادته اللعبة من مكانين للاختيار نفسه) */
+  countWrong() {
+    const now = performance.now();
+    if (now - (this._wrongAt || 0) < 120) return;
+    this._wrongAt = now;
+    this.roundWrong = (this.roundWrong || 0) + 1;
+  },
   get usesLives() { return this.def.settings.includes('lives'); },
 
   /* احتفال صغير بإجابة صحيحة: صوت وقصاصات و+١ */
@@ -107,6 +124,7 @@ const Play = {
     if (el) { FX.burst(el, { count: 22 }); FX.floatText(el, '+' + toAr(points)); }
   },
   bad(el) {
+    this.countWrong();
     FX.play('bad');
     if (el) FX.floatText(el, '✗', '#C0392B');
   },
