@@ -6,7 +6,7 @@ window.__GAMES_INDEX__ = [
   "name": "اخفاء",
   "desc": "",
   "count": 1,
-  "updated": 1795643749189
+  "updated": 1795651784031
  },
  {
   "id": "gmwwjl2h9483",
