@@ -174,7 +174,7 @@ function catapultScene() {
       t.fly = .01;
       K3.tint(t.flag, '#4CAF50', .6);
       S.collected.push(t.a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       FX.play('boom');
       if (S.collected.length < S.need) { FX.burst(pt, { count: 16 }); FX.floatText(pt, '✓'); return; }
       S.answered = true;

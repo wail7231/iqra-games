@@ -50,7 +50,7 @@ Play.register({
         b.disabled = true;
         if (o.ok) {
           b.classList.add('right', 'celebrate');
-          got++;
+          got++; Play.right(o.t);
           paintSub();
           const complete = !needAll || got === corrects.length;
           if (complete && !missed) { Play.streak++; Play.good(b); showStreak(); }

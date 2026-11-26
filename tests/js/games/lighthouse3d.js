@@ -214,7 +214,7 @@ function lighthouseScene() {
       s.dock = new THREE.Vector3(LH.x + 6 + k * 3.1, 0, LH.z - 3.4);
       K3.tint(s.g.userData.body, '#4CAF50', .35);
       for (let i = 0; i < 22; i++) { const m = K3.starMesh(.2, i % 2 ? K3.theme().gold : '#FFFFFF', .06); m.position.set(s.x, 5.5, s.z); scene.add(m); const a = Math.random() * 6.28; bits.push({ m, v: new THREE.Vector3(Math.cos(a) * 4, K3.rnd(2, 7), Math.sin(a) * 4), life: 1, spin: K3.rnd(-8, 8) }); }
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { FX.burst(pt, { count: 14 }); FX.floatText(pt, '✓'); FX.play('good'); return; }
       S.answered = true;
       FX.burst(pt, { count: 28 }); FX.floatText(pt, S.missed ? '✓' : '+١'); FX.play('ok');

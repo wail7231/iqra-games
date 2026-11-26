@@ -98,7 +98,7 @@ function skyScene() {
       c.state = 'good';
       /* «يجب جمعها كلها»: تكمل الطائرة حتى تمر بكل الغيوم الصحيحة */
       S.collected.push(c.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { FX.burst(pt, { count: 12 }); FX.floatText(pt, '✓'); FX.play('good'); return; }
       S.answered = true;
       FX.burst(pt, { count: 28 });

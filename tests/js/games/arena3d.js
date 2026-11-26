@@ -342,7 +342,7 @@ function arenaScene() {
       scene.add(key);
       c.key = key;
       P.keys++;
-      if (S.paint) S.paint(P.keys);
+      Play.right(c.a.t); if (S.paint) S.paint(P.keys);
       K3.burstAt(S, pt, true, '🗝');
       FX.play('good');
       if (P.keys >= S.need) openPortal();

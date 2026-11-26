@@ -316,7 +316,7 @@ function shootScene() {
       K3.tint(t.g, '#4CAF50', .45);
       burst(pos, [K3.theme().gold, '#FFFFFF', '#7FD36B'], 22);
       S.collected.push(t.a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { FX.burst(pt, { count: 14 }); FX.floatText(pt, '✓'); FX.play('good'); return; }
       S.answered = true;
       FX.burst(pt, { count: 28 }); FX.floatText(pt, S.missed ? '✓' : '+١'); FX.play('ok');

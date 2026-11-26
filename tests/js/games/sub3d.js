@@ -215,7 +215,7 @@ function subScene() {
         bits.push({ m, v: new THREE.Vector3(Math.cos(a) * Math.cos(e), Math.sin(e), Math.sin(a) * Math.cos(e)).multiplyScalar(K3.rnd(2, 5)), life: 1 });
       }
       S.collected.push(b.a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { FX.burst(pt, { count: 14 }); FX.floatText(pt, '✓'); FX.play('good'); return; }
       S.answered = true;
       FX.burst(pt, { count: 28 }); FX.floatText(pt, S.missed ? '✓' : '+١'); FX.play('ok');

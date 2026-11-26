@@ -203,7 +203,7 @@ function boatScene() {
       b.state = 'good';
       paintGood(b);
       S.collected.push(b.a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { K3.burstAt(S, pt, true, '✓'); FX.play('good'); return; }
       S.answered = true;
       K3.burstAt(S, pt, true, S.missed ? '✓' : '+١');

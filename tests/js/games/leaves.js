@@ -93,7 +93,7 @@ function pondScene() {
       /* «يجب جمعها كلها»: الورقة تخضرّ وتبقى، والقطعة تعود لتقفز إلى صحيحة أخرى */
       leaf.good = true;
       leaf.squash = 1;
-      if (S.paint) S.paint(S.got);
+      Play.right(leaf.t); if (S.paint) S.paint(S.got);
       FX.burst(pt, { count: 12 });
       FX.floatText(pt, '✓');
       FX.play('good');
@@ -101,7 +101,7 @@ function pondScene() {
       return;
     }
     if (leaf.ok) {
-      if (S.paint) S.paint(S.got);
+      Play.right(leaf.t); if (S.paint) S.paint(S.got);
       FX.burst(pt, { count: 26 });
       FX.floatText(pt, S.missed ? '✓' : '+١');
       FX.play('ok');

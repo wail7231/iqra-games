@@ -216,7 +216,7 @@ function balloonScene() {
       K3.tint(pad.g, '#4CAF50', .5);
       for (let i = 0; i < 22; i++) { const m = K3.starMesh(.2, i % 2 ? K3.theme().gold : '#FFFFFF', .06); m.position.copy(pos); scene.add(m); const a = Math.random() * 6.28; bits.push({ m, v: new THREE.Vector3(Math.cos(a) * 3.5, K3.rnd(3, 8), Math.sin(a) * 3.5), life: 1, spin: K3.rnd(-8, 8) }); }
       S.collected.push(pad.a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { FX.burst(pt, { count: 14 }); FX.floatText(pt, '✓'); FX.play('good'); return; }
       S.answered = true;
       FX.burst(pt, { count: 28 }); FX.floatText(pt, S.missed ? '✓' : '+١'); FX.play('ok');

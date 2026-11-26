@@ -171,7 +171,7 @@ function skiScene() {
     if (a.ok) {
       K3.tint(gt, '#4CAF50', .7);
       S.collected.push(a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { K3.burstAt(S, wp, true, '✓'); FX.play('good'); return; }
       S.answered = true;
       K3.burstAt(S, wp, true, S.missed ? '✓' : '+١');

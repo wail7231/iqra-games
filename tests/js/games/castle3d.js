@@ -157,7 +157,7 @@ function castleScene() {
       K3.tint(l.g, '#4CAF50', .7);
       K3.recolorSign(l.sign, '✓ ' + l.a.t, { bg: '#4CAF50', fg: '#FFFFFF', edge: '#2E7D32', px: 64 });
       S.collected.push(l.a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { K3.burstAt(S, pt, true, '✓'); FX.play('good'); P.drop = .5; return; }
       S.answered = true;
       K3.burstAt(S, pt, true, S.missed ? '✓' : '+١');

@@ -129,7 +129,7 @@ Play.register({
       if (t.ok) {
         t.hit = 1;
         got++;
-        paintNeed(got);
+        Play.right(t.t); paintNeed(got);
         if (got < need) { FX.burst(screen, { count: 14 }); FX.floatText(screen, '✓'); FX.play('good'); return; }
         done = true;
         FX.burst(screen, { count: 30 });

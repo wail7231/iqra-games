@@ -33,7 +33,7 @@ const Play = {
     clearTimeout(this._next);
     const order = [...this.game.questions.keys()];
     this.items = (this.game.settings || {}).order === 'random' ? shuffle(order).map(i => this.game.questions[i]) : order.map(i => this.game.questions[i]);
-    this.idx = 0; this.score = 0; this._shown = 0; this.maxOf = []; this.streak = 0; this.results = []; this.wrongPicks = []; this.t0 = 0; this.finished = false;
+    this.idx = 0; this.score = 0; this._shown = 0; this.maxOf = []; this.streak = 0; this.results = []; this.wrongPicks = []; this.picks = []; this.t0 = 0; this.finished = false;
     this.max = this.items.reduce((s, it) => s + this.planned(it), 0);
     this.lives = this.usesLives && this.cfg.lives > 0 ? this.cfg.lives : Infinity;
     $('#summary').classList.add('hidden');
@@ -66,7 +66,7 @@ const Play = {
     if (this.roundDone || this.finished) return;
     this.roundDone = true;
     const multi = this.multi(this.item);
-    if (multi && max == null && points <= 1) points = points >= 1 ? multi : Math.max(0, multi - Math.max(1, this.roundWrong || 0));
+    if (multi && max == null && points <= 1) points = points >= 1 ? multi : ((this.picks[this.idx] || []).length ? this.multiScore(this.idx, multi) : Math.max(0, multi - Math.max(1, this.roundWrong || 0)));
     this.score += points;
     this.results[this.idx] = points;
     if (max != null) { this.max += max - this.planned(this.item); (this.maxOf = this.maxOf || [])[this.idx] = max; }
@@ -110,9 +110,20 @@ const Play = {
     return n > 1 ? n : 0;
   },
   /* اختيار خاطئ في السؤال الحالي (يُعدّ مرة واحدة وإن نادته اللعبة من مكانين للاختيار نفسه) */
+  right(text) { this.logPick(text, true); },
+  logPick(text, ok) {
+    const list = (this.picks[this.idx] = this.picks[this.idx] || []), t = text == null ? null : String(text);
+    if (t != null && list.some(p => p.t === t)) return;
+    list.push({ t, ok });
+  },
+  /* نقاط سؤال «اجمعها كلها»: الصحيحة من بين أول اختيارات بعدد إجاباته الصحيحة (مثلًا ٣ صحيحة: أول ٣ اختيارات) */
+  multiScore(i, need) {
+    const list = this.picks[i] || [];
+    return list.slice(0, need).filter(p => p.ok).length;
+  },
   countWrong(text) {
     const now = performance.now();
-    if (text != null) { const w = (this.wrongPicks[this.idx] = this.wrongPicks[this.idx] || []); if (!w.includes(String(text))) w.push(String(text)); }
+    if (text != null) { const w = (this.wrongPicks[this.idx] = this.wrongPicks[this.idx] || []); if (!w.includes(String(text))) w.push(String(text)); this.logPick(text, false); }
     if (now - (this._wrongAt || 0) < 120) return;
     this._wrongAt = now;
     this.roundWrong = (this.roundWrong || 0) + 1;
@@ -149,7 +160,12 @@ const Play = {
     $('#playArea').classList.add('hidden');
     $('#summary').classList.remove('hidden');
     const complete = reason === 'done';
-    const ratio = this.max ? this.score / this.max : 0;
+    if (!complete && this.results[this.idx] == null && this.item) {
+      const m = this.multi(this.item);
+      if (m && (this.picks[this.idx] || []).length) { const pts = this.multiScore(this.idx, m); this.results[this.idx] = pts; this.score += pts; }
+    }
+    /* النسبة النهائية: متوسط نسب الأسئلة (لكل سؤال نسبته حسب عدد إجاباته) */
+    const ratio = this.items.length ? this.items.reduce((s, it, i) => { const mx = (this.maxOf && this.maxOf[i] != null) ? this.maxOf[i] : this.planned(it); return s + (mx ? Math.min(1, (this.results[i] || 0) / mx) : 0); }, 0) / this.items.length : 0;
     const stars = complete ? (ratio >= .9 ? 3 : ratio >= .6 ? 2 : ratio > 0 ? 1 : 0) : 0;
     $('#sumEmoji').textContent = !complete ? (reason === 'time' ? '⏰' : '💪') : stars === 3 ? '🏆' : stars === 2 ? '🌟' : '👍';
     $('#sumTitle').textContent = complete ? (stars === 3 ? 'ممتاز' : stars === 2 ? 'أحسنت' : 'انتهت اللعبة') : reason === 'time' ? 'انتهى الوقت' : 'انتهت القلوب';
@@ -174,7 +190,8 @@ const Play = {
       if (it && it.correct != null && Array.isArray(it.wrong)) {
         const box = $('.sum-ans', el); box.classList.add('sum-chips');
         const chip = (t, cls) => { const c = document.createElement('span'); c.className = 'sum-chip ' + cls; c.textContent = t; box.appendChild(c); };
-        answersOf(it).forEach(t => chip(t, 'ok'));
+        const picked = (this.picks[i] || []).filter(p => p.ok).map(p => p.t), any = (this.picks[i] || []).length > 0;
+        answersOf(it).forEach(t => chip(t, !any || picked.includes(String(t)) ? 'ok' : 'miss'));
         (this.wrongPicks[i] || []).forEach(t => chip(t, 'bad'));
       } else $('.sum-ans', el).textContent = this.def.answer(it);
       list.appendChild(el);

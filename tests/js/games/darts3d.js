@@ -254,7 +254,7 @@ function bowScene() {
       K3.tint(t.g, '#4CAF50', .45);
       for (let i = 0; i < 20; i++) { const m = K3.starMesh(.16, i % 2 ? K3.theme().gold : '#FFFFFF', .05); m.position.copy(pos); scene.add(m); const a = Math.random() * 6.28; bits.push({ m, v: new THREE.Vector3(Math.cos(a) * 3, K3.rnd(2, 6), Math.sin(a) * 3), life: 1, spin: K3.rnd(-8, 8) }); }
       S.collected.push(t.a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { FX.burst(pt, { count: 14 }); FX.floatText(pt, '✓'); FX.play('good'); return; }
       S.answered = true;
       FX.burst(pt, { count: 28 }); FX.floatText(pt, S.missed ? '✓' : '+١'); FX.play('ok');

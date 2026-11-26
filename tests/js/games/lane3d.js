@@ -200,7 +200,7 @@ function laneScene() {
       K3.tint(gt, '#4CAF50', .7);
       gt.userData.veil.material.color.set('#7FD36B'); gt.userData.veil.material.opacity = .45;
       S.collected.push(a.t);
-      if (S.paint) S.paint(S.collected.length);
+      Play.right(S.collected[S.collected.length - 1]); if (S.paint) S.paint(S.collected.length);
       if (S.collected.length < S.need) { K3.burstAt(S, pt, true, '✓'); FX.play('good'); queue = queue.filter(x => x.t !== a.t); return; }
       S.answered = true;
       K3.burstAt(S, pt, true, S.missed ? '✓' : '+١');

@@ -2026,3 +2026,6 @@ a { color: inherit; text-decoration: none; }
 .sum-chip.bad::before { content: "✗"; }
 .dark .sum-chip.ok, :root[data-theme="dark"] .sum-chip.ok { background: #1B3A1F; color: #A5D6A7; }
 .dark .sum-chip.bad, :root[data-theme="dark"] .sum-chip.bad { background: #3A1C1C; color: #EF9A9A; }
+
+.sum-chip.miss { background: transparent; border-color: #B0B6BE; border-style: dashed; color: #6B7280; }
+.sum-chip.miss::before { content: "○"; }
