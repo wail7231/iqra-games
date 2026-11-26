@@ -222,9 +222,9 @@ function shootScene() {
     else if (kind === 'side') { const arm = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.4, 6), armM); arm.rotation.z = Math.PI / 2; arm.position.x = -slot.dir * 1.05; face.add(arm); }
     else { const arm = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.6, 6), armM); arm.position.y = -1.1; face.add(arm); }
     g.add(face);
-    const sign = K3.sign(a.t, { h: .7, px: 72 });
-    if (sign.scale.x > 3) sign.scale.set(3, 3 / sign.userData.ratio, 1);
-    sign.position.y = kind === 'down' ? -1.15 : 1.15;
+    const sign = K3.sign(a.t, { h: .9, px: 76 });
+    if (sign.scale.x > 3.6) sign.scale.set(3.6, 3.6 / sign.userData.ratio, 1);
+    sign.position.y = kind === 'down' ? -1.25 : 1.25;
     face.add(sign);
     g.userData = { face, sign };
     return g;
