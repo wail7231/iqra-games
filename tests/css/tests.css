@@ -2016,3 +2016,13 @@ a { color: inherit; text-decoration: none; }
 .k3-cross.dart i, .k3-cross.dart b { background: var(--aim, rgba(255, 236, 160, .95)); }
 .k3-joy { border-color: var(--aim, rgba(255, 255, 255, .85)); }
 .k3-joy i { background: var(--aim, rgba(255, 255, 255, .9)); }
+
+/* النتيجة: الإجابات مربعات صغيرة داخل مربع السؤال — الصحيحة خضراء، والخاطئة المختارة حمراء */
+.sum-ans.sum-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sum-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 8px; font-weight: 700; font-size: 14px; border: 1.5px solid; }
+.sum-chip.ok { background: #E8F5E9; border-color: #4CAF50; color: #1B5E20; }
+.sum-chip.bad { background: #FDECEA; border-color: #E53935; color: #B71C1C; }
+.sum-chip.ok::before { content: "✓"; }
+.sum-chip.bad::before { content: "✗"; }
+.dark .sum-chip.ok, :root[data-theme="dark"] .sum-chip.ok { background: #1B3A1F; color: #A5D6A7; }
+.dark .sum-chip.bad, :root[data-theme="dark"] .sum-chip.bad { background: #3A1C1C; color: #EF9A9A; }

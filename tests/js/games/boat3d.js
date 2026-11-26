@@ -218,7 +218,7 @@ function boatScene() {
       const dx = P.x - b.g.position.x, dz = P.z - b.g.position.z, d = Math.hypot(dx, dz) || 1;
       P.push = { vx: dx / d * 9, vz: dz / d * 9, t: .45 };
       P.v *= -.3;
-      Play.mistake();
+      Play.mistake(b.a.t);
     }
   }
 

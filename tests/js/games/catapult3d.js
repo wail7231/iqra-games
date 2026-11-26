@@ -187,7 +187,7 @@ function catapultScene() {
       t.blocks.forEach(b => K3.tint(b.m, '#C0392B', .35));
       S.missed = true;
       FX.floatText(pt, '✗', '#C0392B'); FX.play('bad');
-      Play.mistake();
+      Play.mistake(t.a.t);
     }
   }
   function puff(pos) {

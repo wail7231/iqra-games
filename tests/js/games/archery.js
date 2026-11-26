@@ -141,7 +141,7 @@ Play.register({
         missed = true;
         FX.floatText(screen, '✗', '#C0392B');
         FX.play('bad');
-        Play.mistake();
+        Play.mistake(t.t);
       }
     }
 

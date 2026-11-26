@@ -172,7 +172,7 @@ function castleScene() {
       K3.burstAt(S, pt, false);
       FX.play('bad');
       P.on = null; P.vy = 0;
-      Play.mistake();
+      Play.mistake(l.a.t);
     }
   }
 

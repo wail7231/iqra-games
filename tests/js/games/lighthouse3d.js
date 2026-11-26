@@ -224,7 +224,7 @@ function lighthouseScene() {
       K3.tint(s.g.userData.body, '#C0392B', .5);
       S.missed = true;
       FX.floatText(pt, '✗', '#C0392B'); FX.play('bad');
-      Play.mistake();
+      Play.mistake(s.a.t);
     }
   }
 

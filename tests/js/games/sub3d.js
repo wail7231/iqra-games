@@ -226,7 +226,7 @@ function subScene() {
       ink.classList.remove('on'); void ink.offsetWidth; ink.classList.add('on');
       S.missed = true;
       FX.floatText(pt, '✗', '#C0392B'); FX.play('bad');
-      Play.mistake();
+      Play.mistake(b.a.t);
     }
   }
 

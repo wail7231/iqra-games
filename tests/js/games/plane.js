@@ -110,7 +110,7 @@ function skyScene() {
       S.missed = true;
       FX.floatText(pt, '✗', '#C0392B');
       FX.play('bad');
-      Play.mistake();
+      Play.mistake(c.t);
     }
   }
 

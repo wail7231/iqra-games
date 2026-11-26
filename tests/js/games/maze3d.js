@@ -262,7 +262,7 @@ function maze3dScene() {
       const to = at(door.c + dc, door.r + dr);
       P.knock = { fx: P.x, fz: P.z, tx: to.x, tz: to.z, t: 0, door };
       P.vx = P.vz = 0;
-      Play.mistake();
+      Play.mistake(door.a.t);
     }
   }
   /* عصا التحكم: اسحب بإصبعك من أي مكان في اللوحة */

@@ -347,7 +347,7 @@ Play.register({
         combo = 0;
         FX.floatText(pt, '✗', '#C0392B');
         FX.play('bad');
-        Play.mistake();
+        Play.mistake(h.text);
       }
     };
 

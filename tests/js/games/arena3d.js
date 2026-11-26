@@ -359,7 +359,7 @@ function arenaScene() {
       }
       const dx = P.x - c.x, dz = P.z - c.z, d = Math.hypot(dx, dz) || 1;
       P.vx = dx / d * 10; P.vz = dz / d * 10; P.vy = 5; P.stun = .45;
-      Play.mistake();
+      Play.mistake(c.a.t);
     }
   }
   function win() {

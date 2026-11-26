@@ -172,7 +172,7 @@ function islandsScene() {
       S.missed = true;
       K3.burstAt(S, pt, false);
       FX.play('bad');
-      if (!Play.mistake()) setTimeout(() => { if (P.prev) hopTo(P.prev.c, P.prev.r, true); }, 380);
+      if (!Play.mistake(cell.a.t)) setTimeout(() => { if (P.prev) hopTo(P.prev.c, P.prev.r, true); }, 380);
     }
   }
   const move = d => {

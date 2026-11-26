@@ -33,7 +33,7 @@ const Play = {
     clearTimeout(this._next);
     const order = [...this.game.questions.keys()];
     this.items = (this.game.settings || {}).order === 'random' ? shuffle(order).map(i => this.game.questions[i]) : order.map(i => this.game.questions[i]);
-    this.idx = 0; this.score = 0; this._shown = 0; this.maxOf = []; this.streak = 0; this.results = []; this.t0 = 0; this.finished = false;
+    this.idx = 0; this.score = 0; this._shown = 0; this.maxOf = []; this.streak = 0; this.results = []; this.wrongPicks = []; this.t0 = 0; this.finished = false;
     this.max = this.items.reduce((s, it) => s + this.planned(it), 0);
     this.lives = this.usesLives && this.cfg.lives > 0 ? this.cfg.lives : Infinity;
     $('#summary').classList.add('hidden');
@@ -89,8 +89,8 @@ const Play = {
     else this.round();
   },
   /* خطأ يكلّف قلبًا (في القوالب التي تستعمل القلوب) */
-  mistake() {
-    this.countWrong();
+  mistake(text) {
+    this.countWrong(text);
     this.board.classList.remove('shake');
     void this.board.offsetWidth;
     this.board.classList.add('shake');
@@ -110,8 +110,9 @@ const Play = {
     return n > 1 ? n : 0;
   },
   /* اختيار خاطئ في السؤال الحالي (يُعدّ مرة واحدة وإن نادته اللعبة من مكانين للاختيار نفسه) */
-  countWrong() {
+  countWrong(text) {
     const now = performance.now();
+    if (text != null) { const w = (this.wrongPicks[this.idx] = this.wrongPicks[this.idx] || []); if (!w.includes(String(text))) w.push(String(text)); }
     if (now - (this._wrongAt || 0) < 120) return;
     this._wrongAt = now;
     this.roundWrong = (this.roundWrong || 0) + 1;
@@ -123,8 +124,8 @@ const Play = {
     FX.play('ok');
     if (el) { FX.burst(el, { count: 22 }); FX.floatText(el, '+' + toAr(points)); }
   },
-  bad(el) {
-    this.countWrong();
+  bad(el, text) {
+    this.countWrong(text);
     FX.play('bad');
     if (el) FX.floatText(el, '✗', '#C0392B');
   },
@@ -169,7 +170,13 @@ const Play = {
         <div class="sum-head-row"><span class="sum-name"></span><span class="sum-badge">${got == null ? '–' : got === max ? '✓' : max > 1 ? toAr(got) + '/' + toAr(max) : '✗'}</span></div>
         <div class="sum-row"><span class="sum-label">الإجابة</span><span class="sum-ans"></span></div>`;
       $('.sum-name', el).textContent = this.def.label(it);
-      $('.sum-ans', el).textContent = this.def.answer(it);
+      /* أسئلة الاختيار: كل إجابة في مربع صغير — الصحيحة بالأخضر، والخاطئة التي اختارها الطالب بالأحمر */
+      if (it && it.correct != null && Array.isArray(it.wrong)) {
+        const box = $('.sum-ans', el); box.classList.add('sum-chips');
+        const chip = (t, cls) => { const c = document.createElement('span'); c.className = 'sum-chip ' + cls; c.textContent = t; box.appendChild(c); };
+        answersOf(it).forEach(t => chip(t, 'ok'));
+        (this.wrongPicks[i] || []).forEach(t => chip(t, 'bad'));
+      } else $('.sum-ans', el).textContent = this.def.answer(it);
       list.appendChild(el);
     });
     if (!this.isDraft && complete && !STUDENT) {

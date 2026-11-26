@@ -62,7 +62,7 @@ Play.register({
           Play.streak = 0;
           showStreak();
           Play.bad(b);
-          const over = Play.mistake();
+          const over = Play.mistake(o.t);
           if (!needAll && !over) { setTimeout(reveal, 350); Play.finish(0, { delay: 2000 }); }
         }
       });

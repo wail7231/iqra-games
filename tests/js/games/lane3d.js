@@ -212,7 +212,7 @@ function laneScene() {
       S.missed = true;
       K3.burstAt(S, pt, false);
       FX.play('bad');
-      Play.mistake();
+      Play.mistake(a.t);
     }
   }
 

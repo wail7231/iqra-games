@@ -120,7 +120,7 @@ function pondScene() {
       spray(leaf.x, leaf.y, 22, 'rgba(255,255,255,.9)');
       FX.floatText(pt, '✗', '#C0392B');
       FX.play('bad');
-      Play.mistake();
+      Play.mistake(leaf.t);
       /* القطعة تعود إلى ورقتها */
       S.jump = { from: { x: leaf.x, y: leaf.y }, leaf: S.home, t: 0, back: true };
     }

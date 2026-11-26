@@ -321,7 +321,7 @@ function shootScene() {
       burst(pos, ['#C0392B', '#5A5A66'], 10);
       S.missed = true;
       FX.floatText(pt, '✗', '#C0392B'); FX.play('bad');
-      Play.mistake();
+      Play.mistake(t.a.t);
     }
   }
 

@@ -65,7 +65,7 @@ Play.register({
         if (need > 1 && !(o.ok && got + 1 === need)) {
           b.disabled = true;
           if (o.ok) { got++; paintNeed(got); b.classList.add('right', 'celebrate'); FX.play('good'); }
-          else { missed = true; b.classList.add('wrong'); Play.bad(b); svg.classList.add('wilt'); setTimeout(() => svg.classList.remove('wilt'), 900); }
+          else { missed = true; b.classList.add('wrong'); Play.bad(b, o.t); svg.classList.add('wilt'); setTimeout(() => svg.classList.remove('wilt'), 900); }
           return;
         }
         if (o.ok && need > 1) { got++; paintNeed(got); }
@@ -83,7 +83,7 @@ Play.register({
           b.classList.add('wrong');
           svg.classList.add('wilt');
           setTimeout(() => svg.classList.remove('wilt'), 1300);
-          Play.bad(b);
+          Play.bad(b, o.t);
           Play.finish(0, { delay: 2200 });
         }
       });

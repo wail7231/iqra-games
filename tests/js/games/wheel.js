@@ -119,13 +119,13 @@ Play.register({
             if (need > 1 && !(o.ok && got + 1 === need)) {
               b.disabled = true;
               if (o.ok) { got++; paintSub(); b.classList.add('right', 'celebrate'); FX.play('good'); }
-              else { missed = true; b.classList.add('wrong'); Play.bad(b); }
+              else { missed = true; b.classList.add('wrong'); Play.bad(b, o.t); }
               return;
             }
             if (o.ok && need > 1) { got++; paintSub(); }
             bs.forEach((y, z) => { y.disabled = true; if (opts[z].ok) y.classList.add('right'); else if (y !== b && !y.classList.contains('wrong')) y.classList.add('dim'); });
             if (o.ok) { b.classList.add('celebrate'); Play.good(b); Play.finish(missed ? 0 : 1, next); }
-            else { b.classList.add('wrong'); Play.bad(b); Play.finish(0, next); }
+            else { b.classList.add('wrong'); Play.bad(b, o.t); Play.finish(0, next); }
           });
           grid.appendChild(b);
           return b;
