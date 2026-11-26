@@ -26,12 +26,13 @@ function shootScene() {
   camera.position.set(0, SH.eye, 0);
   camera.rotation.order = 'YXZ';
 
-  const cross = el('div', 'k3-cross', '<i></i><b></b>');
+  /* الشعيرة ثابتة في وسط الشاشة: الكاميرا والسلاح يتحركان معًا والتصويب دائمًا نحو الوسط */
+  const cross = el('div', 'k3-cross bow on', '<i></i><b></b>');
   S.wrap.appendChild(cross);
   const hintL = el('div', 'k3-hint l', '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>');
   const hintR = el('div', 'k3-hint r', '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>');
   S.wrap.append(hintL, hintR);
-  S.cv.style.cursor = 'none';
+  S.cv.style.cursor = 'crosshair';
   const showFor = () => Math.max(1, Math.min(6, +Play.cfg.show || 3));
 
   /* ---------- قوام الجدران الطينية وأرضية الساحة ---------- */
@@ -317,25 +318,31 @@ function shootScene() {
     }
   }
 
-  /* ---------- التحكم: سحب للنظر، ولمسة قصيرة للإطلاق حيث لُمس ---------- */
-  let last = null, moved = 0;
-  const ndc = e => { const r = S.cv.getBoundingClientRect(); return { nx: (e.clientX - r.left) / r.width * 2 - 1, ny: -(e.clientY - r.top) / r.height * 2 + 1, x: e.clientX - r.left, y: e.clientY - r.top }; };
-  S.cv.addEventListener('pointermove', e => { const p = ndc(e); cross.style.left = p.x + 'px'; cross.style.top = p.y + 'px'; cross.classList.add('on'); if (!last) aimGun(p.nx, p.ny); });
-  S.cv.addEventListener('pointerleave', () => cross.classList.remove('on'));
+  /* ---------- التحكم: تحريك الفأرة (أو السحب بالإصبع) يدير الكاميرا مع السلاح، والنقر يطلق نحو الشعيرة ----------
+     - الفأرة: حركتها فوق اللعبة تدير النظر مباشرة، وعند الاقتراب من حافة الشاشة يستمر الدوران نحوها.
+     - اللمس: سحب الإصبع يدير النظر، واللمسة القصيرة تطلق. */
+  let last = null, moved = 0, edge = 0, edgeV = 0;
+  const turn = (dx, dy) => { look.yaw -= dx * .0045; look.pitch = Math.max(-.35, Math.min(.7, look.pitch - dy * .0035)); };
+  S.cv.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse' || !S.started) return;
+    const r = S.cv.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    if (e.movementX || e.movementY) turn(e.movementX, e.movementY);
+    /* قرب الحافة يمينًا أو يسارًا: دوران مستمر بسرعة تتناسب مع القرب */
+    edge = fx < .1 ? (.1 - fx) / .1 : fx > .9 ? -(fx - .9) / .1 : 0;
+    edgeV = fy < .1 ? (.1 - fy) / .1 : fy > .92 ? -(fy - .92) / .08 : 0;
+  });
+  S.cv.addEventListener('pointerleave', () => { edge = edgeV = 0; });
   K3.controls(S, {
     hold(e, phase) {
       if (phase === 'down' && e) { last = { x: e.clientX, y: e.clientY }; moved = 0; }
       else if (phase === 'move' && e && last) {
         const dx = e.clientX - last.x, dy = e.clientY - last.y;
         moved += Math.abs(dx) + Math.abs(dy);
-        look.yaw += dx * .0055; look.pitch = Math.max(-.35, Math.min(.7, look.pitch + dy * .004));
+        if (e.pointerType !== 'mouse') turn(dx * 1.25, dy * 1.25);
         last = { x: e.clientX, y: e.clientY };
       } else if (phase === 'up') last = null;
     },
-    tap(e) {
-      if (!e) { S.fireAt(0, 0); return; }
-      if (moved < 10) { const p = ndc(e); S.fireAt(p.nx, p.ny); }
-    },
+    tap(e) { if (!e || moved < 14 || (e && e.pointerType === 'mouse')) S.fireAt(0, 0); },
   });
   const fire = el('button', 'k3-btn k3-fire', '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>');
   fire.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); S.fireAt(0, 0); });
@@ -347,6 +354,8 @@ function shootScene() {
     if (live) {
       look.yaw += ((k.ArrowLeft || k.KeyA ? 1 : 0) - (k.ArrowRight || k.KeyD ? 1 : 0)) * dt * 1.9;
       look.pitch = Math.max(-.35, Math.min(.7, look.pitch + ((k.ArrowUp || k.KeyW ? 1 : 0) - (k.ArrowDown || k.KeyS ? 1 : 0)) * dt * 1.1));
+      look.yaw += edge * dt * 1.6;
+      look.pitch = Math.max(-.35, Math.min(.7, look.pitch + edgeV * dt * .8));
     } else look.yaw += dt * .07;
     camera.rotation.y = look.yaw; camera.rotation.x = look.pitch;
     /* جدولة الأهداف: حتى ثلاثة ظاهرة معًا، يظهر كل منها مدة الإعداد ثم يختفي ويعود غيره */
@@ -375,7 +384,7 @@ function shootScene() {
     bits = bits.filter(b => b.life > 0);
     /* البندقية والومضة */
     recoil = Math.max(0, recoil - dt * 6);
-    if (gun) { aim.yaw += (aim.ty - aim.yaw) * Math.min(1, dt * 14); aim.pitch += (aim.tp - aim.pitch) * Math.min(1, dt * 14); gun.rotation.y = aim.yaw; gun.rotation.x = aim.pitch + recoil * .22; gun.position.z = GUN_AT.z + recoil * .16; }
+    if (gun) { aimGun(0, 0); aim.yaw += (aim.ty - aim.yaw) * Math.min(1, dt * 14); aim.pitch += (aim.tp - aim.pitch) * Math.min(1, dt * 14); gun.rotation.y = aim.yaw; gun.rotation.x = aim.pitch + recoil * .22; gun.position.z = GUN_AT.z + recoil * .16; }
     if (muzzle) { flashT -= dt; muzzle.visible = flashT > 0; const q = Math.max(0, flashT / .13); muzzle.userData.star.scale.setScalar(.8 + q * 1.4); muzzle.userData.ml.intensity = q * 2.2; }
     /* مؤشرات الأهداف الظاهرة خارج النظر */
     const half = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect) * .9;
